@@ -12,6 +12,10 @@ public class Browser {
     public Browser() {
     }
 
+    public Browser(List<Condition> conditions) {
+        this.conditions = conditions;
+    }
+
     public Browser(String name) {
         this.name = name;
     }
@@ -20,6 +24,8 @@ public class Browser {
         this.name = name;
         this.splitByKeyword = splitByKeyword;
     }
+
+
 
     public Browser(String name, String splitByKeyword, List<Condition> conditions) {
         this.name = name;

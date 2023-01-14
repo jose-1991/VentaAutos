@@ -35,12 +35,12 @@ public class BrowserService {
     public static final int END_INDEX = 4;
 
 
-    public static String identifyBrowserAndVersion(String userAgent) {
+    public String identifyBrowserAndVersion(String userAgent) {
         Browser userBrowser = identifyBrowser(userAgent);
         return userBrowser != null ? parseVersion(userAgent, userBrowser) : UNKNOWN;
     }
 
-    private static Browser identifyBrowser(String userAgent) {
+    private Browser identifyBrowser(String userAgent) {
         for (Browser browser : browseList) {
             boolean meetsAllConditions = evaluateConditions(userAgent, browser, 0, true);
             if (meetsAllConditions) {
@@ -50,7 +50,7 @@ public class BrowserService {
         return null;
     }
 
-    private static boolean evaluateConditions(String userAgent, Browser browser, int index, boolean meets) {
+    private boolean evaluateConditions(String userAgent, Browser browser, int index, boolean meets) {
         while (index < browser.getConditions().size()) {
             Condition condition = browser.getConditions().get(index);
             if (meets || condition.isOptional()) {
@@ -64,7 +64,7 @@ public class BrowserService {
         return meets;
     }
 
-    private static String parseVersion(String userAgent, Browser userBrowser) {
+    private String parseVersion(String userAgent, Browser userBrowser) {
         String splitWith = userBrowser.getAdditionalKeyword() != null ? userBrowser.getAdditionalKeyword() : userBrowser.getSplitByKeyword();
         String[] splitUpUserAgent = userAgent.split(splitWith);
         if (splitUpUserAgent.length > 1) {
@@ -76,7 +76,7 @@ public class BrowserService {
         return userBrowser.getName();
     }
 
-    private static String additionalParsing(String unparsedVersion, String parseVersionBy) {
+    private String additionalParsing(String unparsedVersion, String parseVersionBy) {
         if (parseVersionBy.equalsIgnoreCase(EXTRA_SPLIT)) {
             String[] strings = unparsedVersion.split(SPACE);
             return strings[0];
