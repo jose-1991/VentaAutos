@@ -1,33 +1,55 @@
-HELP.md
-target/
-!.mvn/wrapper/maven-wrapper.jar
-!**/src/main/**/target/
-!**/src/test/**/target/
+### Local properties file ###
+**/application-local.yml
+**/application-local.properties
 
-### STS ###
-.apt_generated
-.classpath
-.factorypath
-.project
-.settings
-.springBeans
-.sts4-cache
+### Common Build Deploy ###
+**/manifest-generated.yml
+
+### Build Output Directories (Combined) ###
+build/
+bin/
+classes/
+out/
+target/
+log/
+src/main/java/com/car/sales/company/services/VentaService.java
+
+### Gradle ###
+.gradle/
+
+### Maven ###
+.mvn/
 
 ### IntelliJ IDEA ###
-.idea
+.idea/
 *.iws
 *.iml
 *.ipr
 
-### NetBeans ###
-/nbproject/private/
-/nbbuild/
-/dist/
-/nbdist/
-/.nb-gradle/
-build/
-!**/src/main/**/build/
-!**/src/test/**/build/
+### Eclipse ###
+.settings/
+.classpath
+.project
+.metadata
+.springBeans
 
-### VS Code ###
-.vscode/
+### Node/NPM ###
+node_modules/
+dist/
+typings/
+coverage/
+jspm_packages/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+.env
+
+### OS Specific ###
+.DS_Store
+Thumbs.db
+[Dd]esktop.ini
+$RECYCLE.BIN/
+
+### Other ###
+*.swp
+
