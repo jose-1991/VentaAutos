@@ -26,6 +26,7 @@ public class PublicacionServiceTest {
     private Publicacion publicacion1;
     private Publicacion publicacion2;
     private Usuario vendedor;
+    private Usuario comprador;
     private Vehiculo vehiculo;
     @InjectMocks
     private PublicacionService publicacionService;
@@ -33,6 +34,9 @@ public class PublicacionServiceTest {
     @Before
     public void setUp() {
 
+
+         comprador = new Usuario("Ruben", "Sanchez", "ci", "5203746",
+                "comprador", "rube.123-122@gmail.com");
 
         vendedor = new Usuario("Jorge", "Lopez", "ci", "5203717",
                 "vendedor", "jorgito-122@gmail.com");
@@ -43,13 +47,13 @@ public class PublicacionServiceTest {
         publicacion1.setVendedor(vendedor);
         publicacion1.setVehiculo(vehiculo);
 
-        publicacion1.setEstaDisponibleEnWeb(true);
+        publicacion1.setEstaDisponibleEnLaWeb(true);
 
         publicacion2 = new Publicacion();
         publicacion2.setVendedor(vendedor);
         publicacion2.setVehiculo(new Vehiculo("1HGBH41JXMN109716", "Toyota", "CH-R", "2021", "22600"));
 
-        publicacion2.setEstaDisponibleEnWeb(true);
+        publicacion2.setEstaDisponibleEnLaWeb(true);
 
 
     }
@@ -59,7 +63,7 @@ public class PublicacionServiceTest {
         Publicacion publicacionActual = publicacionService.publicarVehiculo(vendedor, vehiculo);
 
         assertNotNull(publicacionActual);
-        assertTrue(publicacionActual.isEstaDisponibleEnWeb());
+        assertTrue(publicacionActual.isEstaDisponibleEnLaWeb());
         assertTrue(publicacionService.vehiculosPublicados.contains(publicacionActual));
     }
 
@@ -81,46 +85,46 @@ public class PublicacionServiceTest {
     @Test
     public void testDarDeBajaPublicaciones() {
 
-        publicacion1.setFecha(LocalDate.of(2023, Month.APRIL, 10));
+        publicacion1.setFecha(LocalDate.of(2023, Month.APRIL, 20));
         publicacion2.setFecha(LocalDate.now());
 
         publicacionService.vehiculosPublicados.add(publicacion1);
         publicacionService.vehiculosPublicados.add(publicacion2);
 
-        List<Publicacion> vehiculosPublicadosActual = publicacionService.darDeBajaPublicaciones();
-        assertNotNull(vehiculosPublicadosActual);
-        assertEquals(1, vehiculosPublicadosActual.size());
+        int numeroDeBajasActual = publicacionService.darDeBajaPublicaciones();
+        assertEquals(1, numeroDeBajasActual);
     }
 
     @Test
-    public void testDarDeBajaPublicacionesNoBorraNadaCuandoPublicacionTieneOfertas() {
-        publicacion1.setOfertasCompradores(Collections.singletonList(new Oferta(15800)));
-        publicacion2.setOfertasCompradores(Arrays.asList(new Oferta(22000), new Oferta(22400)));
+    public void testDarDeBajaPublicacionesNoInhabilitaNadaCuandoPublicacionTieneOfertas() {
+        publicacion1.setOfertasCompradores(Collections.singletonList(new Oferta(15800, comprador)));
+        publicacion2.setOfertasCompradores(Arrays.asList(new Oferta(22000,comprador), new Oferta(22400,comprador)));
 
         publicacionService.vehiculosPublicados.add(publicacion1);
         publicacionService.vehiculosPublicados.add(publicacion2);
 
-        List<Publicacion> vehiculosPublicadosActual = publicacionService.darDeBajaPublicaciones();
-        assertEquals(2, vehiculosPublicadosActual.size());
+        int numeroDeBajasActual = publicacionService.darDeBajaPublicaciones();
+        assertEquals(0, numeroDeBajasActual);
 
     }
 
     @Test
     public void testRePublicarVehiculo() {
-        vehiculo.setVin("1HGBH41JXMN109716");
-        vehiculo.setPrecio("16000");
+        publicacion1.setOfertasCompradores(Collections.EMPTY_LIST);
+        publicacion1.setEstaDisponibleEnLaWeb(false);
+        publicacion1.getVehiculo().setPrecio("15000");
         nuevoPrecio = 14000;
 
-        Publicacion publicacionActual = publicacionService.rePublicarVehiculo(vendedor, vehiculo, nuevoPrecio);
+        Publicacion publicacionActual = publicacionService.rePublicarVehiculo(publicacion1, nuevoPrecio);
         assertNotNull(publicacionActual);
-        assertTrue(publicacionService.vehiculosPublicados.contains(publicacionActual));
+        assertTrue(publicacionActual.isEstaDisponibleEnLaWeb());
     }
 
     @Test(expected = DatoInvalidoException.class)
     public void testRepublicarVehiculoBotaExceptionCuandoNuevoPrecioEsMayorAlPrecioActual() {
-        vehiculo.setPrecio("17000");
+        publicacion1.getVehiculo().setPrecio("17000");
         nuevoPrecio = 18000;
 
-        publicacionService.rePublicarVehiculo(vendedor, vehiculo, nuevoPrecio);
+        publicacionService.rePublicarVehiculo(publicacion1, nuevoPrecio);
     }
 }

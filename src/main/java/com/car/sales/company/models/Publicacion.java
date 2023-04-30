@@ -9,12 +9,11 @@ public class Publicacion {
     private Vehiculo vehiculo;
     private LocalDate fecha;
     private List<Oferta> ofertasCompradores;
-    private List<Oferta> ofertasVendedores;
-    private Notificacion notificacion;
+    private boolean estaDisponibleEnLaWeb;
+
 
     public Publicacion() {
         ofertasCompradores = new ArrayList<>();
-        ofertasVendedores = new ArrayList<>();
     }
 
     public Usuario getVendedor() {
@@ -41,19 +40,19 @@ public class Publicacion {
         this.ofertasCompradores = ofertasCompradores;
     }
 
-    public List<Oferta> getOfertasVendedores() {
-        return ofertasVendedores;
-    }
-
-    public void setOfertasVendedores(List<Oferta> ofertasVendedores) {
-        this.ofertasVendedores = ofertasVendedores;
-    }
-
     public LocalDate getFecha() {
         return fecha;
     }
 
     public void setFecha(LocalDate fecha) {
         this.fecha = fecha;
+    }
+
+    public boolean isEstaDisponibleEnLaWeb() {
+        return estaDisponibleEnLaWeb;
+    }
+
+    public void setEstaDisponibleEnLaWeb(boolean estaDisponibleEnLaWeb) {
+        this.estaDisponibleEnLaWeb = estaDisponibleEnLaWeb;
     }
 }

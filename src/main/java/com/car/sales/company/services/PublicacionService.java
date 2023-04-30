@@ -1,7 +1,7 @@
 package com.car.sales.company.services;
 
-import com.car.sales.company.models.Publicacion;
 import com.car.sales.company.exceptions.DatoInvalidoException;
+import com.car.sales.company.models.Publicacion;
 import com.car.sales.company.models.Usuario;
 import com.car.sales.company.models.Vehiculo;
 
@@ -22,25 +22,32 @@ public class PublicacionService {
             publicacion.setVendedor(vendedor);
             publicacion.setVehiculo(vehiculo);
             publicacion.setFecha(LocalDate.now());
+            publicacion.setEstaDisponibleEnLaWeb(true);
             vehiculosPublicados.add(publicacion);
             return publicacion;
         }
         throw new DatoInvalidoException("El usuario debe ser de tipo vendedor");
     }
 
-    public List<Publicacion> darDeBajaPublicaciones() {
-        vehiculosPublicados.removeIf(p -> p.getOfertasCompradores().size() < 1 &&
-                tieneMaximoDiasSinOfertas(p.getFecha()));
-        return vehiculosPublicados;
+    public int darDeBajaPublicaciones() {
+        int publicacionesDeBaja = 0;
+        for (Publicacion publicacion : vehiculosPublicados) {
+            if (publicacion.getOfertasCompradores().size() < 1 && tieneMaximoDiasSinOfertas(publicacion.getFecha())) {
+                publicacion.setEstaDisponibleEnLaWeb(false);
+                publicacionesDeBaja++;
+            }
+        }
+        return publicacionesDeBaja;
     }
 
-    public Publicacion rePublicarVehiculo(Usuario vendedor, Vehiculo vehiculo, Integer nuevoPrecioVehiculo) {
-        if (nuevoPrecioVehiculo < validarEnteroPositivo(vehiculo.getPrecio())) {
-            vehiculo.setPrecio(nuevoPrecioVehiculo.toString());
+    public Publicacion rePublicarVehiculo(Publicacion publicacion, Integer nuevoPrecioVehiculo) {
+        if (nuevoPrecioVehiculo < validarEnteroPositivo(publicacion.getVehiculo().getPrecio())) {
+            publicacion.getVehiculo().setPrecio(nuevoPrecioVehiculo.toString());
+            publicacion.setEstaDisponibleEnLaWeb(true);
         } else {
             throw new DatoInvalidoException("el nuevo precio debe ser menor al precio actual");
         }
-        return publicarVehiculo(vendedor, vehiculo);
+        return publicacion;
     }
 
 }
