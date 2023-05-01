@@ -3,19 +3,19 @@ package com.car.sales.company.models;
 import java.util.Objects;
 
 public class Oferta {
-    private double monto;
+    private String monto;
     private Usuario comprador;
 
-    public Oferta(double monto, Usuario comprador) {
+    public Oferta(String monto, Usuario comprador) {
         this.monto = monto;
         this.comprador = comprador;
     }
 
-    public double getMonto() {
+    public String getMonto() {
         return monto;
     }
 
-    public void setMonto(double monto) {
+    public void setMonto(String monto) {
         this.monto = monto;
     }
 
@@ -32,7 +32,11 @@ public class Oferta {
         if (this == o) return true;
         if (!(o instanceof Oferta)) return false;
         Oferta oferta = (Oferta) o;
-        return Double.compare(oferta.monto, monto) == 0 && comprador.getIdentificacion().equals(oferta.comprador.getIdentificacion());
+        return Objects.equals(monto, oferta.monto) && Objects.equals(comprador.getIdentificacion(), oferta.comprador.getIdentificacion());
     }
 
+    @Override
+    public int hashCode() {
+        return Objects.hash(monto, comprador);
+    }
 }

@@ -34,7 +34,7 @@ public class UsuarioService {
             usuarios.add(usuario);
             return usuario;
         }
-        throw  new DatoInvalidoException("El usuario no debe ser nulo");
+        throw new DatoInvalidoException("El usuario no debe ser nulo");
 
     }
 

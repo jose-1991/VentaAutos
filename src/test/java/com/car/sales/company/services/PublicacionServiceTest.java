@@ -15,7 +15,6 @@ import java.time.LocalDate;
 import java.time.Month;
 import java.util.Arrays;
 import java.util.Collections;
-import java.util.List;
 
 import static org.junit.Assert.*;
 
@@ -35,7 +34,7 @@ public class PublicacionServiceTest {
     public void setUp() {
 
 
-         comprador = new Usuario("Ruben", "Sanchez", "ci", "5203746",
+        comprador = new Usuario("Ruben", "Sanchez", "ci", "5203746",
                 "comprador", "rube.123-122@gmail.com");
 
         vendedor = new Usuario("Jorge", "Lopez", "ci", "5203717",
@@ -97,8 +96,8 @@ public class PublicacionServiceTest {
 
     @Test
     public void testDarDeBajaPublicacionesNoInhabilitaNadaCuandoPublicacionTieneOfertas() {
-        publicacion1.setOfertasCompradores(Collections.singletonList(new Oferta(15800, comprador)));
-        publicacion2.setOfertasCompradores(Arrays.asList(new Oferta(22000,comprador), new Oferta(22400,comprador)));
+        publicacion1.setOfertasCompradores(Collections.singletonList(new Oferta("15800", comprador)));
+        publicacion2.setOfertasCompradores(Arrays.asList(new Oferta("22000", comprador), new Oferta("22400", comprador)));
 
         publicacionService.vehiculosPublicados.add(publicacion1);
         publicacionService.vehiculosPublicados.add(publicacion2);
