@@ -1,6 +1,7 @@
 package com.car.sales.company.models;
 
-import java.util.Objects;
+import java.util.HashMap;
+
 public class Usuario {
     private String nombre;
     private String apellido;
@@ -10,6 +11,8 @@ public class Usuario {
     private String email;
     private String celular;
     private boolean aceptaNotificacionSms;
+    private HashMap<String, Boolean> notificacionesEmail;
+    private HashMap<String, Boolean> notificacionesSms;
 
     public Usuario(String nombre, String apellido, String tipoIdentificacion, String identificacion, String email,
                    String tipoUsuario, String celular) {
@@ -20,6 +23,8 @@ public class Usuario {
         this.email = email;
         this.tipoUsuario = tipoUsuario;
         this.celular = celular;
+        this.notificacionesEmail = new HashMap<>();
+        this.notificacionesSms = new HashMap<>();
     }
 
     public Usuario(String nombre, String apellido, String tipoIdentificacion, String identificacion, String tipoUsuario, String email) {
@@ -29,6 +34,7 @@ public class Usuario {
         this.identificacion = identificacion;
         this.tipoUsuario = tipoUsuario;
         this.email = email;
+        this.notificacionesEmail = new HashMap<>();
     }
 
     public String getNombre() {
@@ -95,4 +101,19 @@ public class Usuario {
         this.tipoUsuario = tipoUsuario;
     }
 
+    public HashMap<String, Boolean> getNotificacionesEmail() {
+        return notificacionesEmail;
+    }
+
+    public void setNotificacionesEmail(HashMap<String, Boolean> notificacionesEmail) {
+        this.notificacionesEmail = notificacionesEmail;
+    }
+
+    public HashMap<String, Boolean> getNotificacionesSms() {
+        return notificacionesSms;
+    }
+
+    public void setNotificacionesSms(HashMap<String, Boolean> notificacionesSms) {
+        this.notificacionesSms = notificacionesSms;
+    }
 }

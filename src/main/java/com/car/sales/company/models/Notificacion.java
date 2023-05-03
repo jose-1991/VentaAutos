@@ -2,13 +2,12 @@ package com.car.sales.company.models;
 
 public class Notificacion {
     private String tipoNotificacion;
-    boolean envioEmail;
-    boolean envioSms;
+    private String email;
+    private String celular;
 
-    public Notificacion(String tipoNotificacion, boolean envioEmail, boolean envioSms) {
+
+    public Notificacion(String tipoNotificacion) {
         this.tipoNotificacion = tipoNotificacion;
-        this.envioEmail = envioEmail;
-        this.envioSms = envioSms;
     }
 
     public String getTipoNotificacion() {
@@ -19,19 +18,19 @@ public class Notificacion {
         this.tipoNotificacion = tipoNotificacion;
     }
 
-    public boolean isEnvioEmail() {
-        return envioEmail;
+    public String getEmail() {
+        return email;
     }
 
-    public void setEnvioEmail(boolean envioEmail) {
-        this.envioEmail = envioEmail;
+    public void setEmail(String email) {
+        this.email = email;
     }
 
-    public boolean isEnvioSms() {
-        return envioSms;
+    public String getCelular() {
+        return celular;
     }
 
-    public void setEnvioSms(boolean envioSms) {
-        this.envioSms = envioSms;
+    public void setCelular(String celular) {
+        this.celular = celular;
     }
 }

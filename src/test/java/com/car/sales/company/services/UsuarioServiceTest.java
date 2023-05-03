@@ -14,6 +14,10 @@ import org.mockito.junit.MockitoJUnitRunner;
 public class UsuarioServiceTest {
     String identificacionEsperado;
     Usuario usuarioEsperado;
+    Usuario usuario1;
+    Usuario usuario2;
+    Usuario usuario3;
+    Usuario usuario4;
 
     @InjectMocks
     private UsuarioService usuarioService;
@@ -24,6 +28,20 @@ public class UsuarioServiceTest {
         identificacionEsperado = "A3278129";
         usuarioEsperado = new Usuario("Jorge", "Foronda", "ci", "5203717",
                 "vendedor", "jorgito-122@gmail.com");
+
+         usuario1 = new Usuario("Javier", "Rodriguez", "licencia", "490123984",
+                "javi.31_82@hotmail.com", "vendedor");
+         usuario2 = new Usuario("Pablo", "Valencia", "pasaporte", "A3278129",
+                "pa_val.1985@gmail.com", "comprador", "60782023");
+         usuario3 = new Usuario("Lucy", "Pardo", "ci", "52082393B",
+                "lucy.luz023@hotmail.com", "vendedor", "76437428");
+         usuario4 = new Usuario("Christian", "Ledezma", "licencia", "12323984",
+                "cris_lu.21412@hotmail.com", "comprador");
+
+        usuarioService.usuarios.add(usuario1);
+        usuarioService.usuarios.add(usuario2);
+        usuarioService.usuarios.add(usuario3);
+        usuarioService.usuarios.add(usuario4);
     }
 
     @Test

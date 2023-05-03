@@ -16,21 +16,31 @@ public class UsuarioService {
     private final String VALIDAR_CELULAR = "^(\\+591)?(6|7)[0-9]{7}$";
     private final String VALIDAR_IDENTIFICACION = "^[a-zA-Z0-9]{7,11}$";      //"^\\d{7,11}([\\s-]\\d[A-Z])?$";
     private final String VALIDAR_SOLO_LETRAS = "^[a-zA-Z ]+$";
-
-    Usuario usuario1 = new Usuario("Javier", "Rodriguez", "licencia", "490123984",
-            "javi.31_82@hotmail.com", "vendedor");
-    Usuario usuario2 = new Usuario("Pablo", "Valencia", "pasaporte", "A3278129",
-            "pa_val.1985@gmail.com", "comprador", "60782023");
-    Usuario usuario3 = new Usuario("Lucy", "Pardo", "ci", "52082393B",
-            "lucy.luz023@hotmail.com", "vendedor", "76437428");
-    Usuario usuario4 = new Usuario("Christian", "Ledezma", "licencia", "12323984",
-            "cris_lu.21412@hotmail.com", "comprador");
-    private List<Usuario> usuarios = new ArrayList<>();
+    List<Usuario> usuarios = new ArrayList<>();
 
 
     public Usuario registrarUsuario(Usuario usuario) {
         if (usuario != null) {
             validarUsuario(usuario);
+            if (usuario.getTipoUsuario().equalsIgnoreCase("Vendedor")) {
+                usuario.getNotificacionesEmail().put("CompradorPrimeraOferta", true);
+                usuario.getNotificacionesEmail().put("CompradorAceptaOferta", true);
+                usuario.getNotificacionesEmail().put("CompradorRetiraOferta", true);
+                usuario.getNotificacionesEmail().put("VehiculoExpirado", true);
+            } else {
+                usuario.getNotificacionesEmail().put("NuevoVehiculoEnVenta", true);
+                usuario.getNotificacionesEmail().put("VendedorContraOferta", true);
+                usuario.getNotificacionesEmail().put("VendedorAceptaOferta", true);
+                usuario.getNotificacionesEmail().put("vendedorDeclinaOferta", true);
+                usuario.getNotificacionesEmail().put("VehiculoNoDisponible", true);
+            }
+            if (usuario.getTipoUsuario().equalsIgnoreCase("Vendedor") && usuario.isAceptaNotificacionSms()) {
+                usuario.getNotificacionesSms().put("CompradorPrimeraOferta", false);
+                usuario.getNotificacionesSms().put("CompradorAceptaOferta", false);
+            } else if (usuario.isAceptaNotificacionSms()) {
+                usuario.getNotificacionesSms().put("NuevoVehiculoEnVenta", false);
+                usuario.getNotificacionesSms().put("VendedorAceptaOferta", false);
+            }
             usuarios.add(usuario);
             return usuario;
         }
@@ -39,13 +49,7 @@ public class UsuarioService {
     }
 
     public Usuario eliminarUsuario(String identificacion) {
-        usuarios.add(usuario1);
-        usuarios.add(usuario2);
-        usuarios.add(usuario3);
-        usuarios.add(usuario4);
-
         validarString(identificacion);
-
         for (Usuario usuario : usuarios) {
             if (usuario.getIdentificacion().equals(identificacion)) {
                 usuarios.remove(usuario);
@@ -56,11 +60,6 @@ public class UsuarioService {
     }
 
     public Usuario modificarUsuario(String identificacion, String nuevoTipoUsuario, String nuevoCelular) {
-        usuarios.add(usuario1);
-        usuarios.add(usuario2);
-        usuarios.add(usuario3);
-        usuarios.add(usuario4);
-
         validarString(identificacion);
         validarString(nuevoTipoUsuario);
 

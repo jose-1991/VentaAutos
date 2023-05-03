@@ -13,6 +13,9 @@ import static com.car.sales.company.helper.ValidacionHelper.*;
 
 public class PublicacionService {
 
+    NotificacionService notificacionService;
+    UsuarioService usuarioService;
+
     List<Publicacion> vehiculosPublicados = new ArrayList<>();
 
     public Publicacion publicarVehiculo(Usuario vendedor, Vehiculo vehiculo) {
@@ -24,6 +27,11 @@ public class PublicacionService {
             publicacion.setFecha(LocalDate.now());
             publicacion.setEstaDisponibleEnLaWeb(true);
             vehiculosPublicados.add(publicacion);
+            for (Usuario usuario : usuarioService.usuarios) {
+                if (usuario.getTipoUsuario().equalsIgnoreCase("Comprador")) {
+                    notificacionService.enviarNotificacion(usuario, "NuevoVehiculoEnVenta");
+                }
+            }
             return publicacion;
         }
         throw new DatoInvalidoException("El usuario debe ser de tipo vendedor");
@@ -34,6 +42,7 @@ public class PublicacionService {
         for (Publicacion publicacion : vehiculosPublicados) {
             if (publicacion.getOfertasCompradores().size() < 1 && tieneMaximoDiasSinOfertas(publicacion.getFecha())) {
                 publicacion.setEstaDisponibleEnLaWeb(false);
+                notificacionService.enviarNotificacion(publicacion.getVendedor(), "VehiculoExpirado");
                 publicacionesDeBaja++;
             }
         }
