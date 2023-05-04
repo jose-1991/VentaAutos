@@ -2,7 +2,7 @@ package com.car.sales.company.services;
 
 import com.car.sales.company.exceptions.DatoInvalidoException;
 import com.car.sales.company.exceptions.UsuarioNoEncontradoException;
-import com.car.sales.company.models.Usuario;
+import com.models.Usuario;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -22,24 +22,12 @@ public class UsuarioService {
     public Usuario registrarUsuario(Usuario usuario) {
         if (usuario != null) {
             validarUsuario(usuario);
-            if (usuario.getTipoUsuario().equalsIgnoreCase("Vendedor")) {
-                usuario.getNotificacionesEmail().put("CompradorPrimeraOferta", true);
-                usuario.getNotificacionesEmail().put("CompradorAceptaOferta", true);
-                usuario.getNotificacionesEmail().put("CompradorRetiraOferta", true);
-                usuario.getNotificacionesEmail().put("VehiculoExpirado", true);
-            } else {
-                usuario.getNotificacionesEmail().put("NuevoVehiculoEnVenta", true);
-                usuario.getNotificacionesEmail().put("VendedorContraOferta", true);
-                usuario.getNotificacionesEmail().put("VendedorAceptaOferta", true);
-                usuario.getNotificacionesEmail().put("vendedorDeclinaOferta", true);
-                usuario.getNotificacionesEmail().put("VehiculoNoDisponible", true);
-            }
-            if (usuario.getTipoUsuario().equalsIgnoreCase("Vendedor") && usuario.isAceptaNotificacionSms()) {
-                usuario.getNotificacionesSms().put("CompradorPrimeraOferta", false);
-                usuario.getNotificacionesSms().put("CompradorAceptaOferta", false);
-            } else if (usuario.isAceptaNotificacionSms()) {
-                usuario.getNotificacionesSms().put("NuevoVehiculoEnVenta", false);
-                usuario.getNotificacionesSms().put("VendedorAceptaOferta", false);
+            if (usuario.getTipoUsuario().equalsIgnoreCase("Vendedor") && usuario.isAceptaNotificacionSms()){
+                usuario.getUnsuscripcionesSms().add("CompradorPrimeraOFerta");
+                usuario.getUnsuscripcionesSms().add("CompradorAceptaOferta");
+            }else if (usuario.isAceptaNotificacionSms()){
+                usuario.getUnsuscripcionesSms().add("NuevoVehiculoEnVenta");
+                usuario.getUnsuscripcionesSms().add("VendedorAceptaOferta");
             }
             usuarios.add(usuario);
             return usuario;

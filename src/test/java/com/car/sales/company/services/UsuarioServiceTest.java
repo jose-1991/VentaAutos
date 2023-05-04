@@ -2,7 +2,7 @@ package com.car.sales.company.services;
 
 import com.car.sales.company.exceptions.DatoInvalidoException;
 import com.car.sales.company.exceptions.UsuarioNoEncontradoException;
-import com.car.sales.company.models.Usuario;
+import com.models.Usuario;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;

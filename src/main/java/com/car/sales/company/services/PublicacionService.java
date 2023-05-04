@@ -1,15 +1,16 @@
 package com.car.sales.company.services;
 
 import com.car.sales.company.exceptions.DatoInvalidoException;
-import com.car.sales.company.models.Publicacion;
-import com.car.sales.company.models.Usuario;
-import com.car.sales.company.models.Vehiculo;
+import com.models.Publicacion;
+import com.models.Usuario;
+import com.models.Vehiculo;
 
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
 
 import static com.car.sales.company.helper.ValidacionHelper.*;
+import static com.models.TipoNotificacion.*;
 
 public class PublicacionService {
 
@@ -29,7 +30,8 @@ public class PublicacionService {
             vehiculosPublicados.add(publicacion);
             for (Usuario usuario : usuarioService.usuarios) {
                 if (usuario.getTipoUsuario().equalsIgnoreCase("Comprador")) {
-                    notificacionService.enviarNotificacion(usuario, "NuevoVehiculoEnVenta");
+                    notificacionService.ValidarNotificacion(publicacion,null, "NuevoVehiculoEnVenta",
+                            usuario, AMBOS);
                 }
             }
             return publicacion;
@@ -42,7 +44,8 @@ public class PublicacionService {
         for (Publicacion publicacion : vehiculosPublicados) {
             if (publicacion.getOfertasCompradores().size() < 1 && tieneMaximoDiasSinOfertas(publicacion.getFecha())) {
                 publicacion.setEstaDisponibleEnLaWeb(false);
-                notificacionService.enviarNotificacion(publicacion.getVendedor(), "VehiculoExpirado");
+                notificacionService.ValidarNotificacion(publicacion,null, "VehiculoExpirado",
+                        publicacion.getVendedor(),EMAIL);
                 publicacionesDeBaja++;
             }
         }

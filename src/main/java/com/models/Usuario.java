@@ -1,6 +1,7 @@
-package com.car.sales.company.models;
+package com.models;
 
-import java.util.HashMap;
+import java.util.ArrayList;
+import java.util.List;
 
 public class Usuario {
     private String nombre;
@@ -11,8 +12,8 @@ public class Usuario {
     private String email;
     private String celular;
     private boolean aceptaNotificacionSms;
-    private HashMap<String, Boolean> notificacionesEmail;
-    private HashMap<String, Boolean> notificacionesSms;
+    private List<String> unsuscribcionesEmail;
+    private List<String> unsuscribcionesSms;
 
     public Usuario(String nombre, String apellido, String tipoIdentificacion, String identificacion, String email,
                    String tipoUsuario, String celular) {
@@ -23,8 +24,8 @@ public class Usuario {
         this.email = email;
         this.tipoUsuario = tipoUsuario;
         this.celular = celular;
-        this.notificacionesEmail = new HashMap<>();
-        this.notificacionesSms = new HashMap<>();
+        this.unsuscribcionesEmail = new ArrayList<>();
+        this.unsuscribcionesSms = new ArrayList<>();
     }
 
     public Usuario(String nombre, String apellido, String tipoIdentificacion, String identificacion, String tipoUsuario, String email) {
@@ -34,7 +35,8 @@ public class Usuario {
         this.identificacion = identificacion;
         this.tipoUsuario = tipoUsuario;
         this.email = email;
-        this.notificacionesEmail = new HashMap<>();
+        this.unsuscribcionesEmail = new ArrayList<>();
+        this.unsuscribcionesSms = new ArrayList<>();
     }
 
     public String getNombre() {
@@ -101,19 +103,19 @@ public class Usuario {
         this.tipoUsuario = tipoUsuario;
     }
 
-    public HashMap<String, Boolean> getNotificacionesEmail() {
-        return notificacionesEmail;
+    public List<String> getUnsuscripcionesEmail() {
+        return unsuscribcionesEmail;
     }
 
-    public void setNotificacionesEmail(HashMap<String, Boolean> notificacionesEmail) {
-        this.notificacionesEmail = notificacionesEmail;
+    public void setUnsuscribcionesEmail(List<String> unsuscribcionesEmail) {
+        this.unsuscribcionesEmail = unsuscribcionesEmail;
     }
 
-    public HashMap<String, Boolean> getNotificacionesSms() {
-        return notificacionesSms;
+    public List<String> getUnsuscripcionesSms() {
+        return unsuscribcionesSms;
     }
 
-    public void setNotificacionesSms(HashMap<String, Boolean> notificacionesSms) {
-        this.notificacionesSms = notificacionesSms;
+    public void setUnsuscribcionesSms(List<String> unsuscribcionesSms) {
+        this.unsuscribcionesSms = unsuscribcionesSms;
     }
 }

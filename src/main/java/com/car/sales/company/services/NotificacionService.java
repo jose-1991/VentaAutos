@@ -1,35 +1,53 @@
 package com.car.sales.company.services;
 
-import com.car.sales.company.exceptions.DatoInvalidoException;
-import com.car.sales.company.models.Accion;
-import com.car.sales.company.models.Notificacion;
-import com.car.sales.company.models.Usuario;
+import com.models.*;
+
+import java.util.List;
+
+import static com.models.TipoNotificacion.EMAIL;
 
 public class NotificacionService {
 
-    public Notificacion enviarNotificacion(Usuario usuario, String tipoNotificacion) {
-        Notificacion notificacion = new Notificacion(tipoNotificacion);
-        if (usuario.getNotificacionesEmail().get(tipoNotificacion)) {
-            notificacion.setEmail(usuario.getEmail());
-        } else if (usuario.getNotificacionesSms().get(tipoNotificacion))
-            notificacion.setCelular(usuario.getCelular());
-        else {
-            throw new DatoInvalidoException("El tipo de notificacion ingresado no existe");
+    public Notificacion ValidarNotificacion(Publicacion publicacion, Oferta oferta, String nombreNotificacion, Usuario usuario,
+                                            TipoNotificacion tipoNotificacion) {
+        Notificacion notificacion = new Notificacion(nombreNotificacion, publicacion);
+        if (oferta != null) {
+            notificacion.setOferta(oferta);
+        }
+        switch (tipoNotificacion) {
+            case AMBOS:
+                if (!usuario.getUnsuscripcionesSms().contains(nombreNotificacion)) {
+                    notificacion.setCelular(usuario.getCelular());
+                }
+            case EMAIL:
+                if (!usuario.getUnsuscripcionesEmail().contains(nombreNotificacion)) {
+                    notificacion.setEmail(usuario.getEmail());
+                    enviarNotificacion(notificacion);
+                }
+                break;
         }
         return notificacion;
     }
 
-    public void suscripcionNotificacion(Usuario usuario, String tipoNotificacion, Accion accion, String metodoEnvio) {
-        boolean estaDisponible = false;
+    public void enviarNotificacion(Notificacion notificacion) {
+    }
+
+    public List<String> actualizarSuscripcion(Usuario usuario, String nombreNotificacion, Accion accion, TipoNotificacion tipoNotificacion) {
         switch (accion) {
             case SUSCRIBIR:
-                estaDisponible = true;
+                if (tipoNotificacion == EMAIL) {
+                    usuario.getUnsuscripcionesEmail().remove(nombreNotificacion);
+                } else {
+                    usuario.getUnsuscripcionesSms().remove(nombreNotificacion);
+                }
                 break;
+            case UNSUSCRIBIR:
+                if (tipoNotificacion == EMAIL) {
+                    usuario.getUnsuscripcionesEmail().add(nombreNotificacion);
+                } else {
+                    usuario.getUnsuscripcionesSms().add(nombreNotificacion);
+                }
         }
-        if (metodoEnvio.equalsIgnoreCase("Email")) {
-            usuario.getNotificacionesEmail().put(tipoNotificacion, estaDisponible);
-        } else {
-            usuario.getNotificacionesSms().put(tipoNotificacion, estaDisponible);
-        }
+        return usuario.getUnsuscripcionesEmail();
     }
 }

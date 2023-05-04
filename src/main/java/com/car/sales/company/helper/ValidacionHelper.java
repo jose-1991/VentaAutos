@@ -1,8 +1,8 @@
 package com.car.sales.company.helper;
 
 import com.car.sales.company.exceptions.DatoInvalidoException;
-import com.car.sales.company.models.Usuario;
-import com.car.sales.company.models.Vehiculo;
+import com.models.Usuario;
+import com.models.Vehiculo;
 
 import java.time.LocalDate;
 import java.time.temporal.ChronoUnit;

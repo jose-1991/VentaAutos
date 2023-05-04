@@ -2,10 +2,10 @@ package com.car.sales.company.services;
 
 import com.car.sales.company.exceptions.DatoInvalidoException;
 import com.car.sales.company.exceptions.UsuarioNoEncontradoException;
-import com.car.sales.company.models.Oferta;
-import com.car.sales.company.models.Publicacion;
-import com.car.sales.company.models.Usuario;
-import com.car.sales.company.models.Vehiculo;
+import com.models.Oferta;
+import com.models.Publicacion;
+import com.models.Usuario;
+import com.models.Vehiculo;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
@@ -13,7 +13,7 @@ import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
 import org.mockito.junit.MockitoJUnitRunner;
 
-import static com.car.sales.company.models.Accion.*;
+import static com.models.Accion.*;
 
 @RunWith(MockitoJUnitRunner.class)
 public class VentaServiceTest {
