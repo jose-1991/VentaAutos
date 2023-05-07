@@ -1,4 +1,4 @@
-package com.models;
+package com.car.sales.company.models;
 
 import java.util.UUID;
 

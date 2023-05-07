@@ -2,7 +2,7 @@ package com.car.sales.company.services;
 
 import com.car.sales.company.exceptions.DatoInvalidoException;
 import com.car.sales.company.exceptions.UsuarioNoEncontradoException;
-import com.models.Usuario;
+import com.car.sales.company.models.Usuario;
 
 import java.util.ArrayList;
 import java.util.List;

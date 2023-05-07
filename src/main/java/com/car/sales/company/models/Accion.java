@@ -1,4 +1,4 @@
-package com.models;
+package com.car.sales.company.models;
 
 public enum Accion {
 

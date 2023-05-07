@@ -1,18 +1,28 @@
 package com.car.sales.company.services;
 
-import com.models.*;
+import com.car.sales.company.models.*;
 
+import java.util.Arrays;
 import java.util.List;
 
-import static com.models.TipoNotificacion.EMAIL;
+import static com.car.sales.company.models.TipoNotificacion.EMAIL;
 
 public class NotificacionService {
 
-    public Notificacion ValidarNotificacion(Publicacion publicacion, Oferta oferta, String nombreNotificacion, Usuario usuario,
+    private final List<String> notificacionesVendedor = Arrays.asList("CompradorPrimeraOferta", "CompradorAceptaOferta",
+            "CompradorRetiraOferta", "VehiculoExpirado");
+
+    public Notificacion ValidarNotificacion(Publicacion publicacion, Oferta oferta, String nombreNotificacion,
                                             TipoNotificacion tipoNotificacion) {
+        Usuario usuario;
         Notificacion notificacion = new Notificacion(nombreNotificacion, publicacion);
         if (oferta != null) {
             notificacion.setOferta(oferta);
+        }
+        if (notificacionesVendedor.contains(nombreNotificacion)) {
+            usuario = publicacion.getVendedor();
+        } else {
+            usuario = oferta.getComprador();
         }
         switch (tipoNotificacion) {
             case AMBOS:

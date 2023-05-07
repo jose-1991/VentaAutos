@@ -1,16 +1,17 @@
 package com.car.sales.company.services;
 
 import com.car.sales.company.exceptions.DatoInvalidoException;
-import com.models.Publicacion;
-import com.models.Usuario;
-import com.models.Vehiculo;
+import com.car.sales.company.models.Oferta;
+import com.car.sales.company.models.Publicacion;
+import com.car.sales.company.models.Usuario;
+import com.car.sales.company.models.Vehiculo;
 
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
 
 import static com.car.sales.company.helper.ValidacionHelper.*;
-import static com.models.TipoNotificacion.*;
+import static com.car.sales.company.models.TipoNotificacion.*;
 
 public class PublicacionService {
 
@@ -30,8 +31,8 @@ public class PublicacionService {
             vehiculosPublicados.add(publicacion);
             for (Usuario usuario : usuarioService.usuarios) {
                 if (usuario.getTipoUsuario().equalsIgnoreCase("Comprador")) {
-                    notificacionService.ValidarNotificacion(publicacion,null, "NuevoVehiculoEnVenta",
-                            usuario, AMBOS);
+                    Oferta oferta = new Oferta(usuario);
+                    notificacionService.ValidarNotificacion(publicacion,oferta, "NuevoVehiculoEnVenta", AMBOS);
                 }
             }
             return publicacion;
@@ -44,8 +45,7 @@ public class PublicacionService {
         for (Publicacion publicacion : vehiculosPublicados) {
             if (publicacion.getOfertasCompradores().size() < 1 && tieneMaximoDiasSinOfertas(publicacion.getFecha())) {
                 publicacion.setEstaDisponibleEnLaWeb(false);
-                notificacionService.ValidarNotificacion(publicacion,null, "VehiculoExpirado",
-                        publicacion.getVendedor(),EMAIL);
+                notificacionService.ValidarNotificacion(publicacion,null, "VehiculoExpirado",EMAIL);
                 publicacionesDeBaja++;
             }
         }

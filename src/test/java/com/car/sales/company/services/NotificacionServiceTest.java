@@ -1,6 +1,6 @@
 package com.car.sales.company.services;
 
-import com.models.*;
+import com.car.sales.company.models.*;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -9,9 +9,9 @@ import org.mockito.junit.MockitoJUnitRunner;
 
 import java.util.List;
 
-import static com.models.Accion.UNSUSCRIBIR;
-import static com.models.TipoNotificacion.AMBOS;
-import static com.models.TipoNotificacion.EMAIL;
+import static com.car.sales.company.models.Accion.UNSUSCRIBIR;
+import static com.car.sales.company.models.TipoNotificacion.AMBOS;
+import static com.car.sales.company.models.TipoNotificacion.EMAIL;
 import static org.junit.Assert.*;
 
 @RunWith(MockitoJUnitRunner.class)
@@ -49,8 +49,7 @@ public class NotificacionServiceTest {
     public void testEnviarNotificacion() {
         nombreNotificacionEsperado = "CompradorPrimeraOferta";
 
-        Notificacion notificacionActual = notificacionService.ValidarNotificacion(publicacion, oferta, nombreNotificacionEsperado,
-                publicacion.getVendedor(), AMBOS);
+        Notificacion notificacionActual = notificacionService.ValidarNotificacion(publicacion, oferta, nombreNotificacionEsperado, AMBOS);
         assertNotNull(notificacionActual);
         assertEquals(nombreNotificacionEsperado, notificacionActual.getNombre());
     }

@@ -1,4 +1,4 @@
-package com.models;
+package com.car.sales.company.models;
 
 import java.util.Objects;
 
@@ -8,6 +8,10 @@ public class Oferta {
 
     public Oferta(String monto, Usuario comprador) {
         this.monto = monto;
+        this.comprador = comprador;
+    }
+
+    public Oferta(Usuario comprador) {
         this.comprador = comprador;
     }
 
