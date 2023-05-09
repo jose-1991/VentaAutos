@@ -7,10 +7,10 @@ public class Vehiculo {
     private String vin;
     private String marca;
     private String modelo;
-    private String anio;
-    private String precio;
+    private int anio;
+    private double precio;
 
-    public Vehiculo(String vin, String marca, String modelo, String anio, String precio) {
+    public Vehiculo(String vin, String marca, String modelo, int anio, double precio) {
         this.stockNumber = UUID.randomUUID();
         this.vin = vin;
         this.marca = marca;
@@ -52,19 +52,19 @@ public class Vehiculo {
         this.modelo = modelo;
     }
 
-    public String getAnio() {
+    public int getAnio() {
         return anio;
     }
 
-    public void setAnio(String anio) {
+    public void setAnio(int anio) {
         this.anio = anio;
     }
 
-    public String getPrecio() {
+    public double getPrecio() {
         return precio;
     }
 
-    public void setPrecio(String precio) {
+    public void setPrecio(double precio) {
         this.precio = precio;
     }
 }

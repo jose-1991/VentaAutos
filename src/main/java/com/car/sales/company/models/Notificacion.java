@@ -1,26 +1,26 @@
 package com.car.sales.company.models;
 
 public class Notificacion {
-    private String nombre;
-    private Publicacion publicacion;
-    private Oferta oferta;
-    private TipoNotificacion tipoNotificacion;
+    private NombreNotificacion nombreNotificacion;
+    private Vehiculo vehiculo;
+    private double montoOferta;
     private String email;
     private String celular;
 
-
-    public Notificacion(String nombre, Publicacion publicacion) {
-        this.nombre = nombre;
-        this.publicacion = publicacion;
-
+    public Notificacion(NombreNotificacion nombreNotificacion, Vehiculo vehiculo, double montoOferta, String email, String celular) {
+        this.nombreNotificacion = nombreNotificacion;
+        this.vehiculo = vehiculo;
+        this.montoOferta = montoOferta;
+        this.email = email;
+        this.celular = celular;
     }
 
-    public String getNombre() {
-        return nombre;
+    public NombreNotificacion getNombreNotificacion() {
+        return nombreNotificacion;
     }
 
-    public void setNombre(String nombre) {
-        this.nombre = nombre;
+    public void setNombreNotificacion(NombreNotificacion nombreNotificacion) {
+        this.nombreNotificacion = nombreNotificacion;
     }
 
     public String getEmail() {
@@ -39,27 +39,19 @@ public class Notificacion {
         this.celular = celular;
     }
 
-    public Publicacion getPublicacion() {
-        return publicacion;
+    public Vehiculo getVehiculo() {
+        return vehiculo;
     }
 
-    public void setPublicacion(Publicacion publicacion) {
-        this.publicacion = publicacion;
+    public void setVehiculo(Vehiculo vehiculo) {
+        this.vehiculo = vehiculo;
     }
 
-    public Oferta getOferta() {
-        return oferta;
+    public double getMontoOferta() {
+        return montoOferta;
     }
 
-    public void setOferta(Oferta oferta) {
-        this.oferta = oferta;
-    }
-
-    public TipoNotificacion getTipoNotificacion() {
-        return tipoNotificacion;
-    }
-
-    public void setTipoNotificacion(TipoNotificacion tipoNotificacion) {
-        this.tipoNotificacion = tipoNotificacion;
+    public void setMontoOferta(double montoOferta) {
+        this.montoOferta = montoOferta;
     }
 }

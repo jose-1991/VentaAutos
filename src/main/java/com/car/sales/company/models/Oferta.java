@@ -1,26 +1,28 @@
 package com.car.sales.company.models;
 
-import java.util.Objects;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
 
 public class Oferta {
-    private String monto;
+    private double montoOferta;
+    private double montoContraOferta;
     private Usuario comprador;
+    private LocalDateTime fechaOferta;
+    private boolean inactivo;
 
-    public Oferta(String monto, Usuario comprador) {
-        this.monto = monto;
+    public Oferta(double montoOferta, double montoContraOferta, Usuario comprador, LocalDateTime fechaOferta) {
+        this.montoOferta = montoOferta;
+        this.montoContraOferta = montoContraOferta;
         this.comprador = comprador;
+        this.fechaOferta = fechaOferta;
     }
 
-    public Oferta(Usuario comprador) {
-        this.comprador = comprador;
+    public double getMontoOferta() {
+        return montoOferta;
     }
 
-    public String getMonto() {
-        return monto;
-    }
-
-    public void setMonto(String monto) {
-        this.monto = monto;
+    public void setMontoOferta(double montoOferta) {
+        this.montoOferta = montoOferta;
     }
 
     public Usuario getComprador() {
@@ -31,16 +33,27 @@ public class Oferta {
         this.comprador = comprador;
     }
 
-    @Override
-    public boolean equals(Object o) {
-        if (this == o) return true;
-        if (!(o instanceof Oferta)) return false;
-        Oferta oferta = (Oferta) o;
-        return Objects.equals(monto, oferta.monto) && Objects.equals(comprador.getIdentificacion(), oferta.comprador.getIdentificacion());
+    public double getMontoContraOferta() {
+        return montoContraOferta;
     }
 
-    @Override
-    public int hashCode() {
-        return Objects.hash(monto, comprador);
+    public void setMontoContraOferta(double montoContraOferta) {
+        this.montoContraOferta = montoContraOferta;
+    }
+
+    public LocalDateTime getFechaOferta() {
+        return fechaOferta;
+    }
+
+    public void setFechaOferta(LocalDateTime fechaOferta) {
+        this.fechaOferta = fechaOferta;
+    }
+
+    public boolean isInactivo() {
+        return inactivo;
+    }
+
+    public void setInactivo(boolean inactivo) {
+        this.inactivo = inactivo;
     }
 }

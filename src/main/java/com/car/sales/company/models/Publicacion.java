@@ -12,9 +12,6 @@ public class Publicacion {
     private boolean estaDisponibleEnLaWeb;
 
 
-    public Publicacion() {
-        ofertasCompradores = new ArrayList<>();
-    }
 
     public Usuario getVendedor() {
         return vendedor;

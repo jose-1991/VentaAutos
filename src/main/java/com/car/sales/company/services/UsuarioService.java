@@ -2,13 +2,21 @@ package com.car.sales.company.services;
 
 import com.car.sales.company.exceptions.DatoInvalidoException;
 import com.car.sales.company.exceptions.UsuarioNoEncontradoException;
+import com.car.sales.company.models.Accion;
+import com.car.sales.company.models.NombreNotificacion;
+import com.car.sales.company.models.TipoNotificacion;
 import com.car.sales.company.models.Usuario;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 import static com.car.sales.company.helper.ValidacionHelper.validarString;
-import static com.car.sales.company.helper.ValidacionHelper.validarUsuario;
+import static com.car.sales.company.helper.ValidacionHelper.validarTipoUsuario;
+import static com.car.sales.company.models.NombreNotificacion.*;
+import static com.car.sales.company.models.TipoNotificacion.EMAIL;
+import static com.car.sales.company.models.TipoUsuario.VENDEDOR;
+import static com.car.sales.company.services.NotificacionService.NOTIFICACIONES_SMS_LIST;
 
 public class UsuarioService {
 
@@ -22,18 +30,30 @@ public class UsuarioService {
     public Usuario registrarUsuario(Usuario usuario) {
         if (usuario != null) {
             validarUsuario(usuario);
-            if (usuario.getTipoUsuario().equalsIgnoreCase("Vendedor") && usuario.isAceptaNotificacionSms()){
-                usuario.getUnsuscripcionesSms().add("CompradorPrimeraOFerta");
-                usuario.getUnsuscripcionesSms().add("CompradorAceptaOferta");
-            }else if (usuario.isAceptaNotificacionSms()){
-                usuario.getUnsuscripcionesSms().add("NuevoVehiculoEnVenta");
-                usuario.getUnsuscripcionesSms().add("VendedorAceptaOferta");
-            }
             usuarios.add(usuario);
             return usuario;
         }
         throw new DatoInvalidoException("El usuario no debe ser nulo");
+    }
 
+    public static void validarUsuario(Usuario usuario) {
+
+        validarString(usuario.getNombre());
+        validarString(usuario.getApellido());
+        validarString(usuario.getTipoIdentificacion());
+        validarString(usuario.getIdentificacion());
+        validarString(usuario.getEmail());
+        validarTipoUsuario(usuario.getTipoUsuario());
+        if (usuario.getCelular() != null && !usuario.getCelular().trim().isEmpty()) {
+            usuario.setAceptaNotificacionSms(true);
+            if (usuario.getTipoUsuario().equals(VENDEDOR)) {
+                usuario.setUnsuscribcionesSms(Arrays.asList(COMPRADOR_PRIMERA_OFERTA, COMPRADOR_ACEPTA_OFERTA));
+            } else {
+                usuario.setUnsuscribcionesSms(Arrays.asList(NUEVO_VEHICULO_EN_VENTA, VENDEDOR_ACEPTA_OFERTA));
+            }
+        } else {
+            usuario.setCelular(null);
+        }
     }
 
     public Usuario eliminarUsuario(String identificacion) {
@@ -47,13 +67,11 @@ public class UsuarioService {
         throw new UsuarioNoEncontradoException("No existe usuario registrado con la identificacion ingresada");
     }
 
-    public Usuario modificarUsuario(String identificacion, String nuevoTipoUsuario, String nuevoCelular) {
+    public Usuario modificarUsuario(String identificacion, String nuevoCelular) {
         validarString(identificacion);
-        validarString(nuevoTipoUsuario);
 
         for (Usuario usuario : usuarios) {
             if (usuario.getIdentificacion().equals(identificacion)) {
-                usuario.setTipoUsuario(nuevoTipoUsuario);
                 usuario.setCelular(nuevoCelular);
                 return usuario;
             }
@@ -61,34 +79,50 @@ public class UsuarioService {
         throw new UsuarioNoEncontradoException("No existe usuario registrado con la identificacion ingresada");
     }
 
-    private boolean validarValorDeCampo(String nombreCampo, String valor) {
-        String regex = "";
-        String mensajeError = "   -->  ";
-        switch (nombreCampo) {
-            case "nombre":
-            case "apellido":
-            case "tipoUsuario":
-            case "tipoIdentificacion":
-                regex = VALIDAR_SOLO_LETRAS;
-                mensajeError += "solo debe contener letras";
+    // evaluar el caso de unsuscribir todas las notificaciones
+    public Usuario actualizarSuscripcion(Usuario usuario, NombreNotificacion nombreNotificacion, Accion accion, TipoNotificacion tipoNotificacion) {
+        switch (accion) {
+            case SUSCRIBIR:
+                if (tipoNotificacion.equals(EMAIL)) {
+                    usuario.getUnsuscripcionesEmail().remove(nombreNotificacion);
+                } else if (usuario.isAceptaNotificacionSms() && NOTIFICACIONES_SMS_LIST.contains(nombreNotificacion)) {
+                    usuario.getUnsuscripcionesSms().remove(nombreNotificacion);
+                } else {
+                    throw new DatoInvalidoException("No es posible Suscribirse a la notificacion ingresada");
+                }
                 break;
-            case "identificacion":
-                regex = VALIDAR_IDENTIFICACION;
-                mensajeError += "error en el formato de identificacion";
+            case UNSUSCRIBIR:
+                if (tipoNotificacion.equals(EMAIL)) {
+                    usuario.getUnsuscripcionesEmail().add(nombreNotificacion);
+                } else if (usuario.isAceptaNotificacionSms() && NOTIFICACIONES_SMS_LIST.contains(nombreNotificacion)) {
+                    usuario.getUnsuscripcionesSms().add(nombreNotificacion);
+                } else {
+                    throw new DatoInvalidoException("No es posible unsuscribirse a la notificacion ingresada");
+                }
                 break;
-            case "email":
-                regex = VALIDAR_EMAIL;
-                mensajeError += "no es un email valido";
+            case SUSCRIBIR_TODO:
+                usuario.getUnsuscripcionesEmail().clear();
+                if (usuario.isAceptaNotificacionSms()) {
+                    usuario.getUnsuscripcionesSms().clear();
+                }
                 break;
-            case "celular":
-                regex = VALIDAR_CELULAR;
-                mensajeError = "no es un celular valido";
+            case UNSUSCRIBIR_TODO:
+                for (NombreNotificacion notificacion : NombreNotificacion.values()) {
+                    if (!usuario.getUnsuscripcionesEmail().contains(notificacion)) {
+                        usuario.getUnsuscripcionesEmail().add(notificacion);
+                    }
+                }
+                if (usuario.isAceptaNotificacionSms()) {
+                    for (NombreNotificacion notificacion : NOTIFICACIONES_SMS_LIST) {
+                        if (!usuario.getUnsuscripcionesSms().contains(notificacion)) {
+                            usuario.getUnsuscripcionesSms().add(notificacion);
+                        }
+                    }
+                }
                 break;
         }
-        if (valor.matches(regex)) {
-            return true;
-        }
-        throw new RuntimeException(valor + mensajeError);
+        return usuario;
+
     }
 
 //    private String validarEmail(String email) {
