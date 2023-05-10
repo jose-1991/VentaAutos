@@ -29,7 +29,6 @@ TipoNotificacion,EnvioEmail,EnvioSms
 NuevoVehiculoEnVenta,true,true
 VendedorContraoferta,true,false
 VendedorAceptaOferta,true,true
-VendedorDeclinaOferta,true,false
 VehiculoNoDisponible,true,false
 
 Si el usuario ha solicitado unsuscribirse de alguna notification via texto o todas, la empresa no deberia enviar ningun mensaje de texto de la/las notificationes unsuscritas a partir de ese momento. En caso de enviar un mensaje de texto a un usuario que se unsubcrito anteriorment la empresa recibe una multa de $100 por cada mensaje de texto enviado.

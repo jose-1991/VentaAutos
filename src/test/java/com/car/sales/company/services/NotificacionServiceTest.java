@@ -81,4 +81,9 @@ public class NotificacionServiceTest {
 
         notificacionService.enviarNotificacion(vendedor, vehiculo, 0, nombreNotificacion);
     }
+
+    @Test
+    public void testEnviarNotificacionCaseVendedorAceptaOferta() {
+
+    }
 }

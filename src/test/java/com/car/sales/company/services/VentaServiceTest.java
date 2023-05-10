@@ -112,13 +112,4 @@ public class VentaServiceTest {
         Oferta ofertaEsperada = new Oferta(123908, 0, comprador, LocalDateTime.now());
         ventaService.interactuar(publicacion, ofertaEsperada, tipoUsuario, RETIRAR, 0);
     }
-
-    @Test
-    public void interactuarCaseRechazar() {
-        tipoUsuario = VENDEDOR;
-        Publicacion publicacionActual = ventaService.interactuar(publicacion, oferta, tipoUsuario, RECHAZAR, 0);
-        Assert.assertTrue(oferta.isInactivo());
-    }
-
-
 }

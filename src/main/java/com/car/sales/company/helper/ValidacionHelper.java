@@ -29,10 +29,11 @@ public class ValidacionHelper {
         throw new DatoInvalidoException("El Vin ingresado no es valido");
     }
 
-    public static void validarString(String valor) {
+    public static String validarString(String valor) {
         if (valor == null || valor.trim().isEmpty()) {
             throw new DatoInvalidoException("El dato ingresado no es valido");
         }
+        return valor;
     }
 
     public static void validarTipoUsuario(TipoUsuario tipoUsuario) {

@@ -15,6 +15,7 @@ public class NotificacionService {
 
     static final List<NombreNotificacion> NOTIFICACIONES_SMS_LIST = Arrays.asList(COMPRADOR_PRIMERA_OFERTA, COMPRADOR_ACEPTA_OFERTA,
             NUEVO_VEHICULO_EN_VENTA, VENDEDOR_ACEPTA_OFERTA);
+    static final List<NombreNotificacion> NOTIFICACIONES_EMAIL_LIST = Arrays.asList(NombreNotificacion.values());
 
     public Notificacion enviarNotificacion(Usuario usuario, Vehiculo vehiculo, double montoOferta, NombreNotificacion nombreNotificacion) {
         Notificacion notificacion = new Notificacion(nombreNotificacion, vehiculo, montoOferta, null, null);
