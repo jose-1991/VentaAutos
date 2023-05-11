@@ -24,7 +24,7 @@ public class VentaService {
         return oferta;
     }
 
-    public Publicacion interactuar(Publicacion publicacion, Oferta oferta, TipoUsuario tipoUsuario, Accion accion, double nuevoMonto) {
+    public Oferta interactuar(Publicacion publicacion, Oferta oferta, TipoUsuario tipoUsuario, Accion accion, double nuevoMonto) {
         switch (accion) {
             case CONTRA_OFERTAR:
                 if (tipoUsuario.equals(VENDEDOR)) {
@@ -37,24 +37,29 @@ public class VentaService {
                 }
                 break;
             case ACEPTAR:
-                Oferta mayorOferta = obtenerMayorOferta(publicacion.getOfertasCompradores());
+                Oferta mejorOferta;
+                if (tipoUsuario.equals(VENDEDOR)) {
+                    mejorOferta = obtenerMayorOferta(publicacion.getOfertasCompradores());
+                    notificacionService.enviarNotificacion(mejorOferta.getComprador(), publicacion.getVehiculo(),
+                            mejorOferta.getMontoOferta(), VENDEDOR_ACEPTA_OFERTA);
 
+                } else if (tipoUsuario.equals(COMPRADOR) && oferta.getMontoContraOferta() > 1) {
+                    mejorOferta = oferta;
+                    notificacionService.enviarNotificacion(publicacion.getVendedor(), publicacion.getVehiculo(),
+                            mejorOferta.getMontoContraOferta(), COMPRADOR_ACEPTA_OFERTA);
+
+                } else {
+                    throw new UsuarioNoEncontradoException("No es posible Aceptar la oferta");
+                }
                 for (Oferta ofertaActual : publicacion.getOfertasCompradores()) {
-                    if (!ofertaActual.getComprador().getIdentificacion().equals(mayorOferta.getComprador().getIdentificacion())) {
+                    if (!ofertaActual.getComprador().getIdentificacion().equals(mejorOferta.getComprador().getIdentificacion())) {
                         ofertaActual.setInactivo(true);
                         notificacionService.enviarNotificacion(ofertaActual.getComprador(), publicacion.getVehiculo(),
                                 0, VEHICULO_NO_DISPONIBLE);
                     }
                 }
                 publicacion.setEstaDisponibleEnLaWeb(false);
-                if (tipoUsuario.equals(COMPRADOR)) {
-                    notificacionService.enviarNotificacion(publicacion.getVendedor(), publicacion.getVehiculo(),
-                            mayorOferta.getMontoOferta(), COMPRADOR_ACEPTA_OFERTA);
-                } else {
-                    notificacionService.enviarNotificacion(oferta.getComprador(), publicacion.getVehiculo(),
-                            mayorOferta.getMontoOferta(), VENDEDOR_ACEPTA_OFERTA);
-                }
-                break;
+                return mejorOferta;
             case RETIRAR:
                 if (tipoUsuario.equals(COMPRADOR)) {
                     for (Oferta ofertaActual : publicacion.getOfertasCompradores()) {
@@ -69,18 +74,19 @@ public class VentaService {
                 }
                 break;
         }
-        return publicacion;
+        return oferta;
     }
 
     private Oferta obtenerMayorOferta(List<Oferta> ofertasCompradores) {
         double montoMayor = 0;
         Oferta ofertaMontoMayor = null;
         for (Oferta ofertaActual : ofertasCompradores) {
-            if (ofertaActual.getMontoOferta() > montoMayor){
+            if (ofertaActual.getMontoOferta() > montoMayor) {
                 montoMayor = ofertaActual.getMontoOferta();
                 ofertaMontoMayor = ofertaActual;
-            }if (ofertaActual.getMontoOferta() == montoMayor && ofertaMontoMayor != null &&
-                    ofertaActual.getFechaOferta().isBefore(ofertaMontoMayor.getFechaOferta())){
+            }
+            if (ofertaActual.getMontoOferta() == montoMayor && ofertaMontoMayor != null &&
+                    ofertaActual.getFechaOferta().isBefore(ofertaMontoMayor.getFechaOferta())) {
                 ofertaMontoMayor = ofertaActual;
             }
         }

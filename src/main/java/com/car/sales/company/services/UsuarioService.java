@@ -16,8 +16,7 @@ import static com.car.sales.company.helper.ValidacionHelper.validarTipoUsuario;
 import static com.car.sales.company.models.Accion.SUSCRIBIR;
 import static com.car.sales.company.models.NombreNotificacion.*;
 import static com.car.sales.company.models.TipoUsuario.VENDEDOR;
-import static com.car.sales.company.services.NotificacionService.NOTIFICACIONES_EMAIL_LIST;
-import static com.car.sales.company.services.NotificacionService.NOTIFICACIONES_SMS_LIST;
+import static com.car.sales.company.services.NotificacionService.*;
 
 public class UsuarioService {
 
@@ -76,6 +75,7 @@ public class UsuarioService {
         for (Usuario usuario : usuarios) {
             if (usuario.getIdentificacion().equals(identificacion)) {
                 usuario.setCelular(nuevoCelular);
+                usuario.setAceptaNotificacionSms(true);
                 return usuario;
             }
         }

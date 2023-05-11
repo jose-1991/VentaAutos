@@ -14,14 +14,15 @@ import java.time.LocalDateTime;
 import java.util.Arrays;
 
 import static com.car.sales.company.models.Accion.*;
-import static com.car.sales.company.models.TipoUsuario.COMPRADOR;
-import static com.car.sales.company.models.TipoUsuario.VENDEDOR;
+import static com.car.sales.company.models.TipoUsuario.*;
+import static org.junit.Assert.*;
 
 @RunWith(MockitoJUnitRunner.class)
 public class VentaServiceTest {
 
     TipoUsuario tipoUsuario;
     double montoOferta;
+    double montoContraOferta;
     Oferta oferta;
     Oferta oferta2;
     Oferta oferta3;
@@ -35,7 +36,8 @@ public class VentaServiceTest {
     @Before
     public void setUp() {
         tipoUsuario = COMPRADOR;
-        montoOferta = 17000;
+        montoOferta = 1730;
+        montoContraOferta = 1203;
         comprador = new Usuario("Ruben", "Sanchez", "ci", "5203746",
                 "rube.123-122@gmail.com", COMPRADOR, null);
 
@@ -45,8 +47,8 @@ public class VentaServiceTest {
         vehiculo = new Vehiculo("1HGBH41JXMN109716", "Toyota", "Scion", 2020, 16000);
 
         oferta = new Oferta(17000, 0, comprador, LocalDateTime.now());
-        oferta2 = new Oferta(16000, 0, comprador, LocalDateTime.now());
-        oferta3 = new Oferta(16600, 0, comprador, LocalDateTime.now());
+        oferta2 = new Oferta(14000, 0, comprador, LocalDateTime.now());
+        oferta3 = new Oferta(13600, 0, comprador, LocalDateTime.now());
 
         publicacion = new Publicacion();
         publicacion.setVendedor(vendedor);
@@ -58,58 +60,85 @@ public class VentaServiceTest {
     @Test
     public void realizarPrimeraOferta() {
         comprador.setIdentificacion("5203717");
+        montoOferta = 17000;
 
         Oferta ofertaActual = ventaService.realizarPrimeraOferta(publicacion, comprador, montoOferta);
+
         Assert.assertNotNull(ofertaActual);
-        Assert.assertEquals("5203717", ofertaActual.getComprador().getIdentificacion());
+        assertEquals("5203717", ofertaActual.getComprador().getIdentificacion());
     }
 
     @Test(expected = DatoInvalidoException.class)
     public void realizarPrimeraOfertaBotaExceptionCuandoNoSeIngresaUnMontoValido() {
-        montoOferta = 0;
+        montoOferta = -4650;
 
         ventaService.realizarPrimeraOferta(publicacion, comprador, montoOferta);
     }
 
     @Test
     public void interactuarCaseContraOfertar() {
-
         tipoUsuario = VENDEDOR;
-        double montoContraOferta = 17300;
+        montoContraOferta = 17300;
 
-        Publicacion publicacionActual = ventaService.interactuar(publicacion, oferta, tipoUsuario, CONTRA_OFERTAR, montoContraOferta);
+        Oferta ofertaActual = ventaService.interactuar(publicacion, oferta, tipoUsuario, CONTRA_OFERTAR, montoContraOferta);
 
-        Assert.assertEquals(montoContraOferta, oferta.getMontoContraOferta(), 0.0);
+        assertNotNull(ofertaActual);
+        assertEquals(montoContraOferta, ofertaActual.getMontoContraOferta(), 0.0);
     }
 
     @Test(expected = UsuarioNoEncontradoException.class)
-    public void interactuarCaseContraOfertarBotaExceptionCuandoEsComprador() {
+    public void interactuarCaseContraOfertarBotaExceptionCuandoNoEsVendedor() {
         tipoUsuario = COMPRADOR;
-        montoOferta = 17300;
-        ventaService.interactuar(publicacion, oferta, tipoUsuario, CONTRA_OFERTAR, montoOferta);
+        montoContraOferta = 17300;
+
+        ventaService.interactuar(publicacion, oferta, tipoUsuario, CONTRA_OFERTAR, montoContraOferta);
     }
 
     @Test
-    public void interactuarCaseAceptar() {
+    public void interactuarCaseAceptarCaseVendedor() {
         tipoUsuario = VENDEDOR;
+        oferta.setMontoOferta(18000);
+        oferta.setFechaOferta(LocalDateTime.now());
+        oferta2.setMontoOferta(18000);
+        oferta2.setFechaOferta(LocalDateTime.now().minusHours(8));
 
-        Publicacion publicacionActual = ventaService.interactuar(publicacion, oferta, tipoUsuario, ACEPTAR, 0);
+        Oferta ofertaActual = ventaService.interactuar(publicacion, null, tipoUsuario, ACEPTAR, 0);
 
-        Assert.assertEquals(3, publicacionActual.getOfertasCompradores().size());
-        Assert.assertFalse(publicacionActual.isEstaDisponibleEnLaWeb());
+        assertNotNull(ofertaActual);
+        assertEquals(oferta2.getMontoOferta(), ofertaActual.getMontoOferta(), 0.0);
+        assertEquals(oferta2.getFechaOferta(), ofertaActual.getFechaOferta());
+    }
+
+    @Test
+    public void interactuarCaseAceptarCaseComprador() {
+        tipoUsuario = COMPRADOR;
+        oferta.setMontoContraOferta(200);
+
+        Oferta ofertaActual = ventaService.interactuar(publicacion, oferta, tipoUsuario, ACEPTAR, 0);
+
+        assertNotNull(ofertaActual);
+        assertEquals(oferta.getMontoContraOferta(), ofertaActual.getMontoContraOferta(), 0.0);
+    }
+
+    @Test(expected = UsuarioNoEncontradoException.class)
+    public void interactuarCaseAceptarCaseCompradorBotaExceptionCuandoNoExisteContraOferta() {
+        oferta.setMontoContraOferta(0);
+
+        ventaService.interactuar(publicacion, oferta, tipoUsuario, ACEPTAR, 0);
     }
 
     @Test
     public void interactuarCaseRetirar() {
         tipoUsuario = COMPRADOR;
-        Publicacion publicacionActual = ventaService.interactuar(publicacion, oferta, tipoUsuario, RETIRAR, 0);
-        Assert.assertTrue(oferta.isInactivo());
 
+        Oferta ofertaActual = ventaService.interactuar(publicacion, oferta, tipoUsuario, RETIRAR, 0);
+        Assert.assertTrue(ofertaActual.isInactivo());
     }
 
     @Test(expected = DatoInvalidoException.class)
-    public void interactuarCaseRetirarBotaExceptionCuandoNoExisteLaOferta() {
-        Oferta ofertaEsperada = new Oferta(123908, 0, comprador, LocalDateTime.now());
-        ventaService.interactuar(publicacion, ofertaEsperada, tipoUsuario, RETIRAR, 0);
+    public void interactuarCaseRetirarBotaExceptionCuandoNoEsComprador() {
+        tipoUsuario = VENDEDOR;
+
+        ventaService.interactuar(publicacion, oferta, tipoUsuario, RETIRAR, 0);
     }
 }

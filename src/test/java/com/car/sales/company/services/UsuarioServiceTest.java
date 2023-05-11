@@ -16,10 +16,9 @@ import java.util.Arrays;
 
 import static com.car.sales.company.models.Accion.*;
 import static com.car.sales.company.models.NombreNotificacion.*;
-import static com.car.sales.company.models.TipoNotificacion.EMAIL;
-import static com.car.sales.company.models.TipoNotificacion.SMS;
-import static com.car.sales.company.models.TipoUsuario.COMPRADOR;
-import static com.car.sales.company.models.TipoUsuario.VENDEDOR;
+import static com.car.sales.company.models.TipoNotificacion.*;
+import static com.car.sales.company.models.TipoUsuario.*;
+import static com.car.sales.company.services.NotificacionService.*;
 import static org.junit.Assert.*;
 
 @RunWith(MockitoJUnitRunner.class)
@@ -49,8 +48,10 @@ public class UsuarioServiceTest {
                 "javi.31_82@hotmail.com", VENDEDOR, null);
         usuario2 = new Usuario("Pablo", "Valencia", "pasaporte", "A3278129",
                 "pa_val.1985@gmail.com", COMPRADOR, "60782023");
+        usuario2.setAceptaNotificacionSms(true);
         usuario3 = new Usuario("Lucy", "Pardo", "ci", "52082393B",
                 "lucy.luz023@hotmail.com", COMPRADOR, "76437428");
+        usuario3.setAceptaNotificacionSms(true);
         usuario4 = new Usuario("Christian", "Ledezma", "licencia", "12323984",
                 "cris_lu.21412@hotmail.com", COMPRADOR, null);
 
@@ -122,7 +123,7 @@ public class UsuarioServiceTest {
 
     @Test(expected = UsuarioNoEncontradoException.class)
     public void testEliminarUsuarioBotaExceptionCuandoLaIdentificacionNoExisteEnLaLista() {
-        identificacionEsperado = "A3278129123";
+        identificacionEsperado = "3278ES29123";
 
         usuarioService.eliminarUsuario(identificacionEsperado);
     }
@@ -135,6 +136,14 @@ public class UsuarioServiceTest {
         Usuario usuarioActual = usuarioService.modificarUsuario(identificacionEsperado, celularEsperado);
 
         Assert.assertEquals(celularEsperado, usuarioActual.getCelular());
+        Assert.assertTrue(usuarioActual.isAceptaNotificacionSms());
+    }
+
+    @Test (expected = UsuarioNoEncontradoException.class)
+    public void testModificarUsuarioBotaExceptionCuandoLaIdentificacionNoExiste(){
+        identificacionEsperado = "1245234";
+
+        usuarioService.modificarUsuario(identificacionEsperado,"75463462");
     }
 
     @Test
@@ -145,14 +154,34 @@ public class UsuarioServiceTest {
 
         assertNotNull(usuarioEsperado);
         assertTrue(usuarioEsperado.getUnsuscripcionesEmail().contains(nombreNotificacion));
+    }
+
+    @Test
+    public void testActualizarSuscripcionCaseUnsuscribirSms() {
+        nombreNotificacion = VENDEDOR_ACEPTA_OFERTA;
+
+        Usuario usuarioEsperado = usuarioService.actualizarSuscripcion(usuario2, nombreNotificacion, UNSUSCRIBIR, SMS);
+
+        assertNotNull(usuarioEsperado);
+        assertTrue(usuarioEsperado.getUnsuscripcionesSms().contains(nombreNotificacion));
+    }
+
+    @Test
+    public void testActualizarSuscripcionCaseSuscribirEmail() {
+        nombreNotificacion = VENDEDOR_CONTRAOFERTA;
+
+        Usuario usuarioEsperado = usuarioService.actualizarSuscripcion(usuario2, nombreNotificacion, SUSCRIBIR, EMAIL);
+
+        assertNotNull(usuarioEsperado);
+        assertFalse(usuarioEsperado.getUnsuscripcionesEmail().contains(nombreNotificacion));
 
     }
 
     @Test
-    public void testActualizarSuscripcionSuscribirSms() {
+    public void testActualizarSuscripcionCaseSuscribirSms() {
         nombreNotificacion = NUEVO_VEHICULO_EN_VENTA;
 
-        Usuario usuarioEsperado = usuarioService.actualizarSuscripcion(usuario2, nombreNotificacion, UNSUSCRIBIR, EMAIL);
+        Usuario usuarioEsperado = usuarioService.actualizarSuscripcion(usuario2, nombreNotificacion, SUSCRIBIR, SMS);
 
         assertNotNull(usuarioEsperado);
         assertFalse(usuarioEsperado.getUnsuscripcionesSms().contains(nombreNotificacion));
@@ -167,18 +196,18 @@ public class UsuarioServiceTest {
     }
 
     @Test
-    public void testActualizarSuscripcionCaseUnsuscribirTodoEmail() {
+    public void testActualizarSuscripcionCaseUnsuscribirTodo() {
 
-        Usuario usuarioEsperado = usuarioService.actualizarSuscripcion(usuario1, null, UNSUSCRIBIR_TODO, EMAIL);
+        Usuario usuarioEsperado = usuarioService.actualizarSuscripcion(usuario1, null, UNSUSCRIBIR_TODO, null);
 
         assertNotNull(usuarioEsperado);
         assertTrue(usuarioEsperado.getUnsuscripcionesEmail().containsAll(Arrays.asList(NombreNotificacion.values())));
     }
 
     @Test
-    public void testActualizarSuscripcionCaseSuscribirTodoSms() {
+    public void testActualizarSuscripcionCaseSuscribirTodo() {
 
-        Usuario usuarioEsperado = usuarioService.actualizarSuscripcion(usuario1, null, SUSCRIBIR_TODO, SMS);
+        Usuario usuarioEsperado = usuarioService.actualizarSuscripcion(usuario1, null, SUSCRIBIR_TODO, null);
         assertTrue(usuarioEsperado.getUnsuscripcionesSms().isEmpty());
     }
 }

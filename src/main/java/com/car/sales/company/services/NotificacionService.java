@@ -27,8 +27,8 @@ public class NotificacionService {
         }
         if (!usuario.getUnsuscripcionesEmail().contains(nombreNotificacion)) {
             notificacion.setEmail(usuario.getEmail());
-        } else {
-            throw new DatoInvalidoException("El usuario NO esta suscrito a la notificacion Ingresada");
+        } if (notificacion.getEmail() == null && notificacion.getCelular() == null){
+            throw new DatoInvalidoException("El usuario no esta suscrito a la notificacion ingresada");
         }
         enviar(notificacion);
         return notificacion;
