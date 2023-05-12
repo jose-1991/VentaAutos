@@ -10,6 +10,7 @@ import java.util.Arrays;
 import java.util.List;
 
 import static com.car.sales.company.models.NombreNotificacion.*;
+import static com.car.sales.company.models.TipoUsuario.COMPRADOR;
 
 public class NotificacionService {
 
@@ -35,5 +36,13 @@ public class NotificacionService {
     }
 
     public void enviar(Notificacion notificacion) {
+    }
+
+    public void notificarTodosLosCompradores(List<Usuario> usuarios, Vehiculo vehiculo, NombreNotificacion nombreNotificacion){
+        for (Usuario usuario : usuarios) {
+            if (usuario.getTipoUsuario().equals(COMPRADOR)) {
+                enviarNotificacion(usuario, vehiculo, 0, nombreNotificacion);
+            }
+        }
     }
 }

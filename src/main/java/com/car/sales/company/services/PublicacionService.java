@@ -33,11 +33,7 @@ public class PublicacionService {
             publicacion.setOfertasCompradores(new ArrayList<>());
             publicacion.setEstaDisponibleEnLaWeb(true);
             vehiculosPublicados.add(publicacion);
-            for (Usuario usuario : usuarioService.usuarios) {
-                if (usuario.getTipoUsuario().equals(COMPRADOR)) {
-                    notificacionService.enviarNotificacion(usuario, vehiculo, 0, NUEVO_VEHICULO_EN_VENTA);
-                }
-            }
+            notificacionService.notificarTodosLosCompradores(usuarioService.usuarios,vehiculo,NUEVO_VEHICULO_EN_VENTA);
             return publicacion;
         }
         throw new DatoInvalidoException("El usuario debe ser de tipo vendedor");
@@ -60,10 +56,13 @@ public class PublicacionService {
         if (nuevoPrecioVehiculo < publicacion.getVehiculo().getPrecio()) {
             publicacion.getVehiculo().setPrecio(nuevoPrecioVehiculo);
             publicacion.setEstaDisponibleEnLaWeb(true);
+            notificacionService.notificarTodosLosCompradores(usuarioService.usuarios,publicacion.getVehiculo(),NUEVO_VEHICULO_EN_VENTA);
         } else {
             throw new DatoInvalidoException("el nuevo precio debe ser menor al precio actual");
         }
         return publicacion;
     }
+
+
 
 }
