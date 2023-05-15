@@ -155,7 +155,7 @@ public class VentaService {
 
     private NombreNotificacion interactuarComprador(Publicacion publicacion, Oferta oferta, Accion accion) {
         if (accion.equals(CONTRA_OFERTAR)) {
-            throw new UsuarioNoEncontradoException("Solo el vendedor puede realizar una contra oferta");
+            throw new DatoInvalidoException("Solo el vendedor puede realizar una contra oferta");
         }
         if (accion.equals(RETIRAR)) {
             for (Oferta ofertaActual : publicacion.getOfertasCompradores()) {
@@ -180,6 +180,7 @@ public class VentaService {
     }
 
     private NombreNotificacion interactuarVendedor(Publicacion publicacion, Oferta oferta, Accion accion, double nuevoMonto) {
+
         if (accion.equals(CONTRA_OFERTAR)) {
             oferta.setMontoContraOferta(nuevoMonto);
             montoNotificacion = oferta.getMontoContraOferta();
