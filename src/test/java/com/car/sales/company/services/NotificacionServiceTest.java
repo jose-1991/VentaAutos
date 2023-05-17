@@ -256,6 +256,13 @@ public class NotificacionServiceTest {
         vendedor.setUnsuscribcionesEmail(Collections.singletonList(nombreNotificacion));
         vendedor.setUnsuscribcionesSms(Collections.singletonList(nombreNotificacion));
 
-        notificacionService.enviarNotificacion(vendedor, vehiculo, 0, nombreNotificacion);
+        notificacionService.enviarNotificacion(vendedor, vehiculo, montoOfertaEsperado, nombreNotificacion);
+    }
+
+    @Test (expected = DatoInvalidoException.class)
+    public void testEnviarNotificacionBotaExceptionCuandoNombreNotificacionEsNull(){
+        nombreNotificacion = null;
+
+        notificacionService.enviarNotificacion(vendedor,vehiculo,0,nombreNotificacion);
     }
 }

@@ -4,13 +4,15 @@ public class Notificacion {
     private NombreNotificacion nombreNotificacion;
     private Vehiculo vehiculo;
     private double montoOferta;
+    private double montoContraOferta;
     private String email;
     private String celular;
 
-    public Notificacion(NombreNotificacion nombreNotificacion, Vehiculo vehiculo, double montoOferta, String email, String celular) {
+    public Notificacion(NombreNotificacion nombreNotificacion, Vehiculo vehiculo, double montoOferta,double montoContraOferta, String email, String celular) {
         this.nombreNotificacion = nombreNotificacion;
         this.vehiculo = vehiculo;
         this.montoOferta = montoOferta;
+        this.montoContraOferta = montoContraOferta;
         this.email = email;
         this.celular = celular;
     }

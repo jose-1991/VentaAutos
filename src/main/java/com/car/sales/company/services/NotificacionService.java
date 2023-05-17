@@ -18,9 +18,11 @@ public class NotificacionService {
             NUEVO_VEHICULO_EN_VENTA, VENDEDOR_ACEPTA_OFERTA);
     static final List<NombreNotificacion> NOTIFICACIONES_EMAIL_LIST = Arrays.asList(NombreNotificacion.values());
 
-    public Notificacion enviarNotificacion(Usuario usuario, Vehiculo vehiculo, double montoOferta, NombreNotificacion nombreNotificacion) {
-        Notificacion notificacion = new Notificacion(nombreNotificacion, vehiculo, montoOferta, null, null);
-
+    public Notificacion enviarNotificacion(Usuario usuario, Vehiculo vehiculo, double montoOferta, double montoContraOferta, NombreNotificacion nombreNotificacion) {
+        Notificacion notificacion = new Notificacion(nombreNotificacion, vehiculo, montoOferta, montoContraOferta,null, null);
+        if (nombreNotificacion == null){
+            throw new DatoInvalidoException("Nombre de notifiacion invalido");
+        }
         if (NOTIFICACIONES_SMS_LIST.contains(nombreNotificacion)) {
             if (usuario.isAceptaNotificacionSms() && !usuario.getUnsuscripcionesSms().contains(nombreNotificacion)) {
                 notificacion.setCelular(usuario.getCelular());
