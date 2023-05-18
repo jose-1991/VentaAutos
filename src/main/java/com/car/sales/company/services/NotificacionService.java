@@ -43,7 +43,7 @@ public class NotificacionService {
     public void notificarTodosLosCompradores(List<Usuario> usuarios, Vehiculo vehiculo, NombreNotificacion nombreNotificacion){
         for (Usuario usuario : usuarios) {
             if (usuario.getTipoUsuario().equals(COMPRADOR)) {
-                enviarNotificacion(usuario, vehiculo, 0, nombreNotificacion);
+                enviarNotificacion(usuario, vehiculo, 0,0, nombreNotificacion);
             }
         }
     }

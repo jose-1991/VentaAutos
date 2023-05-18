@@ -44,7 +44,7 @@ public class PublicacionService {
         for (Publicacion publicacion : vehiculosPublicados) {
             if (publicacion.getOfertasCompradores().size() < 1 && tieneMaximoDiasSinOfertas(publicacion.getFecha())) {
                 publicacion.setEstaDisponibleEnLaWeb(false);
-                notificacionService.enviarNotificacion(publicacion.getVendedor(), publicacion.getVehiculo(), 0,
+                notificacionService.enviarNotificacion(publicacion.getVendedor(), publicacion.getVehiculo(), 0,0,
                         VEHICULO_EXPIRADO);
                 publicacionesDeBaja++;
             }
