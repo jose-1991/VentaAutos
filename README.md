@@ -19,6 +19,7 @@ Las notificationes para vendedores son:
 
 TipoNotificacion,EnvioEmail,EnvioSms
 CompradorPrimeraOferta,true,true
+CompradorNuevaOferta, true, true
 CompradorAcceptaOfferta,true,true
 CompradorRetiraOferta,true,false
 VehiculoExpirado,true,false

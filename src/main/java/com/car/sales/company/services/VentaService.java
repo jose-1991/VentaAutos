@@ -1,7 +1,6 @@
 package com.car.sales.company.services;
 
 import com.car.sales.company.exceptions.DatoInvalidoException;
-import com.car.sales.company.exceptions.UsuarioNoEncontradoException;
 import com.car.sales.company.models.*;
 
 import java.time.LocalDateTime;
@@ -15,7 +14,6 @@ import static com.car.sales.company.models.TipoUsuario.VENDEDOR;
 
 public class VentaService {
     NotificacionService notificacionService = new NotificacionService();
-    private static double montoNotificacion;
 
     public Oferta realizarPrimeraOferta(Publicacion publicacion, Usuario usuario, double montoOferta) {
         Oferta oferta = new Oferta(validarPositivoDecimal(montoOferta), 0, usuario, LocalDateTime.now());
@@ -29,82 +27,90 @@ public class VentaService {
         switch (accion) {
             case CONTRA_OFERTAR:
                 return interactuarConContraOferta(publicacion, usuario, nuevoMonto);
-            case ACEPTAR:
+            case ACEPTAR_OFERTA:
                 return interactuarConAceptar(publicacion, usuario);
-            case RETIRAR:
+            case RETIRAR_OFERTA:
                 return interactuarConRetirar(publicacion, usuario);
+            case OFERTAR:
+                return interactuarConOfertar(publicacion, usuario, nuevoMonto);
+        }
+        return publicacion;
+    }
+
+    private Publicacion interactuarConOfertar(Publicacion publicacion, Usuario usuario, double monto) {
+        if (usuario.getTipoUsuario().equals(COMPRADOR)) {
+            Oferta oferta = new Oferta(monto, 0, usuario, LocalDateTime.now());
+            publicacion.getOfertasCompradores().add(oferta);
+            notificacionService.enviarNotificacion(publicacion.getVendedor(), publicacion.getVehiculo(), monto,
+                    0, COMPRADOR_NUEVA_OFERTA);
         }
         return publicacion;
     }
 
     private Publicacion interactuarConContraOferta(Publicacion publicacion, Usuario comprador, double nuevoMonto) {
         if (comprador.getTipoUsuario().equals(COMPRADOR)) {
-            for (Oferta oferta : publicacion.getOfertasCompradores()) {
-                if (usuarioTieneOferta(comprador,oferta)) {
-                    oferta.setMontoContraOferta(nuevoMonto);
-                    notificacionService.enviarNotificacion(comprador, publicacion.getVehiculo(), oferta.getMontoOferta(),
-                            oferta.getMontoContraOferta(), VENDEDOR_CONTRAOFERTA);
-                }
-            }
+            Oferta ofertaActual = encontrarOfertaUsuario(publicacion, comprador);
+            ofertaActual.setMontoContraOferta(nuevoMonto);
+            notificacionService.enviarNotificacion(comprador, publicacion.getVehiculo(), ofertaActual.getMontoOferta(),
+                    ofertaActual.getMontoContraOferta(), VENDEDOR_CONTRAOFERTA);
         } else {
             throw new DatoInvalidoException("El usuario debe ser comprador");
         }
-
         return publicacion;
     }
 
     private Publicacion interactuarConAceptar(Publicacion publicacion, Usuario usuario) {
-        Oferta mejorOferta = null;
+        Oferta mejorOferta;
         NombreNotificacion nombreNotificacion = null;
         if (usuario.getTipoUsuario().equals(VENDEDOR)) {
             mejorOferta = obtenerMayorOferta(publicacion.getOfertasCompradores());
             nombreNotificacion = VENDEDOR_ACEPTA_OFERTA;
             usuario = mejorOferta.getComprador();
         } else {
-            for (Oferta ofertaActual : publicacion.getOfertasCompradores()) {
-                if (usuarioTieneOferta(usuario,ofertaActual) &&
-                        ofertaActual.getMontoContraOferta() > 0) {
-                    mejorOferta = ofertaActual;
-                    nombreNotificacion = COMPRADOR_ACEPTA_OFERTA;
-                    usuario = publicacion.getVendedor();
-                }
+            mejorOferta = encontrarOfertaUsuario(publicacion, usuario);
+            if (mejorOferta.getMontoContraOferta() > 0) {
+                nombreNotificacion = COMPRADOR_ACEPTA_OFERTA;
+                usuario = publicacion.getVendedor();
             }
         }
-        if (mejorOferta != null) {
-            notificacionService.enviarNotificacion(usuario, publicacion.getVehiculo(),
-                    mejorOferta.getMontoOferta(), mejorOferta.getMontoContraOferta(), nombreNotificacion);
-            notificarCompradoresVehiculoVendido(publicacion, mejorOferta);
-            publicacion.setEstaDisponibleEnLaWeb(false);
-        }
+        notificacionService.enviarNotificacion(usuario, publicacion.getVehiculo(),
+                mejorOferta.getMontoOferta(), mejorOferta.getMontoContraOferta(), nombreNotificacion);
+        notificarCompradoresVehiculoVendido(publicacion, mejorOferta);
+        publicacion.setEstaDisponibleEnLaWeb(false);
+
         return publicacion;
+    }
+
+    private Oferta encontrarOfertaUsuario(Publicacion publicacion, Usuario usuario) {
+        for (Oferta ofertaActual : publicacion.getOfertasCompradores()) {
+            if (usuarioTieneOferta(usuario, ofertaActual)) {
+                return ofertaActual;
+            }
+        }
+        throw new DatoInvalidoException("Usuario no tiene oferta en esta Publicacion");
     }
 
     private Publicacion interactuarConRetirar(Publicacion publicacion, Usuario usuario) {
         if (usuario.getTipoUsuario().equals(COMPRADOR)) {
-            for (Oferta ofertaActual : publicacion.getOfertasCompradores()) {
-                if (usuarioTieneOferta(usuario,ofertaActual)) {
-                    ofertaActual.setInactivo(true);
-                    notificacionService.enviarNotificacion(publicacion.getVendedor(), publicacion.getVehiculo(),
-                            ofertaActual.getMontoOferta(), ofertaActual.getMontoContraOferta(), COMPRADOR_RETIRA_OFERTA);
-                }
-            }
+            Oferta ofertaActual = encontrarOfertaUsuario(publicacion, usuario);
+            ofertaActual.setInactivo(true);
+            notificacionService.enviarNotificacion(publicacion.getVendedor(), publicacion.getVehiculo(),
+                    ofertaActual.getMontoOferta(), ofertaActual.getMontoContraOferta(), COMPRADOR_RETIRA_OFERTA);
+
+
         } else {
             throw new DatoInvalidoException("El usuario debe ser de tipo comprador");
         }
         return publicacion;
     }
 
-    private boolean usuarioTieneOferta(Usuario usuario, Oferta oferta){
+    private boolean usuarioTieneOferta(Usuario usuario, Oferta oferta) {
         return usuario.getIdentificacion().equals(oferta.getComprador().getIdentificacion());
     }
-//     TODO: 11/5/2023 como saber cuando se llama a notificacionService
-//    devolver publicacion (metodo original)
-//    arreglar test ventaService
-//    optimizar metodo interactuar
 
-    private void notificarCompradoresVehiculoVendido(Publicacion publicacion, Oferta oferta) {
+    private void notificarCompradoresVehiculoVendido(Publicacion publicacion, Oferta mejorOferta) {
         for (Oferta ofertaActual : publicacion.getOfertasCompradores()) {
-            if (!ofertaActual.getComprador().getIdentificacion().equals(oferta.getComprador().getIdentificacion())) {
+            if (!ofertaActual.getComprador().getIdentificacion().equals(mejorOferta.getComprador().getIdentificacion())) {
                 ofertaActual.setInactivo(true);
                 notificacionService.enviarNotificacion(ofertaActual.getComprador(), publicacion.getVehiculo(),
                         0, 0, VEHICULO_NO_DISPONIBLE);
@@ -127,6 +133,5 @@ public class VentaService {
         }
         return ofertaMontoMayor;
     }
-
 }
 
