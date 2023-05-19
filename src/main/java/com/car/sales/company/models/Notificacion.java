@@ -2,15 +2,16 @@ package com.car.sales.company.models;
 
 public class Notificacion {
     private NombreNotificacion nombreNotificacion;
-    private Vehiculo vehiculo;
+    private Producto producto;
     private double montoOferta;
     private double montoContraOferta;
     private String email;
     private String celular;
 
-    public Notificacion(NombreNotificacion nombreNotificacion, Vehiculo vehiculo, double montoOferta,double montoContraOferta, String email, String celular) {
+    public Notificacion(NombreNotificacion nombreNotificacion, Producto producto, double montoOferta,
+                        double montoContraOferta, String email, String celular) {
         this.nombreNotificacion = nombreNotificacion;
-        this.vehiculo = vehiculo;
+        this.producto = producto;
         this.montoOferta = montoOferta;
         this.montoContraOferta = montoContraOferta;
         this.email = email;
@@ -41,12 +42,12 @@ public class Notificacion {
         this.celular = celular;
     }
 
-    public Vehiculo getVehiculo() {
-        return vehiculo;
+    public Producto getProducto() {
+        return producto;
     }
 
-    public void setVehiculo(Vehiculo vehiculo) {
-        this.vehiculo = vehiculo;
+    public void setProducto(Producto producto) {
+        this.producto = producto;
     }
 
     public double getMontoOferta() {
@@ -55,5 +56,13 @@ public class Notificacion {
 
     public void setMontoOferta(double montoOferta) {
         this.montoOferta = montoOferta;
+    }
+
+    public double getMontoContraOferta() {
+        return montoContraOferta;
+    }
+
+    public void setMontoContraOferta(double montoContraOferta) {
+        this.montoContraOferta = montoContraOferta;
     }
 }

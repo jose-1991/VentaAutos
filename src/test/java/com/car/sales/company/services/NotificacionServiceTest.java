@@ -42,7 +42,7 @@ public class NotificacionServiceTest {
         vendedor = new Usuario("Jorge", "Lopez", "ci", "5203717",
                 "jorgito-122@gmail.com", VENDEDOR, "78943726");
 
-        vehiculo = new Vehiculo("1HGBH41JXMN109716", "Toyota", "Scion", 2020, 16000);
+        vehiculo = new Vehiculo("1HGBH41JXMN109716", "Toyota", "Scion", 2020);
 
         oferta = new Oferta(14000, 14500, comprador, LocalDateTime.now());
     }

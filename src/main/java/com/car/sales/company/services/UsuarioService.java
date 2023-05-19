@@ -16,7 +16,8 @@ import static com.car.sales.company.helper.ValidacionHelper.validarTipoUsuario;
 import static com.car.sales.company.models.Accion.SUSCRIBIR;
 import static com.car.sales.company.models.NombreNotificacion.*;
 import static com.car.sales.company.models.TipoUsuario.VENDEDOR;
-import static com.car.sales.company.services.NotificacionService.*;
+import static com.car.sales.company.services.NotificacionService.NOTIFICACIONES_EMAIL_LIST;
+import static com.car.sales.company.services.NotificacionService.NOTIFICACIONES_SMS_LIST;
 
 public class UsuarioService {
 
@@ -25,13 +26,12 @@ public class UsuarioService {
     private final String VALIDAR_PASAPORTE = "^\\d{7,11}([\\s-]\\d[A-Z])?$";      //"^\\d{7,11}([\\s-]\\d[A-Z])?$";
     private final String VALIDAR_CI_LICENCIA = "^[0-9]{7,11}$";
     private final String PASAPORTE = "Pasaporte";
-    List<Usuario> usuarios = new ArrayList<>();
-
+    List<Usuario> listaUsuariosRegistrados = new ArrayList<>();
 
     public Usuario registrarUsuario(Usuario usuario) {
         if (usuario != null) {
             validarUsuario(usuario);
-            usuarios.add(usuario);
+            listaUsuariosRegistrados.add(usuario);
             return usuario;
         }
         throw new DatoInvalidoException("El usuario no debe ser nulo");
@@ -60,9 +60,9 @@ public class UsuarioService {
 
     public Usuario eliminarUsuario(String identificacion) {
         validarString(identificacion);
-        for (Usuario usuario : usuarios) {
+        for (Usuario usuario : listaUsuariosRegistrados) {
             if (usuario.getIdentificacion().equals(identificacion)) {
-                usuarios.remove(usuario);
+                listaUsuariosRegistrados.remove(usuario);
                 return usuario;
             }
         }
@@ -72,7 +72,7 @@ public class UsuarioService {
     public Usuario modificarUsuario(String identificacion, String nuevoCelular) {
         validarString(identificacion);
 
-        for (Usuario usuario : usuarios) {
+        for (Usuario usuario : listaUsuariosRegistrados) {
             if (usuario.getIdentificacion().equals(identificacion)) {
                 usuario.setCelular(nuevoCelular);
                 usuario.setAceptaNotificacionSms(true);

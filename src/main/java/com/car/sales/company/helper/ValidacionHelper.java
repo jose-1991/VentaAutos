@@ -19,7 +19,6 @@ public class ValidacionHelper {
         validarString(vehiculo.getMarca());
         validarString(vehiculo.getModelo());
         validarEnteroPositivo(vehiculo.getAnio());
-        validarPositivoDecimal(vehiculo.getPrecio());
     }
 
     private static void validarVin(String vin) {

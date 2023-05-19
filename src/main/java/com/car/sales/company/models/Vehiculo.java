@@ -2,21 +2,19 @@ package com.car.sales.company.models;
 
 import java.util.UUID;
 
-public class Vehiculo {
+public class Vehiculo implements Producto {
     private UUID stockNumber;
     private String vin;
     private String marca;
     private String modelo;
     private int anio;
-    private double precio;
 
-    public Vehiculo(String vin, String marca, String modelo, int anio, double precio) {
+    public Vehiculo(String vin, String marca, String modelo, int anio) {
         this.stockNumber = UUID.randomUUID();
         this.vin = vin;
         this.marca = marca;
         this.modelo = modelo;
         this.anio = anio;
-        this.precio = precio;
     }
 
 
@@ -58,14 +56,6 @@ public class Vehiculo {
 
     public void setAnio(int anio) {
         this.anio = anio;
-    }
-
-    public double getPrecio() {
-        return precio;
-    }
-
-    public void setPrecio(double precio) {
-        this.precio = precio;
     }
 }
 

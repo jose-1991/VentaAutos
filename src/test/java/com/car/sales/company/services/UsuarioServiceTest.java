@@ -3,7 +3,6 @@ package com.car.sales.company.services;
 import com.car.sales.company.exceptions.DatoInvalidoException;
 import com.car.sales.company.exceptions.UsuarioNoEncontradoException;
 import com.car.sales.company.models.NombreNotificacion;
-import com.car.sales.company.models.TipoNotificacion;
 import com.car.sales.company.models.Usuario;
 import org.junit.Assert;
 import org.junit.Before;
@@ -16,16 +15,15 @@ import java.util.Arrays;
 
 import static com.car.sales.company.models.Accion.*;
 import static com.car.sales.company.models.NombreNotificacion.*;
-import static com.car.sales.company.models.TipoNotificacion.*;
-import static com.car.sales.company.models.TipoUsuario.*;
-import static com.car.sales.company.services.NotificacionService.*;
+import static com.car.sales.company.models.TipoNotificacion.EMAIL;
+import static com.car.sales.company.models.TipoNotificacion.SMS;
+import static com.car.sales.company.models.TipoUsuario.COMPRADOR;
+import static com.car.sales.company.models.TipoUsuario.VENDEDOR;
 import static org.junit.Assert.*;
 
 @RunWith(MockitoJUnitRunner.class)
 public class UsuarioServiceTest {
 
-
-    TipoNotificacion tipoNotificacion;
     NombreNotificacion nombreNotificacion;
     String identificacionEsperado;
     Usuario usuarioEsperado;
@@ -55,10 +53,10 @@ public class UsuarioServiceTest {
         usuario4 = new Usuario("Christian", "Ledezma", "licencia", "12323984",
                 "cris_lu.21412@hotmail.com", COMPRADOR, null);
 
-        usuarioService.usuarios.add(usuario1);
-        usuarioService.usuarios.add(usuario2);
-        usuarioService.usuarios.add(usuario3);
-        usuarioService.usuarios.add(usuario4);
+        usuarioService.listaUsuariosRegistrados.add(usuario1);
+        usuarioService.listaUsuariosRegistrados.add(usuario2);
+        usuarioService.listaUsuariosRegistrados.add(usuario3);
+        usuarioService.listaUsuariosRegistrados.add(usuario4);
     }
 
     @Test
@@ -139,11 +137,11 @@ public class UsuarioServiceTest {
         Assert.assertTrue(usuarioActual.isAceptaNotificacionSms());
     }
 
-    @Test (expected = UsuarioNoEncontradoException.class)
-    public void testModificarUsuarioBotaExceptionCuandoLaIdentificacionNoExiste(){
+    @Test(expected = UsuarioNoEncontradoException.class)
+    public void testModificarUsuarioBotaExceptionCuandoLaIdentificacionNoExiste() {
         identificacionEsperado = "1245234";
 
-        usuarioService.modificarUsuario(identificacionEsperado,"75463462");
+        usuarioService.modificarUsuario(identificacionEsperado, "75463462");
     }
 
     @Test

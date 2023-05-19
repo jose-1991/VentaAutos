@@ -5,8 +5,9 @@ import java.util.List;
 
 public class Publicacion {
     private Usuario vendedor;
-    private Vehiculo vehiculo;
+    private Producto producto;
     private LocalDate fecha;
+    private double precio;
     private List<Oferta> ofertasCompradores;
     private boolean estaDisponibleEnLaWeb;
 
@@ -20,12 +21,12 @@ public class Publicacion {
         this.vendedor = vendedor;
     }
 
-    public Vehiculo getVehiculo() {
-        return vehiculo;
+    public Producto getProducto() {
+        return producto;
     }
 
-    public void setVehiculo(Vehiculo vehiculo) {
-        this.vehiculo = vehiculo;
+    public void setProducto(Producto producto) {
+        this.producto = producto;
     }
 
     public List<Oferta> getOfertasCompradores() {
@@ -42,6 +43,14 @@ public class Publicacion {
 
     public void setFecha(LocalDate fecha) {
         this.fecha = fecha;
+    }
+
+    public double getPrecio() {
+        return precio;
+    }
+
+    public void setPrecio(double precio) {
+        this.precio = precio;
     }
 
     public boolean isEstaDisponibleEnLaWeb() {

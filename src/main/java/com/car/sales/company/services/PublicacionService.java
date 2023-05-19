@@ -2,6 +2,7 @@ package com.car.sales.company.services;
 
 import com.car.sales.company.exceptions.DatoInvalidoException;
 import com.car.sales.company.models.Publicacion;
+import com.car.sales.company.models.Producto;
 import com.car.sales.company.models.Usuario;
 import com.car.sales.company.models.Vehiculo;
 
@@ -13,27 +14,33 @@ import static com.car.sales.company.helper.ValidacionHelper.tieneMaximoDiasSinOf
 import static com.car.sales.company.helper.ValidacionHelper.validarVehiculo;
 import static com.car.sales.company.models.NombreNotificacion.NUEVO_VEHICULO_EN_VENTA;
 import static com.car.sales.company.models.NombreNotificacion.VEHICULO_EXPIRADO;
-import static com.car.sales.company.models.TipoUsuario.COMPRADOR;
 import static com.car.sales.company.models.TipoUsuario.VENDEDOR;
 
 public class PublicacionService {
 
-    NotificacionService notificacionService = new NotificacionService();
-    UsuarioService usuarioService = new UsuarioService();
+    NotificacionService notificacionService;
+    UsuarioService usuarioService;
 
-    List<Publicacion> vehiculosPublicados = new ArrayList<>();
+    public PublicacionService(NotificacionService notificacionService, UsuarioService usuarioService) {
+        this.notificacionService = notificacionService;
+        this.usuarioService = usuarioService;
+    }
 
-    public Publicacion publicarVehiculo(Usuario vendedor, Vehiculo vehiculo) {
+    List<Publicacion> ProductosPublicados = new ArrayList<>();
+
+    public Publicacion publicarProducto(Usuario vendedor, Producto producto) {
         Publicacion publicacion = new Publicacion();
-        if (vendedor != null && vendedor.getTipoUsuario().equals(VENDEDOR) && vehiculo != null) {
-            validarVehiculo(vehiculo);
+        if (vendedor != null && vendedor.getTipoUsuario().equals(VENDEDOR) && producto != null) {
+            if (producto instanceof Vehiculo){
+                Vehiculo vehiculo = (Vehiculo)producto;
+                validarVehiculo(vehiculo);
+            }
             publicacion.setVendedor(vendedor);
-            publicacion.setVehiculo(vehiculo);
+            publicacion.setProducto(producto);
             publicacion.setFecha(LocalDate.now());
-            publicacion.setOfertasCompradores(new ArrayList<>());
             publicacion.setEstaDisponibleEnLaWeb(true);
-            vehiculosPublicados.add(publicacion);
-            notificacionService.notificarTodosLosCompradores(usuarioService.usuarios,vehiculo,NUEVO_VEHICULO_EN_VENTA);
+            ProductosPublicados.add(publicacion);
+            notificacionService.notificarTodosLosCompradores(usuarioService.listaUsuariosRegistrados, producto, NUEVO_VEHICULO_EN_VENTA);
             return publicacion;
         }
         throw new DatoInvalidoException("El usuario debe ser de tipo vendedor");
@@ -41,10 +48,10 @@ public class PublicacionService {
 
     public int darDeBajaPublicaciones() {
         int publicacionesDeBaja = 0;
-        for (Publicacion publicacion : vehiculosPublicados) {
+        for (Publicacion publicacion : ProductosPublicados) {
             if (publicacion.getOfertasCompradores().size() < 1 && tieneMaximoDiasSinOfertas(publicacion.getFecha())) {
                 publicacion.setEstaDisponibleEnLaWeb(false);
-                notificacionService.enviarNotificacion(publicacion.getVendedor(), publicacion.getVehiculo(), 0,0,
+                notificacionService.enviarNotificacion(publicacion.getVendedor(), publicacion.getProducto(), 0, 0,
                         VEHICULO_EXPIRADO);
                 publicacionesDeBaja++;
             }
@@ -52,17 +59,16 @@ public class PublicacionService {
         return publicacionesDeBaja;
     }
 
-    public Publicacion rePublicarVehiculo(Publicacion publicacion, double nuevoPrecioVehiculo) {
-        if (nuevoPrecioVehiculo < publicacion.getVehiculo().getPrecio()) {
-            publicacion.getVehiculo().setPrecio(nuevoPrecioVehiculo);
+    public Publicacion rePublicarProducto(Publicacion publicacion, double nuevoPrecioProducto) {
+        if (nuevoPrecioProducto < publicacion.getPrecio()) {
+            publicacion.setPrecio(nuevoPrecioProducto);
             publicacion.setEstaDisponibleEnLaWeb(true);
-            notificacionService.notificarTodosLosCompradores(usuarioService.usuarios,publicacion.getVehiculo(),NUEVO_VEHICULO_EN_VENTA);
+            notificacionService.notificarTodosLosCompradores(usuarioService.listaUsuariosRegistrados, publicacion.getProducto(), NUEVO_VEHICULO_EN_VENTA);
         } else {
             throw new DatoInvalidoException("el nuevo precio debe ser menor al precio actual");
         }
         return publicacion;
     }
-
 
 
 }
