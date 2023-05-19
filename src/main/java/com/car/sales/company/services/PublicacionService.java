@@ -1,8 +1,9 @@
 package com.car.sales.company.services;
 
 import com.car.sales.company.exceptions.DatoInvalidoException;
-import com.car.sales.company.models.Publicacion;
+import com.car.sales.company.exceptions.UsuarioNoEncontradoException;
 import com.car.sales.company.models.Producto;
+import com.car.sales.company.models.Publicacion;
 import com.car.sales.company.models.Usuario;
 import com.car.sales.company.models.Vehiculo;
 
@@ -18,21 +19,24 @@ import static com.car.sales.company.models.TipoUsuario.VENDEDOR;
 
 public class PublicacionService {
 
-    NotificacionService notificacionService;
-    UsuarioService usuarioService;
+    private NotificacionService notificacionService;
+    private UsuarioService usuarioService;
+    private List<Publicacion> ProductosPublicados = new ArrayList<>();
+
+    public List<Publicacion> getProductosPublicados() {
+        return ProductosPublicados;
+    }
 
     public PublicacionService(NotificacionService notificacionService, UsuarioService usuarioService) {
         this.notificacionService = notificacionService;
         this.usuarioService = usuarioService;
     }
 
-    List<Publicacion> ProductosPublicados = new ArrayList<>();
-
     public Publicacion publicarProducto(Usuario vendedor, Producto producto) {
         Publicacion publicacion = new Publicacion();
         if (vendedor != null && vendedor.getTipoUsuario().equals(VENDEDOR) && producto != null) {
-            if (producto instanceof Vehiculo){
-                Vehiculo vehiculo = (Vehiculo)producto;
+            if (producto instanceof Vehiculo) {
+                Vehiculo vehiculo = (Vehiculo) producto;
                 validarVehiculo(vehiculo);
             }
             publicacion.setVendedor(vendedor);
@@ -40,9 +44,37 @@ public class PublicacionService {
             publicacion.setFecha(LocalDate.now());
             publicacion.setEstaDisponibleEnLaWeb(true);
             ProductosPublicados.add(publicacion);
-            notificacionService.notificarTodosLosCompradores(usuarioService.listaUsuariosRegistrados, producto, NUEVO_VEHICULO_EN_VENTA);
+            if (!usuarioService.getListaUsuariosRegistrados().isEmpty()) {
+                notificacionService.notificarTodosLosCompradores(usuarioService.getListaUsuariosRegistrados(), producto, NUEVO_VEHICULO_EN_VENTA);
+            }
             return publicacion;
         }
+        throw new DatoInvalidoException("El usuario debe ser de tipo vendedor");
+    }
+
+    public Publicacion publicarProducto1(Usuario vendedor, Producto producto) {
+        Publicacion publicacion = new Publicacion();
+        try {
+            usuarioService.modificarUsuario(vendedor.getIdentificacion(), "76256432");
+
+        } catch (UsuarioNoEncontradoException exception) {
+            if (vendedor.getTipoUsuario().equals(VENDEDOR) && producto != null) {
+                if (producto instanceof Vehiculo) {
+                    Vehiculo vehiculo = (Vehiculo) producto;
+                    validarVehiculo(vehiculo);
+                }
+                publicacion.setVendedor(vendedor);
+                publicacion.setProducto(producto);
+                publicacion.setFecha(LocalDate.now());
+                publicacion.setEstaDisponibleEnLaWeb(true);
+                ProductosPublicados.add(publicacion);
+                if (!usuarioService.getListaUsuariosRegistrados().isEmpty()) {
+                    notificacionService.notificarTodosLosCompradores(usuarioService.getListaUsuariosRegistrados(), producto, NUEVO_VEHICULO_EN_VENTA);
+                }
+                return publicacion;
+            }
+        }
+
         throw new DatoInvalidoException("El usuario debe ser de tipo vendedor");
     }
 
@@ -63,7 +95,8 @@ public class PublicacionService {
         if (nuevoPrecioProducto < publicacion.getPrecio()) {
             publicacion.setPrecio(nuevoPrecioProducto);
             publicacion.setEstaDisponibleEnLaWeb(true);
-            notificacionService.notificarTodosLosCompradores(usuarioService.listaUsuariosRegistrados, publicacion.getProducto(), NUEVO_VEHICULO_EN_VENTA);
+            notificacionService.notificarTodosLosCompradores(usuarioService.getListaUsuariosRegistrados(), publicacion.getProducto(),
+                    NUEVO_VEHICULO_EN_VENTA);
         } else {
             throw new DatoInvalidoException("el nuevo precio debe ser menor al precio actual");
         }

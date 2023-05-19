@@ -1,6 +1,7 @@
 package com.car.sales.company.services;
 
 import com.car.sales.company.exceptions.DatoInvalidoException;
+import com.car.sales.company.exceptions.UsuarioNoEncontradoException;
 import com.car.sales.company.models.Oferta;
 import com.car.sales.company.models.Publicacion;
 import com.car.sales.company.models.Usuario;
@@ -18,14 +19,14 @@ import java.time.Month;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.List;
 
 import static com.car.sales.company.models.TipoUsuario.COMPRADOR;
 import static com.car.sales.company.models.TipoUsuario.VENDEDOR;
 import static org.junit.Assert.*;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyDouble;
-import static org.mockito.Mockito.times;
-import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.*;
 
 @RunWith(MockitoJUnitRunner.class)
 public class PublicacionServiceTest {
@@ -39,9 +40,9 @@ public class PublicacionServiceTest {
     private Vehiculo vehiculo;
 
     @Mock
-    private UsuarioService usuarioService;
+    private UsuarioService usuarioServiceMock;
     @Mock
-    private NotificacionService notificacionService;
+    private NotificacionService notificacionServiceMock;
     @InjectMocks
     private PublicacionService publicacionService;
 
@@ -73,12 +74,26 @@ public class PublicacionServiceTest {
 
     @Test
     public void testPublicarProducto() {
+        List<Usuario> listaUsuarios = Collections.singletonList(comprador);
+        when(usuarioServiceMock.getListaUsuariosRegistrados()).thenReturn(listaUsuarios);
         Publicacion publicacionActual = publicacionService.publicarProducto(vendedor, vehiculo);
 
         assertNotNull(publicacionActual);
         assertTrue(publicacionActual.isEstaDisponibleEnLaWeb());
-        assertTrue(publicacionService.ProductosPublicados.contains(publicacionActual));
-        verify(notificacionService).notificarTodosLosCompradores(any(), any(), any());
+        assertTrue(publicacionService.getProductosPublicados().contains(publicacionActual));
+        verify(notificacionServiceMock).notificarTodosLosCompradores(any(), any(), any());
+    }
+
+    @Test
+    public void testPublicarProducto1() {
+
+        when(usuarioServiceMock.modificarUsuario(anyString(), anyString())).thenThrow(UsuarioNoEncontradoException.class);
+        Publicacion publicacionActual = publicacionService.publicarProducto1(vendedor, vehiculo);
+
+        assertNotNull(publicacionActual);
+        assertTrue(publicacionActual.isEstaDisponibleEnLaWeb());
+        assertTrue(publicacionService.getProductosPublicados().contains(publicacionActual));
+        verify(notificacionServiceMock, times(0)).notificarTodosLosCompradores(any(), any(), any());
     }
 
     @Test(expected = DatoInvalidoException.class)
@@ -102,12 +117,12 @@ public class PublicacionServiceTest {
         publicacion1.setFecha(LocalDate.of(2023, Month.APRIL, 20));
         publicacion2.setFecha(LocalDate.now());
 
-        publicacionService.ProductosPublicados.add(publicacion1);
-        publicacionService.ProductosPublicados.add(publicacion2);
+        publicacionService.getProductosPublicados().add(publicacion1);
+        publicacionService.getProductosPublicados().add(publicacion2);
 
         int numeroDeBajasActual = publicacionService.darDeBajaPublicaciones();
         assertEquals(1, numeroDeBajasActual);
-        verify(notificacionService).enviarNotificacion(any(), any(), anyDouble(), anyDouble(), any());
+        verify(notificacionServiceMock).enviarNotificacion(any(), any(), anyDouble(), anyDouble(), any());
     }
 
     @Test
@@ -116,13 +131,12 @@ public class PublicacionServiceTest {
         publicacion2.setOfertasCompradores(Arrays.asList(new Oferta(22000, 0, comprador, fechaActual),
                 new Oferta(22400, 0, comprador, fechaActual)));
 
-        publicacionService.ProductosPublicados.add(publicacion1);
-        publicacionService.ProductosPublicados.add(publicacion2);
+        publicacionService.getProductosPublicados().add(publicacion1);
+        publicacionService.getProductosPublicados().add(publicacion2);
 
         int numeroDeBajasActual = publicacionService.darDeBajaPublicaciones();
         assertEquals(0, numeroDeBajasActual);
-        verify(notificacionService, times(0)).enviarNotificacion(any(), any(), anyDouble(), anyDouble(), any());
-
+        verify(notificacionServiceMock, times(0)).enviarNotificacion(any(), any(), anyDouble(), anyDouble(), any());
     }
 
     @Test
@@ -135,7 +149,7 @@ public class PublicacionServiceTest {
         Publicacion publicacionActual = publicacionService.rePublicarProducto(publicacion1, nuevoPrecio);
         assertNotNull(publicacionActual);
         assertTrue(publicacionActual.isEstaDisponibleEnLaWeb());
-        verify(notificacionService).notificarTodosLosCompradores(any(), any(), any());
+        verify(notificacionServiceMock).notificarTodosLosCompradores(any(), any(), any());
     }
 
     @Test(expected = DatoInvalidoException.class)

@@ -53,10 +53,10 @@ public class UsuarioServiceTest {
         usuario4 = new Usuario("Christian", "Ledezma", "licencia", "12323984",
                 "cris_lu.21412@hotmail.com", COMPRADOR, null);
 
-        usuarioService.listaUsuariosRegistrados.add(usuario1);
-        usuarioService.listaUsuariosRegistrados.add(usuario2);
-        usuarioService.listaUsuariosRegistrados.add(usuario3);
-        usuarioService.listaUsuariosRegistrados.add(usuario4);
+        usuarioService.getListaUsuariosRegistrados().add(usuario1);
+        usuarioService.getListaUsuariosRegistrados().add(usuario2);
+        usuarioService.getListaUsuariosRegistrados().add(usuario3);
+        usuarioService.getListaUsuariosRegistrados().add(usuario4);
     }
 
     @Test

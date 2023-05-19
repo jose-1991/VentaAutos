@@ -7,9 +7,7 @@ import com.car.sales.company.models.NombreNotificacion;
 import com.car.sales.company.models.TipoNotificacion;
 import com.car.sales.company.models.Usuario;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
+import java.util.*;
 
 import static com.car.sales.company.helper.ValidacionHelper.validarString;
 import static com.car.sales.company.helper.ValidacionHelper.validarTipoUsuario;
@@ -26,7 +24,11 @@ public class UsuarioService {
     private final String VALIDAR_PASAPORTE = "^\\d{7,11}([\\s-]\\d[A-Z])?$";      //"^\\d{7,11}([\\s-]\\d[A-Z])?$";
     private final String VALIDAR_CI_LICENCIA = "^[0-9]{7,11}$";
     private final String PASAPORTE = "Pasaporte";
-    List<Usuario> listaUsuariosRegistrados = new ArrayList<>();
+    private List<Usuario> listaUsuariosRegistrados = new ArrayList<>();
+
+    public List<Usuario> getListaUsuariosRegistrados() {
+        return listaUsuariosRegistrados;
+    }
 
     public Usuario registrarUsuario(Usuario usuario) {
         if (usuario != null) {
@@ -155,6 +157,21 @@ public class UsuarioService {
             return;
         }
         throw new RuntimeException(identificacion + " -> identificacion invalida");
+    }
+
+    //    nombreNotificacion = llave  Integer = contador
+//    si notificacion existe -> contador++
+//    sino nuevo registro y devolver la lista de llaves
+    public int guardarNotificaciones(NombreNotificacion nombreNotificacion) {
+        Map<NombreNotificacion, Integer> mapa = new HashMap<>();
+
+        if (mapa.containsKey(nombreNotificacion)) {
+            mapa.put(nombreNotificacion, mapa.get(nombreNotificacion) + 1);
+        } else {
+            throw new IllegalArgumentException();
+        }
+        return mapa.get(nombreNotificacion);
+
     }
 }
 

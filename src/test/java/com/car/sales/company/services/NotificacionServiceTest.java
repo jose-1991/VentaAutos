@@ -6,15 +6,20 @@ import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
+import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
 
 import java.time.LocalDateTime;
+import java.util.Arrays;
 import java.util.Collections;
+import java.util.List;
 
 import static com.car.sales.company.models.NombreNotificacion.*;
 import static com.car.sales.company.models.TipoUsuario.COMPRADOR;
 import static com.car.sales.company.models.TipoUsuario.VENDEDOR;
 import static org.junit.Assert.*;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.when;
 
 @RunWith(MockitoJUnitRunner.class)
 public class NotificacionServiceTest {
@@ -24,9 +29,15 @@ public class NotificacionServiceTest {
     Vehiculo vehiculo;
     Usuario vendedor;
     Usuario comprador;
+    Usuario comprador2;
+    Usuario comprador3;
     Publicacion publicacion;
     Oferta oferta;
     NombreNotificacion nombreNotificacion;
+    List<Usuario> listaUsuarios;
+
+    @Mock
+    UsuarioService usuarioServiceMock;
     @InjectMocks
     NotificacionService notificacionService;
 
@@ -36,7 +47,12 @@ public class NotificacionServiceTest {
         montoOferta = 15000;
         montoContraOferta = 16000;
 
+
         comprador = new Usuario("Ruben", "Sanchez", "ci", "5203746",
+                "rube.123-122@gmail.com", COMPRADOR, "75647362");
+        comprador2 = new Usuario("Ruben", "Sanchez", "ci", "5203846",
+                "rube.123-122@gmail.com", COMPRADOR, "75647362");
+        comprador3 = new Usuario("Ruben", "Sanchez", "ci", "5293746",
                 "rube.123-122@gmail.com", COMPRADOR, "75647362");
 
         vendedor = new Usuario("Jorge", "Lopez", "ci", "5203717",
@@ -45,6 +61,8 @@ public class NotificacionServiceTest {
         vehiculo = new Vehiculo("1HGBH41JXMN109716", "Toyota", "Scion", 2020);
 
         oferta = new Oferta(14000, 14500, comprador, LocalDateTime.now());
+
+        listaUsuarios = Arrays.asList(comprador, comprador2, comprador3, vendedor);
     }
 
     @Test
@@ -53,7 +71,7 @@ public class NotificacionServiceTest {
         montoOferta = 14000;
         vendedor.setAceptaNotificacionSms(false);
 
-        Notificacion notificacionActual = notificacionService.enviarNotificacion(vendedor, vehiculo, montoOferta,0, nombreNotificacion);
+        Notificacion notificacionActual = notificacionService.enviarNotificacion(vendedor, vehiculo, montoOferta, 0, nombreNotificacion);
 
         assertNotNull(notificacionActual.getEmail());
         assertNull(notificacionActual.getCelular());
@@ -68,7 +86,7 @@ public class NotificacionServiceTest {
         vendedor.setAceptaNotificacionSms(true);
         vendedor.setUnsuscribcionesEmail(Collections.singletonList(nombreNotificacion));
 
-        Notificacion notificacionActual = notificacionService.enviarNotificacion(vendedor, vehiculo, montoOferta,0, nombreNotificacion);
+        Notificacion notificacionActual = notificacionService.enviarNotificacion(vendedor, vehiculo, montoOferta, 0, nombreNotificacion);
 
         assertNotNull(notificacionActual.getCelular());
         assertNull(notificacionActual.getEmail());
@@ -82,7 +100,7 @@ public class NotificacionServiceTest {
         vendedor.setAceptaNotificacionSms(true);
         montoOferta = 14000;
 
-        Notificacion notificacionActual = notificacionService.enviarNotificacion(vendedor, vehiculo, montoOferta,0, nombreNotificacion);
+        Notificacion notificacionActual = notificacionService.enviarNotificacion(vendedor, vehiculo, montoOferta, 0, nombreNotificacion);
 
         assertNotNull(notificacionActual.getEmail());
         assertNotNull(notificacionActual.getCelular());
@@ -245,7 +263,7 @@ public class NotificacionServiceTest {
         comprador.setAceptaNotificacionSms(true);
 
         Notificacion notificacionActual = notificacionService.enviarNotificacion(comprador, vehiculo, montoOferta,
-                0,nombreNotificacion);
+                0, nombreNotificacion);
 
         assertNotNull(notificacionActual.getEmail());
         assertNotNull(notificacionActual.getCelular());
@@ -272,10 +290,40 @@ public class NotificacionServiceTest {
         notificacionService.enviarNotificacion(vendedor, vehiculo, montoOferta, 0, nombreNotificacion);
     }
 
-    @Test (expected = DatoInvalidoException.class)
-    public void testEnviarNotificacionBotaExceptionCuandoNombreNotificacionEsNull(){
+    @Test(expected = DatoInvalidoException.class)
+    public void testEnviarNotificacionBotaExceptionCuandoNombreNotificacionEsNull() {
         nombreNotificacion = null;
 
-        notificacionService.enviarNotificacion(vendedor,vehiculo,0, 0, nombreNotificacion);
+        notificacionService.enviarNotificacion(vendedor, vehiculo, 0, 0, nombreNotificacion);
+    }
+
+    @Test
+    public void testNotificarSinExcederLimite() {
+        nombreNotificacion = NUEVO_VEHICULO_EN_VENTA;
+
+        when(usuarioServiceMock.guardarNotificaciones(any())).thenReturn(12);
+        int numeroNotificacionesEnviadas = notificacionService.notificarSinExcederLimite(listaUsuarios, vehiculo, nombreNotificacion);
+
+        assertEquals(3, numeroNotificacionesEnviadas);
+    }
+
+    @Test(expected = IllegalArgumentException.class)
+    public void testNotificarSinExcederLimiteBotaExceptionCuandoLLegaAlLimite() {
+        nombreNotificacion = NUEVO_VEHICULO_EN_VENTA;
+
+        when(usuarioServiceMock.guardarNotificaciones(any())).thenReturn(101);
+        notificacionService.notificarSinExcederLimite(listaUsuarios, vehiculo, nombreNotificacion);
+
+    }
+
+    @Test
+    public void testNotificarSinExcederLimiteRetornaMilCuandoNoExisteElNombreNotificacion() {
+        nombreNotificacion = NUEVO_VEHICULO_EN_VENTA;
+
+        when(usuarioServiceMock.guardarNotificaciones(any())).thenThrow(IllegalArgumentException.class);
+        int numeroNotificacionesEnviadas = notificacionService.notificarSinExcederLimite(listaUsuarios, vehiculo,
+                nombreNotificacion);
+
+        assertEquals(1000, numeroNotificacionesEnviadas);
     }
 }
