@@ -1,5 +1,6 @@
 package com.car.sales.company.services;
 
+import com.car.sales.company.dao.NotificacionDAO;
 import com.car.sales.company.exceptions.DatoInvalidoException;
 import com.car.sales.company.models.NombreNotificacion;
 import com.car.sales.company.models.Notificacion;
@@ -14,9 +15,11 @@ import static com.car.sales.company.models.TipoUsuario.COMPRADOR;
 
 public class NotificacionService {
     private UsuarioService usuarioService;
+    private NotificacionDAO notificacionDAO;
 
-    public NotificacionService(UsuarioService usuarioService) {
+    public NotificacionService(UsuarioService usuarioService, NotificacionDAO notificacionDAO) {
         this.usuarioService = usuarioService;
+        this.notificacionDAO = notificacionDAO;
     }
 
     static final List<NombreNotificacion> NOTIFICACIONES_SMS_LIST = Arrays.asList(COMPRADOR_PRIMERA_OFERTA, COMPRADOR_ACEPTA_OFERTA,
@@ -45,6 +48,7 @@ public class NotificacionService {
     }
 
     public void enviar(Notificacion notificacion) {
+        notificacionDAO.registrarNotificacionEnDb(notificacion);
     }
 
     public void notificarTodosLosCompradores(List<Usuario> usuarios, Producto producto,

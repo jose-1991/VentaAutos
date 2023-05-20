@@ -1,5 +1,6 @@
 package com.car.sales.company.services;
 
+import com.car.sales.company.dao.PublicacionDAO;
 import com.car.sales.company.exceptions.DatoInvalidoException;
 import com.car.sales.company.exceptions.UsuarioNoEncontradoException;
 import com.car.sales.company.models.Producto;
@@ -21,15 +22,18 @@ public class PublicacionService {
 
     private NotificacionService notificacionService;
     private UsuarioService usuarioService;
+    private PublicacionDAO publicacionDAO;
     private List<Publicacion> ProductosPublicados = new ArrayList<>();
 
     public List<Publicacion> getProductosPublicados() {
         return ProductosPublicados;
     }
 
-    public PublicacionService(NotificacionService notificacionService, UsuarioService usuarioService) {
+    public PublicacionService(NotificacionService notificacionService, UsuarioService usuarioService,
+                              PublicacionDAO publicacionDAO) {
         this.notificacionService = notificacionService;
         this.usuarioService = usuarioService;
+        this.publicacionDAO = publicacionDAO;
     }
 
     public Publicacion publicarProducto(Usuario vendedor, Producto producto) {
@@ -43,7 +47,7 @@ public class PublicacionService {
             publicacion.setProducto(producto);
             publicacion.setFecha(LocalDate.now());
             publicacion.setEstaDisponibleEnLaWeb(true);
-            ProductosPublicados.add(publicacion);
+            publicacionDAO.registarPublicacionEnDb(publicacion);
             if (!usuarioService.getListaUsuariosRegistrados().isEmpty()) {
                 notificacionService.notificarTodosLosCompradores(usuarioService.getListaUsuariosRegistrados(), producto, NUEVO_VEHICULO_EN_VENTA);
             }

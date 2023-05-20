@@ -1,5 +1,6 @@
 package com.car.sales.company.services;
 
+import com.car.sales.company.dao.UsuarioDAO;
 import com.car.sales.company.exceptions.DatoInvalidoException;
 import com.car.sales.company.exceptions.UsuarioNoEncontradoException;
 import com.car.sales.company.models.Accion;
@@ -25,6 +26,11 @@ public class UsuarioService {
     private final String VALIDAR_CI_LICENCIA = "^[0-9]{7,11}$";
     private final String PASAPORTE = "Pasaporte";
     private List<Usuario> listaUsuariosRegistrados = new ArrayList<>();
+    private UsuarioDAO usuarioDAO;
+
+    public UsuarioService(UsuarioDAO usuarioDAO) {
+        this.usuarioDAO = usuarioDAO;
+    }
 
     public List<Usuario> getListaUsuariosRegistrados() {
         return listaUsuariosRegistrados;
@@ -33,7 +39,7 @@ public class UsuarioService {
     public Usuario registrarUsuario(Usuario usuario) {
         if (usuario != null) {
             validarUsuario(usuario);
-            listaUsuariosRegistrados.add(usuario);
+            usuarioDAO.registrarUsuarioEnDb(usuario);
             return usuario;
         }
         throw new DatoInvalidoException("El usuario no debe ser nulo");
