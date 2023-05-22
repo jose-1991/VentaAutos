@@ -15,6 +15,9 @@ public class Usuario {
     private  List<NombreNotificacion> unsuscribcionesEmail;
     private  List<NombreNotificacion> unsuscribcionesSms;
 
+    public Usuario() {
+    }
+
     public Usuario(String nombre, String apellido, String tipoIdentificacion, String identificacion, String email,
                    TipoUsuario tipoUsuario, String celular) {
         this.nombre = nombre;
@@ -107,4 +110,5 @@ public class Usuario {
     public void setUnsuscribcionesSms(List<NombreNotificacion> unsuscribcionesSms) {
         this.unsuscribcionesSms = unsuscribcionesSms;
     }
+
 }

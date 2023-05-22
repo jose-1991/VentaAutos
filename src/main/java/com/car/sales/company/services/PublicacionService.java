@@ -1,6 +1,7 @@
 package com.car.sales.company.services;
 
 import com.car.sales.company.dao.PublicacionDAO;
+import com.car.sales.company.dao.UsuarioDAO;
 import com.car.sales.company.exceptions.DatoInvalidoException;
 import com.car.sales.company.exceptions.UsuarioNoEncontradoException;
 import com.car.sales.company.models.Producto;
@@ -23,6 +24,7 @@ public class PublicacionService {
     private NotificacionService notificacionService;
     private UsuarioService usuarioService;
     private PublicacionDAO publicacionDAO;
+    private UsuarioDAO usuarioDAO;
     private List<Publicacion> ProductosPublicados = new ArrayList<>();
 
     public List<Publicacion> getProductosPublicados() {
@@ -30,10 +32,11 @@ public class PublicacionService {
     }
 
     public PublicacionService(NotificacionService notificacionService, UsuarioService usuarioService,
-                              PublicacionDAO publicacionDAO) {
+                              PublicacionDAO publicacionDAO, UsuarioDAO usuarioDAO) {
         this.notificacionService = notificacionService;
         this.usuarioService = usuarioService;
         this.publicacionDAO = publicacionDAO;
+        this.usuarioDAO = usuarioDAO;
     }
 
     public Publicacion publicarProducto(Usuario vendedor, Producto producto) {
@@ -43,12 +46,12 @@ public class PublicacionService {
                 Vehiculo vehiculo = (Vehiculo) producto;
                 validarVehiculo(vehiculo);
             }
-            publicacion.setVendedor(vendedor);
             publicacion.setProducto(producto);
+            publicacion.setVendedor(vendedor);
             publicacion.setFecha(LocalDate.now());
             publicacion.setEstaDisponibleEnLaWeb(true);
             publicacionDAO.registarPublicacionEnDb(publicacion);
-            if (!usuarioService.getListaUsuariosRegistrados().isEmpty()) {
+            if (!usuarioDAO.usuariosEnDbEstaVacia()) {
                 notificacionService.notificarTodosLosCompradores(usuarioService.getListaUsuariosRegistrados(), producto, NUEVO_VEHICULO_EN_VENTA);
             }
             return publicacion;
@@ -67,8 +70,8 @@ public class PublicacionService {
                     Vehiculo vehiculo = (Vehiculo) producto;
                     validarVehiculo(vehiculo);
                 }
-                publicacion.setVendedor(vendedor);
                 publicacion.setProducto(producto);
+                publicacion.setVendedor(vendedor);
                 publicacion.setFecha(LocalDate.now());
                 publicacion.setEstaDisponibleEnLaWeb(true);
                 ProductosPublicados.add(publicacion);

@@ -30,7 +30,7 @@ public class NotificacionService {
                                            NombreNotificacion nombreNotificacion) {
         Notificacion notificacion = new Notificacion(nombreNotificacion, producto, montoOferta, montoContraOferta, null, null);
         if (nombreNotificacion == null) {
-            throw new DatoInvalidoException("Nombre de notifiacion invalido");
+            throw new DatoInvalidoException("Nombre de notificacion invalido");
         }
         if (NOTIFICACIONES_SMS_LIST.contains(nombreNotificacion)) {
             if (usuario.isAceptaNotificacionSms() && !usuario.getUnsuscripcionesSms().contains(nombreNotificacion)) {
@@ -43,12 +43,13 @@ public class NotificacionService {
         if (notificacion.getEmail() == null && notificacion.getCelular() == null) {
             throw new DatoInvalidoException("El usuario no esta suscrito a la notificacion ingresada");
         }
+        notificacionDAO.registrarNotificacionEnDb(notificacion);
         enviar(notificacion);
         return notificacion;
     }
 
     public void enviar(Notificacion notificacion) {
-        notificacionDAO.registrarNotificacionEnDb(notificacion);
+
     }
 
     public void notificarTodosLosCompradores(List<Usuario> usuarios, Producto producto,

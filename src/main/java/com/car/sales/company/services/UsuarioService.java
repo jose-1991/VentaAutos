@@ -2,7 +2,6 @@ package com.car.sales.company.services;
 
 import com.car.sales.company.dao.UsuarioDAO;
 import com.car.sales.company.exceptions.DatoInvalidoException;
-import com.car.sales.company.exceptions.UsuarioNoEncontradoException;
 import com.car.sales.company.models.Accion;
 import com.car.sales.company.models.NombreNotificacion;
 import com.car.sales.company.models.TipoNotificacion;
@@ -68,26 +67,18 @@ public class UsuarioService {
 
     public Usuario eliminarUsuario(String identificacion) {
         validarString(identificacion);
-        for (Usuario usuario : listaUsuariosRegistrados) {
-            if (usuario.getIdentificacion().equals(identificacion)) {
-                listaUsuariosRegistrados.remove(usuario);
-                return usuario;
-            }
-        }
-        throw new UsuarioNoEncontradoException("No existe usuario registrado con la identificacion ingresada");
+        Usuario usuario = usuarioDAO.obtenerUsuarioDeDb(identificacion);
+        usuarioDAO.eliminarUsuarioEnDb(identificacion);
+
+        return usuario;
     }
 
-    public Usuario modificarUsuario(String identificacion, String nuevoCelular) {
+    public Usuario modificarUsuario(String identificacion, String celular) {
         validarString(identificacion);
+        Usuario usuario = usuarioDAO.obtenerUsuarioDeDb(identificacion);
+        usuarioDAO.modificarUsuarioEnDb(identificacion, celular);
 
-        for (Usuario usuario : listaUsuariosRegistrados) {
-            if (usuario.getIdentificacion().equals(identificacion)) {
-                usuario.setCelular(nuevoCelular);
-                usuario.setAceptaNotificacionSms(true);
-                return usuario;
-            }
-        }
-        throw new UsuarioNoEncontradoException("No existe usuario registrado con la identificacion ingresada");
+        return usuario;
     }
 
     public Usuario actualizarSuscripcion(Usuario usuario, NombreNotificacion nombreNotificacion, Accion accion, TipoNotificacion tipoNotificacion) {
