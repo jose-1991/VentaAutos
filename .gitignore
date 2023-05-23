@@ -12,7 +12,6 @@ classes/
 out/
 target/
 log/
-src/main/java/com/car/sales/company/services/VentaService.java
 
 ### Gradle ###
 .gradle/

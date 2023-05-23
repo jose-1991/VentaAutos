@@ -1,18 +1,22 @@
 package com.car.sales.company.models;
 
-import java.util.Objects;
+import java.util.ArrayList;
+import java.util.List;
+
 public class Usuario {
     private String nombre;
     private String apellido;
     private String tipoIdentificacion;
     private String identificacion;
-    private String tipoUsuario;
+    private TipoUsuario tipoUsuario;
     private String email;
     private String celular;
     private boolean aceptaNotificacionSms;
+    private  List<NombreNotificacion> unsuscribcionesEmail;
+    private  List<NombreNotificacion> unsuscribcionesSms;
 
     public Usuario(String nombre, String apellido, String tipoIdentificacion, String identificacion, String email,
-                   String tipoUsuario, String celular) {
+                   TipoUsuario tipoUsuario, String celular) {
         this.nombre = nombre;
         this.apellido = apellido;
         this.identificacion = identificacion;
@@ -20,15 +24,8 @@ public class Usuario {
         this.email = email;
         this.tipoUsuario = tipoUsuario;
         this.celular = celular;
-    }
-
-    public Usuario(String nombre, String apellido, String tipoIdentificacion, String identificacion, String tipoUsuario, String email) {
-        this.nombre = nombre;
-        this.apellido = apellido;
-        this.tipoIdentificacion = tipoIdentificacion;
-        this.identificacion = identificacion;
-        this.tipoUsuario = tipoUsuario;
-        this.email = email;
+        this.unsuscribcionesEmail = new ArrayList<>();
+        this.unsuscribcionesSms = new ArrayList<>();
     }
 
     public String getNombre() {
@@ -87,12 +84,27 @@ public class Usuario {
         this.tipoIdentificacion = tipoIdentificacion;
     }
 
-    public String getTipoUsuario() {
+    public TipoUsuario getTipoUsuario() {
         return tipoUsuario;
     }
 
-    public void setTipoUsuario(String tipoUsuario) {
+    public void setTipoUsuario(TipoUsuario tipoUsuario) {
         this.tipoUsuario = tipoUsuario;
     }
 
+    public List<NombreNotificacion> getUnsuscripcionesEmail() {
+        return unsuscribcionesEmail;
+    }
+
+    public void setUnsuscribcionesEmail(List<NombreNotificacion> unsuscribcionesEmail) {
+        this.unsuscribcionesEmail = unsuscribcionesEmail;
+    }
+
+    public List<NombreNotificacion> getUnsuscripcionesSms() {
+        return unsuscribcionesSms;
+    }
+
+    public void setUnsuscribcionesSms(List<NombreNotificacion> unsuscribcionesSms) {
+        this.unsuscribcionesSms = unsuscribcionesSms;
+    }
 }

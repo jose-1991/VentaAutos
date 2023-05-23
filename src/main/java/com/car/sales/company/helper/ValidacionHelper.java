@@ -1,7 +1,7 @@
 package com.car.sales.company.helper;
 
 import com.car.sales.company.exceptions.DatoInvalidoException;
-import com.car.sales.company.models.Usuario;
+import com.car.sales.company.models.TipoUsuario;
 import com.car.sales.company.models.Vehiculo;
 
 import java.time.LocalDate;
@@ -12,32 +12,18 @@ public class ValidacionHelper {
     private static final String VALIDAR_VIN = "^[A-Z\\d]{8}[\\dX][A-Z\\d]{2}\\d{6}$";
     private static final long MAX_DIAS_SIN_OFERTA = 5;
 
-    public static void validarUsuario(Usuario usuario) {
-
-            validarString(usuario.getNombre());
-            validarString(usuario.getApellido());
-            validarEnteroPositivo(usuario.getIdentificacion());
-            validarString(usuario.getEmail());
-            validarString(usuario.getTipoUsuario());
-            if (usuario.getCelular() != null && !usuario.getCelular().trim().isEmpty()) {
-                usuario.setAceptaNotificacionSms(true);
-            } else {
-                usuario.setCelular(null);
-            }
-    }
 
     public static void validarVehiculo(Vehiculo vehiculo) {
 
-            validarVin(vehiculo.getVin());
-            validarString(vehiculo.getMarca());
-            validarString(vehiculo.getModelo());
-            validarEnteroPositivo(vehiculo.getAnio());
-            validarPositivoDecimal(vehiculo.getPrecio());
+        validarVin(vehiculo.getVin());
+        validarString(vehiculo.getMarca());
+        validarString(vehiculo.getModelo());
+        validarEnteroPositivo(vehiculo.getAnio());
     }
 
-    private static String validarVin(String vin){
-        if (vin.matches(VALIDAR_VIN)){
-            return vin;
+    private static void validarVin(String vin) {
+        if (vin.matches(VALIDAR_VIN)) {
+            return;
         }
         throw new DatoInvalidoException("El Vin ingresado no es valido");
     }
@@ -49,37 +35,29 @@ public class ValidacionHelper {
         return valor;
     }
 
+    public static void validarTipoUsuario(TipoUsuario tipoUsuario) {
+        if (tipoUsuario == null) {
+            throw new DatoInvalidoException("El Tipo de Usuario no debe ser nulo");
+        }
+    }
+
     public static boolean tieneMaximoDiasSinOfertas(LocalDate fechaPublicacion) {
         return ChronoUnit.DAYS.between(fechaPublicacion, LocalDate.now()) >= MAX_DIAS_SIN_OFERTA;
     }
 
-    public static int validarEnteroPositivo(String valor) {
-
-            try {
-                valor = validarString(valor);
-                int number = Integer.parseInt(valor);
-                if (number >= 1) {
-                    return number;
-                } else {
-                   throw new DatoInvalidoException("numeros negativos no son validos");
-                }
-            } catch (NumberFormatException e) {
-                throw new DatoInvalidoException("el valor ingresado debe ser un numero");
-            }
+    public static void validarEnteroPositivo(int valor) {
+        if (valor >= 1) {
+        } else {
+            throw new DatoInvalidoException("Numeros negativos no son validos");
+        }
     }
 
-    public static double validarPositivoDecimal(String valor) {
+    public static double validarPositivoDecimal(double valor) {
 
-            try {
-                valor = validarString(valor);
-                double number = Double.parseDouble(valor);
-                if (number >= 1) {
-                    return Math.round(number * 100.0) / 100.0;
-                } else {
-                    throw new DatoInvalidoException("numeros negativos son invalidos");
-                }
-            } catch (NumberFormatException e) {
-               throw new DatoInvalidoException("el valor ingresado debe ser un numero");
-            }
+        if (valor >= 1) {
+            return Math.round(valor * 100.0) / 100.0;
+        } else {
+            throw new DatoInvalidoException("Numeros negativos no son validos");
+        }
     }
 }

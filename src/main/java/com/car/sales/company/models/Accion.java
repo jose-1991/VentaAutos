@@ -1,0 +1,6 @@
+package com.car.sales.company.models;
+
+public enum Accion {
+
+    ACEPTAR_OFERTA, CONTRA_OFERTAR, RETIRAR_OFERTA, OFERTAR, SUSCRIBIR,UNSUSCRIBIR, SUSCRIBIR_TODO, UNSUSCRIBIR_TODO
+}

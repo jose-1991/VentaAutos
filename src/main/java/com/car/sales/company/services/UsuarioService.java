@@ -2,135 +2,176 @@ package com.car.sales.company.services;
 
 import com.car.sales.company.exceptions.DatoInvalidoException;
 import com.car.sales.company.exceptions.UsuarioNoEncontradoException;
+import com.car.sales.company.models.Accion;
+import com.car.sales.company.models.NombreNotificacion;
+import com.car.sales.company.models.TipoNotificacion;
 import com.car.sales.company.models.Usuario;
 
-import java.util.ArrayList;
-import java.util.List;
+import java.util.*;
 
 import static com.car.sales.company.helper.ValidacionHelper.validarString;
-import static com.car.sales.company.helper.ValidacionHelper.validarUsuario;
+import static com.car.sales.company.helper.ValidacionHelper.validarTipoUsuario;
+import static com.car.sales.company.models.Accion.SUSCRIBIR;
+import static com.car.sales.company.models.NombreNotificacion.*;
+import static com.car.sales.company.models.TipoUsuario.VENDEDOR;
+import static com.car.sales.company.services.NotificacionService.NOTIFICACIONES_EMAIL_LIST;
+import static com.car.sales.company.services.NotificacionService.NOTIFICACIONES_SMS_LIST;
 
 public class UsuarioService {
 
     private final String VALIDAR_EMAIL = "^[a-zA-Z0-9_!#$%&'*+/=?`{|}~^.-]+@[a-zA-Z0-9.-]+$";
     private final String VALIDAR_CELULAR = "^(\\+591)?(6|7)[0-9]{7}$";
-    private final String VALIDAR_IDENTIFICACION = "^[a-zA-Z0-9]{7,11}$";      //"^\\d{7,11}([\\s-]\\d[A-Z])?$";
-    private final String VALIDAR_SOLO_LETRAS = "^[a-zA-Z ]+$";
+    private final String VALIDAR_PASAPORTE = "^\\d{7,11}([\\s-]\\d[A-Z])?$";      //"^\\d{7,11}([\\s-]\\d[A-Z])?$";
+    private final String VALIDAR_CI_LICENCIA = "^[0-9]{7,11}$";
+    private final String PASAPORTE = "Pasaporte";
+    private List<Usuario> listaUsuariosRegistrados = new ArrayList<>();
 
-    Usuario usuario1 = new Usuario("Javier", "Rodriguez", "licencia", "490123984",
-            "javi.31_82@hotmail.com", "vendedor");
-    Usuario usuario2 = new Usuario("Pablo", "Valencia", "pasaporte", "A3278129",
-            "pa_val.1985@gmail.com", "comprador", "60782023");
-    Usuario usuario3 = new Usuario("Lucy", "Pardo", "ci", "52082393B",
-            "lucy.luz023@hotmail.com", "vendedor", "76437428");
-    Usuario usuario4 = new Usuario("Christian", "Ledezma", "licencia", "12323984",
-            "cris_lu.21412@hotmail.com", "comprador");
-    private List<Usuario> usuarios = new ArrayList<>();
-
+    public List<Usuario> getListaUsuariosRegistrados() {
+        return listaUsuariosRegistrados;
+    }
 
     public Usuario registrarUsuario(Usuario usuario) {
         if (usuario != null) {
             validarUsuario(usuario);
-            usuarios.add(usuario);
+            listaUsuariosRegistrados.add(usuario);
             return usuario;
         }
-        throw  new DatoInvalidoException("El usuario no debe ser nulo");
+        throw new DatoInvalidoException("El usuario no debe ser nulo");
+    }
 
+    public void validarUsuario(Usuario usuario) {
+
+        validarString(usuario.getNombre());
+        validarString(usuario.getApellido());
+
+        validarIdentificacion(usuario.getIdentificacion(), validarString(usuario.getTipoIdentificacion()));
+        validarEmail(usuario.getEmail());
+        validarTipoUsuario(usuario.getTipoUsuario());
+        if (usuario.getCelular() != null && !usuario.getCelular().trim().isEmpty()) {
+            validarCelular(usuario.getCelular());
+            usuario.setAceptaNotificacionSms(true);
+            if (usuario.getTipoUsuario().equals(VENDEDOR)) {
+                usuario.setUnsuscribcionesSms(Arrays.asList(COMPRADOR_PRIMERA_OFERTA, COMPRADOR_ACEPTA_OFERTA));
+            } else {
+                usuario.setUnsuscribcionesSms(Arrays.asList(NUEVO_VEHICULO_EN_VENTA, VENDEDOR_ACEPTA_OFERTA));
+            }
+        } else {
+            usuario.setCelular(null);
+        }
     }
 
     public Usuario eliminarUsuario(String identificacion) {
-        usuarios.add(usuario1);
-        usuarios.add(usuario2);
-        usuarios.add(usuario3);
-        usuarios.add(usuario4);
-
         validarString(identificacion);
-
-        for (Usuario usuario : usuarios) {
+        for (Usuario usuario : listaUsuariosRegistrados) {
             if (usuario.getIdentificacion().equals(identificacion)) {
-                usuarios.remove(usuario);
+                listaUsuariosRegistrados.remove(usuario);
                 return usuario;
             }
         }
         throw new UsuarioNoEncontradoException("No existe usuario registrado con la identificacion ingresada");
     }
 
-    public Usuario modificarUsuario(String identificacion, String nuevoTipoUsuario, String nuevoCelular) {
-        usuarios.add(usuario1);
-        usuarios.add(usuario2);
-        usuarios.add(usuario3);
-        usuarios.add(usuario4);
-
+    public Usuario modificarUsuario(String identificacion, String nuevoCelular) {
         validarString(identificacion);
-        validarString(nuevoTipoUsuario);
 
-        for (Usuario usuario : usuarios) {
+        for (Usuario usuario : listaUsuariosRegistrados) {
             if (usuario.getIdentificacion().equals(identificacion)) {
-                usuario.setTipoUsuario(nuevoTipoUsuario);
                 usuario.setCelular(nuevoCelular);
+                usuario.setAceptaNotificacionSms(true);
                 return usuario;
             }
         }
         throw new UsuarioNoEncontradoException("No existe usuario registrado con la identificacion ingresada");
     }
 
-    private boolean validarValorDeCampo(String nombreCampo, String valor) {
-        String regex = "";
-        String mensajeError = "   -->  ";
-        switch (nombreCampo) {
-            case "nombre":
-            case "apellido":
-            case "tipoUsuario":
-            case "tipoIdentificacion":
-                regex = VALIDAR_SOLO_LETRAS;
-                mensajeError += "solo debe contener letras";
+    public Usuario actualizarSuscripcion(Usuario usuario, NombreNotificacion nombreNotificacion, Accion accion, TipoNotificacion tipoNotificacion) {
+
+        switch (accion) {
+            case SUSCRIBIR:
+            case UNSUSCRIBIR:
+                suscripcionOrUnsuscripcionNotificacion(usuario, nombreNotificacion, accion, tipoNotificacion);
                 break;
-            case "identificacion":
-                regex = VALIDAR_IDENTIFICACION;
-                mensajeError += "error en el formato de identificacion";
+            case SUSCRIBIR_TODO:
+                usuario.getUnsuscripcionesEmail().clear();
+                if (usuario.isAceptaNotificacionSms()) {
+                    usuario.getUnsuscripcionesSms().clear();
+                }
                 break;
-            case "email":
-                regex = VALIDAR_EMAIL;
-                mensajeError += "no es un email valido";
-                break;
-            case "celular":
-                regex = VALIDAR_CELULAR;
-                mensajeError = "no es un celular valido";
+            case UNSUSCRIBIR_TODO:
+                usuario.setUnsuscribcionesEmail(NOTIFICACIONES_EMAIL_LIST);
+                if (usuario.isAceptaNotificacionSms()) {
+                    usuario.setUnsuscribcionesSms(NOTIFICACIONES_SMS_LIST);
+                }
                 break;
         }
-        if (valor.matches(regex)) {
-            return true;
-        }
-        throw new RuntimeException(valor + mensajeError);
+        return usuario;
     }
 
-//    private String validarEmail(String email) {
-//        validarString("email", email);
-//        String regex = "^[a-zA-Z0-9_!#$%&'*+/=?`{|}~^.-]+@[a-zA-Z0-9.-]+$";
-//        if (email.matches(regex)) {
-//            return email;
-//        }
-//        throw new RuntimeException(email + " -> no es un email valido");
-//    }
-//
-//    private String validarCelular(String celular) {
-//        validarString("celular", celular);
-//        String regex = "^(\\+591)?(6|7)[0-9]{7}$";
-//        if (celular.matches(regex)) {
-//            return celular;
-//        }
-//        throw new RuntimeException(celular + " -> no tiene el formato adecuado");
-//    }
-//
-//    private String validarIdentificacion(String identificacion, String tipoIdentificacion){
-//        validarString("identificacion", identificacion);
-//        String regex = "^\\d{7,11}([\\s-]\\d[A-Z])?$";
-//        if (tipoIdentificacion.equalsIgnoreCase("Pasaporte")){
-//            regex = "^[a-zA-Z0-9]{11}$";
-//        }
-//        if (identificacion.matches(regex)){
-//            return identificacion;
-//        }
-//        throw new RuntimeException(identificacion + " -> identificacion invalida");
-//    }
+    private void suscripcionOrUnsuscripcionNotificacion(Usuario usuario, NombreNotificacion nombreNotificacion, Accion accion, TipoNotificacion tipoNotificacion) {
+
+        switch (tipoNotificacion) {
+            case EMAIL:
+                if (accion.equals(SUSCRIBIR)) {
+                    usuario.getUnsuscripcionesEmail().remove(nombreNotificacion);
+                } else {
+                    usuario.getUnsuscripcionesEmail().add(nombreNotificacion);
+                }
+                break;
+            case SMS:
+                if (usuario.isAceptaNotificacionSms() && NOTIFICACIONES_SMS_LIST.contains(nombreNotificacion)) {
+                    if (accion.equals(SUSCRIBIR)) {
+                        usuario.getUnsuscripcionesSms().remove(nombreNotificacion);
+                    } else {
+                        usuario.getUnsuscripcionesSms().add(nombreNotificacion);
+                    }
+                } else {
+                    throw new DatoInvalidoException("La notificacion ingresada no es valida");
+                }
+                break;
+        }
+    }
+
+    private void validarEmail(String email) {
+        validarString(email);
+        if (email.matches(VALIDAR_EMAIL)) {
+            return;
+        }
+        throw new RuntimeException(email + " -> no es un email valido");
+    }
+
+    private void validarCelular(String celular) {
+        validarString(celular);
+        if (celular.matches(VALIDAR_CELULAR)) {
+            return;
+        }
+        throw new RuntimeException(celular + " -> no tiene el formato adecuado");
+    }
+
+    private void validarIdentificacion(String identificacion, String tipoIdentificacion) {
+        validarString(identificacion);
+        String regex = VALIDAR_CI_LICENCIA;
+        if (tipoIdentificacion.equals(PASAPORTE)) {
+            regex = VALIDAR_PASAPORTE;
+        }
+        if (identificacion.matches(regex)) {
+            return;
+        }
+        throw new RuntimeException(identificacion + " -> identificacion invalida");
+    }
+
+    //    nombreNotificacion = llave  Integer = contador
+//    si notificacion existe -> contador++
+//    sino nuevo registro y devolver la lista de llaves
+    public int guardarNotificaciones(NombreNotificacion nombreNotificacion) {
+        Map<NombreNotificacion, Integer> mapa = new HashMap<>();
+
+        if (mapa.containsKey(nombreNotificacion)) {
+            mapa.put(nombreNotificacion, mapa.get(nombreNotificacion) + 1);
+        } else {
+            throw new IllegalArgumentException();
+        }
+        return mapa.get(nombreNotificacion);
+
+    }
 }
+

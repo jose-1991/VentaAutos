@@ -1,21 +1,17 @@
 package com.car.sales.company.models;
 
 import java.time.LocalDate;
-import java.util.ArrayList;
 import java.util.List;
 
 public class Publicacion {
     private Usuario vendedor;
-    private Vehiculo vehiculo;
+    private Producto producto;
     private LocalDate fecha;
+    private double precio;
     private List<Oferta> ofertasCompradores;
-    private List<Oferta> ofertasVendedores;
-    private Notificacion notificacion;
+    private boolean estaDisponibleEnLaWeb;
 
-    public Publicacion() {
-        ofertasCompradores = new ArrayList<>();
-        ofertasVendedores = new ArrayList<>();
-    }
+
 
     public Usuario getVendedor() {
         return vendedor;
@@ -25,12 +21,12 @@ public class Publicacion {
         this.vendedor = vendedor;
     }
 
-    public Vehiculo getVehiculo() {
-        return vehiculo;
+    public Producto getProducto() {
+        return producto;
     }
 
-    public void setVehiculo(Vehiculo vehiculo) {
-        this.vehiculo = vehiculo;
+    public void setProducto(Producto producto) {
+        this.producto = producto;
     }
 
     public List<Oferta> getOfertasCompradores() {
@@ -41,19 +37,27 @@ public class Publicacion {
         this.ofertasCompradores = ofertasCompradores;
     }
 
-    public List<Oferta> getOfertasVendedores() {
-        return ofertasVendedores;
-    }
-
-    public void setOfertasVendedores(List<Oferta> ofertasVendedores) {
-        this.ofertasVendedores = ofertasVendedores;
-    }
-
     public LocalDate getFecha() {
         return fecha;
     }
 
     public void setFecha(LocalDate fecha) {
         this.fecha = fecha;
+    }
+
+    public double getPrecio() {
+        return precio;
+    }
+
+    public void setPrecio(double precio) {
+        this.precio = precio;
+    }
+
+    public boolean isEstaDisponibleEnLaWeb() {
+        return estaDisponibleEnLaWeb;
+    }
+
+    public void setEstaDisponibleEnLaWeb(boolean estaDisponibleEnLaWeb) {
+        this.estaDisponibleEnLaWeb = estaDisponibleEnLaWeb;
     }
 }

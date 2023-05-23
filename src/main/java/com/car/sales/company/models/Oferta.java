@@ -1,17 +1,59 @@
 package com.car.sales.company.models;
 
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+
 public class Oferta {
-    private double monto;
+    private double montoOferta;
+    private double montoContraOferta;
+    private Usuario comprador;
+    private LocalDateTime fechaOferta;
+    private boolean inactivo;
 
-    public Oferta(double monto) {
-        this.monto = monto;
+    public Oferta(double montoOferta, double montoContraOferta, Usuario comprador, LocalDateTime fechaOferta) {
+        this.montoOferta = montoOferta;
+        this.montoContraOferta = montoContraOferta;
+        this.comprador = comprador;
+        this.fechaOferta = fechaOferta;
     }
 
-    public double getMonto() {
-        return monto;
+    public double getMontoOferta() {
+        return montoOferta;
     }
 
-    public void setMonto(double monto) {
-        this.monto = monto;
+    public void setMontoOferta(double montoOferta) {
+        this.montoOferta = montoOferta;
+    }
+
+    public Usuario getComprador() {
+        return comprador;
+    }
+
+    public void setComprador(Usuario comprador) {
+        this.comprador = comprador;
+    }
+
+    public double getMontoContraOferta() {
+        return montoContraOferta;
+    }
+
+    public void setMontoContraOferta(double montoContraOferta) {
+        this.montoContraOferta = montoContraOferta;
+    }
+
+    public LocalDateTime getFechaOferta() {
+        return fechaOferta;
+    }
+
+    public void setFechaOferta(LocalDateTime fechaOferta) {
+        this.fechaOferta = fechaOferta;
+    }
+
+    public boolean isInactivo() {
+        return inactivo;
+    }
+
+    public void setInactivo(boolean inactivo) {
+        this.inactivo = inactivo;
     }
 }
