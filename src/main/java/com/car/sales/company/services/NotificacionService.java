@@ -52,12 +52,10 @@ public class NotificacionService {
 
     }
 
-    public void notificarTodosLosCompradores(List<Usuario> usuarios, Producto producto,
+    public void notificarTodosLosCompradores(List<Usuario> compradores, Producto producto,
                                              NombreNotificacion nombreNotificacion) {
-        for (Usuario usuario : usuarios) {
-            if (usuario.getTipoUsuario().equals(COMPRADOR)) {
+        for (Usuario usuario : compradores) {
                 enviarNotificacion(usuario, producto, 0, 0, nombreNotificacion);
-            }
         }
     }
 

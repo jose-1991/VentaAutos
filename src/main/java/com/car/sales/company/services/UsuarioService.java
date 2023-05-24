@@ -24,21 +24,17 @@ public class UsuarioService {
     private final String VALIDAR_PASAPORTE = "^\\d{7,11}([\\s-]\\d[A-Z])?$";      //"^\\d{7,11}([\\s-]\\d[A-Z])?$";
     private final String VALIDAR_CI_LICENCIA = "^[0-9]{7,11}$";
     private final String PASAPORTE = "Pasaporte";
-    private List<Usuario> listaUsuariosRegistrados = new ArrayList<>();
     private UsuarioDAO usuarioDAO;
 
     public UsuarioService(UsuarioDAO usuarioDAO) {
         this.usuarioDAO = usuarioDAO;
     }
 
-    public List<Usuario> getListaUsuariosRegistrados() {
-        return listaUsuariosRegistrados;
-    }
-
     public Usuario registrarUsuario(Usuario usuario) {
         if (usuario != null) {
             validarUsuario(usuario);
-            usuarioDAO.registrarUsuarioEnDb(usuario);
+            usuarioDAO.registrarUsuario(usuario);
+            usuarioDAO.registrarUnsuscripciones(usuario.getUnsuscripcionesSms(), usuario.getIdentificacion());
             return usuario;
         }
         throw new DatoInvalidoException("El usuario no debe ser nulo");
@@ -51,34 +47,34 @@ public class UsuarioService {
 
         validarIdentificacion(usuario.getIdentificacion(), validarString(usuario.getTipoIdentificacion()));
         validarEmail(usuario.getEmail());
+        usuario.setUnsuscribcionesEmail(new ArrayList<>());
         validarTipoUsuario(usuario.getTipoUsuario());
         if (usuario.getCelular() != null && !usuario.getCelular().trim().isEmpty()) {
             validarCelular(usuario.getCelular());
             usuario.setAceptaNotificacionSms(true);
+            usuario.setUnsuscribcionesSms(new ArrayList<>());
             if (usuario.getTipoUsuario().equals(VENDEDOR)) {
-                usuario.setUnsuscribcionesSms(Arrays.asList(COMPRADOR_PRIMERA_OFERTA, COMPRADOR_ACEPTA_OFERTA));
+                usuario.getUnsuscripcionesSms().add(COMPRADOR_PRIMERA_OFERTA);
+                usuario.getUnsuscripcionesSms().add(COMPRADOR_ACEPTA_OFERTA);
             } else {
-                usuario.setUnsuscribcionesSms(Arrays.asList(NUEVO_VEHICULO_EN_VENTA, VENDEDOR_ACEPTA_OFERTA));
+                usuario.getUnsuscripcionesSms().add(NUEVO_VEHICULO_EN_VENTA);
+                usuario.getUnsuscripcionesSms().add(VENDEDOR_ACEPTA_OFERTA);
             }
         } else {
             usuario.setCelular(null);
         }
     }
 
-    public Usuario eliminarUsuario(String identificacion) {
+    public void eliminarUsuario(String identificacion) {
         validarString(identificacion);
-        Usuario usuario = usuarioDAO.obtenerUsuarioDeDb(identificacion);
-        usuarioDAO.eliminarUsuarioEnDb(identificacion);
+        usuarioDAO.eliminarUsuario(identificacion);
 
-        return usuario;
     }
 
     public Usuario modificarUsuario(String identificacion, String celular) {
         validarString(identificacion);
-        Usuario usuario = usuarioDAO.obtenerUsuarioDeDb(identificacion);
-        usuarioDAO.modificarUsuarioEnDb(identificacion, celular);
-
-        return usuario;
+        validarCelular(celular);
+        return usuarioDAO.modificarUsuario(identificacion, celular);
     }
 
     public Usuario actualizarSuscripcion(Usuario usuario, NombreNotificacion nombreNotificacion, Accion accion, TipoNotificacion tipoNotificacion) {

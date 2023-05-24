@@ -27,8 +27,6 @@ public class Usuario {
         this.email = email;
         this.tipoUsuario = tipoUsuario;
         this.celular = celular;
-        this.unsuscribcionesEmail = new ArrayList<>();
-        this.unsuscribcionesSms = new ArrayList<>();
     }
 
     public String getNombre() {
@@ -111,4 +109,17 @@ public class Usuario {
         this.unsuscribcionesSms = unsuscribcionesSms;
     }
 
+    @Override
+    public String toString() {
+        return "Usuario{" +
+                "nombre='" + nombre + '\'' +
+                ", apellido='" + apellido + '\'' +
+                ", tipoIdentificacion='" + tipoIdentificacion + '\'' +
+                ", identificacion='" + identificacion + '\'' +
+                ", tipoUsuario=" + tipoUsuario +
+                ", email='" + email + '\'' +
+                ", celular='" + celular + '\'' +
+                ", aceptaNotificacionSms=" + aceptaNotificacionSms +
+                '}';
+    }
 }

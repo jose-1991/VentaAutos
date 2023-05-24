@@ -2,8 +2,10 @@ package com.car.sales.company.models;
 
 import java.time.LocalDate;
 import java.util.List;
+import java.util.UUID;
 
 public class Publicacion {
+    private UUID id;
     private Usuario vendedor;
     private Producto producto;
     private LocalDate fecha;
@@ -12,6 +14,13 @@ public class Publicacion {
     private boolean estaDisponibleEnLaWeb;
 
 
+    public UUID getId() {
+        return id;
+    }
+
+    public void setId(UUID id) {
+        this.id = id;
+    }
 
     public Usuario getVendedor() {
         return vendedor;

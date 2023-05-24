@@ -4,11 +4,10 @@ import com.car.sales.company.models.Producto;
 import com.car.sales.company.models.Publicacion;
 import com.car.sales.company.models.Vehiculo;
 
-import java.sql.Connection;
-import java.sql.Date;
-import java.sql.PreparedStatement;
-import java.sql.SQLException;
+import java.sql.*;
 import java.time.LocalDate;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.UUID;
 
 public class PublicacionDAO {
@@ -18,8 +17,7 @@ public class PublicacionDAO {
         return ConexionDB.obtenerInstancia();
     }
 
-    // TODO: 22/5/2023 no se eliminaran las publicaciones dadas de baja?
-    public void registarPublicacionEnDb(Publicacion publicacion) {
+    public void registrarPublicacion(Publicacion publicacion) {
         query = "INSERT INTO comercio.publicacion(publicacion_ID, usuario_ID, producto_ID, fecha, oferta_ID," +
                 "esta_disponible_web) VALUES(?,?,?,?,?,?)";
 
@@ -43,7 +41,7 @@ public class PublicacionDAO {
         return ((Vehiculo) producto).getVin();
     }
 
-    public void actualizarEstadoPublicacionEnWeb(int id, boolean activo) {
+    public void actualizarEstadoPublicacionEnWeb(UUID id, boolean activo) {
         query = "UPDATE comercio.publicacion SET esta_disponible_web = ? WHERE publicacion_ID = " + id;
 
         try (PreparedStatement statement = obtenerConexion().prepareStatement(query)) {
@@ -53,4 +51,17 @@ public class PublicacionDAO {
         }
 
     }
+
+//    public List<Publicacion> obtenerPublicacionDeBaja() {
+//        List<Publicacion> publicacionesDeBaja = new ArrayList<>();
+//        query = "SELECT * FROM comercio.publicacion";
+//        try (Statement statement = obtenerConexion().createStatement();
+//                ResultSet resultSet = statement.executeQuery(query)) {
+//            Publicacion publicacion = new Publicacion();
+//            publicacion.setId();
+//        } catch (SQLException e) {
+//            e.printStackTrace();
+//        }
+//
+//    }
 }

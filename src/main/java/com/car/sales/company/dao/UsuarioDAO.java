@@ -1,10 +1,14 @@
 package com.car.sales.company.dao;
 
-import com.car.sales.company.exceptions.DatoInvalidoException;
+import com.car.sales.company.models.NombreNotificacion;
 import com.car.sales.company.models.TipoUsuario;
 import com.car.sales.company.models.Usuario;
 
 import java.sql.*;
+import java.util.ArrayList;
+import java.util.List;
+
+import static com.car.sales.company.models.TipoNotificacion.SMS;
 
 public class UsuarioDAO {
     String query;
@@ -13,11 +17,34 @@ public class UsuarioDAO {
         return ConexionDB.obtenerInstancia();
     }
 
-    public void registrarUsuarioEnDb(Usuario usuario) {
-        query = "INSERT INTO comercio.usuario(usuario_ID, nombre, apellido, tipo_identificacion, " +
-                "tipo_usuario, email, celular) VALUES(?,?,?,?,?,?,?)";
+    public List<Usuario> obtenerCompradores() {
+        query = "SELECT * FROM comercio.usuario where tipo_usuario = 'COMPRADOR'";
+        List<Usuario> listaCompradores = new ArrayList<>();
 
-        try (PreparedStatement statement = obtenerConexion().prepareStatement(query)) {
+        try (Statement statement = obtenerConexion().createStatement(); ResultSet resultSet =
+                statement.executeQuery(query)) {
+            while (resultSet.next()) {
+                Usuario usuario = new Usuario();
+                usuario.setNombre(resultSet.getString("nombre"));
+                usuario.setApellido(resultSet.getString("apellido"));
+                usuario.setTipoUsuario(TipoUsuario.valueOf(resultSet.getString("tipo_usuario")));
+                usuario.setTipoIdentificacion(resultSet.getString("tipo_identificacion"));
+                usuario.setIdentificacion(resultSet.getString("id"));
+                usuario.setEmail(resultSet.getString("email"));
+                usuario.setCelular(resultSet.getString("celular"));
+                usuario.setAceptaNotificacionSms(resultSet.getBoolean("acepta_notificacion_sms"));
+                listaCompradores.add(usuario);
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return listaCompradores;
+    }
+
+    public void registrarUsuario(Usuario usuario) {
+        query = "INSERT INTO comercio.usuario VALUES(?,?,?,?,?,?,?,?)";
+        try {
+            PreparedStatement statement = obtenerConexion().prepareStatement(query);
             statement.setString(1, usuario.getIdentificacion());
             statement.setString(2, usuario.getNombre());
             statement.setString(3, usuario.getApellido());
@@ -25,6 +52,7 @@ public class UsuarioDAO {
             statement.setString(5, usuario.getTipoUsuario().toString());
             statement.setString(6, usuario.getEmail());
             statement.setString(7, usuario.getCelular());
+            statement.setBoolean(8, usuario.isAceptaNotificacionSms());
             statement.executeUpdate();
 
             System.out.println("Usuario registrado con exito!");
@@ -34,7 +62,7 @@ public class UsuarioDAO {
         }
     }
 
-    public void eliminarUsuarioEnDb(String identificacion) {
+    public void eliminarUsuario(String identificacion) {
 
         query = "DELETE FROM comercio.usuario WHERE usuario_ID = ?";
         try (PreparedStatement statement = obtenerConexion().prepareStatement(query)) {
@@ -49,77 +77,59 @@ public class UsuarioDAO {
         }
     }
 
-    public void modificarUsuarioEnDb(String identificacion, String celular) {
-
-        query = "UPDATE comercio.usuario SET celular = ?  WHERE usuario_ID = " + identificacion;
-        try (PreparedStatement statement = obtenerConexion().prepareStatement(query)) {
-            statement.setString(1, celular);
-            statement.executeUpdate();
-
-            System.out.println("Usuario modificado con exito!");
-        } catch (SQLException e) {
-            System.out.println("Error al modificar usuario");
-            e.printStackTrace();
-        }
-    }
-
-    public Usuario obtenerUsuarioDeDb(String identificacion) {
-        if (!UsuarioExisteEnDb(identificacion)) {
-            throw new DatoInvalidoException("No existe un usuario registrado con la identificacion ingresada");
-        }
+    public Usuario modificarUsuario(String identificacion, String celular) {
 
         Usuario usuario = new Usuario();
-        query = "SELECT * FROM comercio.usuario WHERE usuario_ID = " + identificacion;
-        try (Statement statement = obtenerConexion().createStatement(); ResultSet resultSet =
-                statement.executeQuery(query)) {
-            while (resultSet.next()) {
+        query = "SELECT * FROM comercio.usuario WHERE id = '" + identificacion + "'";
+        try  {
+            Statement statement = obtenerConexion().createStatement();
+            ResultSet resultSet = statement.executeQuery(query);
+            if (resultSet.next()) {
+                usuario.setIdentificacion(resultSet.getString("id"));
                 usuario.setNombre(resultSet.getString("nombre"));
                 usuario.setApellido(resultSet.getString("apellido"));
                 usuario.setTipoIdentificacion(resultSet.getString("tipo_identificacion"));
-                usuario.setIdentificacion(resultSet.getString("usuario_ID"));
                 usuario.setTipoUsuario(TipoUsuario.valueOf(resultSet.getString("tipo_usuario")));
                 usuario.setEmail(resultSet.getString("email"));
                 usuario.setCelular(resultSet.getString("celular"));
+                usuario.setAceptaNotificacionSms(resultSet.getBoolean("acepta_notificacion_sms"));
+
+                String query = "UPDATE comercio.usuario SET celular = ? WHERE id = ?";
+                PreparedStatement updateStatement = obtenerConexion().prepareStatement(query);
+                updateStatement.setString(1, celular);
+                updateStatement.setString(2, identificacion);
+                updateStatement.executeUpdate();
             }
+            resultSet.close();
+            statement.close();
+            obtenerConexion().close();
         } catch (SQLException e) {
-            System.out.println("Error al obtener Usuario");
+            System.out.println("Error al modificar Usuario");
             e.printStackTrace();
         }
         return usuario;
     }
 
-    private boolean UsuarioExisteEnDb(String identificacion) {
-        query = "SELECT usuario_ID FROM comercio.usuario WHERE usuario_ID = " + identificacion;
-        boolean usuarioExiste = false;
 
-        try (Statement statement = obtenerConexion().createStatement(); ResultSet resultSet =
-                statement.executeQuery(query)) {
-            usuarioExiste = resultSet.next();
+    public void registrarUnsuscripciones(List<NombreNotificacion> unsuscripcionesSms, String usuarioId) {
+        query = "INSERT INTO comercio.unsuscripcion VALUES(?,?,?)";
+
+        try {
+            PreparedStatement statement = obtenerConexion().prepareStatement(query);
+            obtenerConexion().setAutoCommit(false);
+            for (NombreNotificacion nombreNotificacion : unsuscripcionesSms) {
+                statement.setString(1, usuarioId);
+                statement.setString(2, nombreNotificacion.toString());
+                statement.setString(3, SMS.toString());
+                statement.addBatch();
+            }
+            statement.executeBatch();
+            obtenerConexion().commit();
+            statement.close();
         } catch (SQLException e) {
-            System.out.println("Error al verificar si el Usuario existe");
             e.printStackTrace();
         }
-        return usuarioExiste;
-    }
 
-    // TODO: 22/5/2023 se crea un helper, o se mueve el metodo, para reutilizar en otra clase DAO
-    public boolean usuariosEnDbEstaVacia() {
-        String query = "SELECT count(*) FROM comercio.usuario";
-
-        try (Statement statement = obtenerConexion().createStatement();
-             ResultSet resultSet = statement.executeQuery(query)) {
-            while (resultSet.next()) {
-                int count = resultSet.getInt("count(*)");
-                if (count > 0) {
-                    return false;
-                }
-            }
-        } catch (SQLException exception) {
-            System.out.println("Error al verificar si la tabla de usuarios esta vacia");
-        }
-        return true;
 
     }
-
-
 }

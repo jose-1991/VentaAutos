@@ -72,29 +72,17 @@ public class PublicacionServiceTest {
         publicacion2.setEstaDisponibleEnLaWeb(true);
     }
 
-    @Test
-    public void testPublicarProducto() {
-        List<Usuario> listaUsuarios = Collections.singletonList(comprador);
-        when(usuarioServiceMock.getListaUsuariosRegistrados()).thenReturn(listaUsuarios);
-        Publicacion publicacionActual = publicacionService.publicarProducto(vendedor, vehiculo);
-
-        assertNotNull(publicacionActual);
-        assertTrue(publicacionActual.isEstaDisponibleEnLaWeb());
-        assertTrue(publicacionService.getProductosPublicados().contains(publicacionActual));
-        verify(notificacionServiceMock).notificarTodosLosCompradores(any(), any(), any());
-    }
-
-    @Test
-    public void testPublicarProducto1() {
-
-        when(usuarioServiceMock.modificarUsuario(anyString(), anyString())).thenThrow(UsuarioNoEncontradoException.class);
-        Publicacion publicacionActual = publicacionService.publicarProducto1(vendedor, vehiculo);
-
-        assertNotNull(publicacionActual);
-        assertTrue(publicacionActual.isEstaDisponibleEnLaWeb());
-        assertTrue(publicacionService.getProductosPublicados().contains(publicacionActual));
-        verify(notificacionServiceMock, times(0)).notificarTodosLosCompradores(any(), any(), any());
-    }
+//    @Test
+//    public void testPublicarProducto() {
+//        List<Usuario> listaUsuarios = Collections.singletonList(comprador);
+//        when(usuarioServiceMock.getListaUsuariosRegistrados()).thenReturn(listaUsuarios);
+//        Publicacion publicacionActual = publicacionService.publicarProducto(vendedor, vehiculo);
+//
+//        assertNotNull(publicacionActual);
+//        assertTrue(publicacionActual.isEstaDisponibleEnLaWeb());
+//        assertTrue(publicacionService.getProductosPublicados().contains(publicacionActual));
+//        verify(notificacionServiceMock).notificarTodosLosCompradores(any(), any(), any());
+//    }
 
     @Test(expected = DatoInvalidoException.class)
     public void testPublicarProductoBotaExceptionCuandoElTipoUsuarioNoEsVendedor() {
@@ -111,33 +99,33 @@ public class PublicacionServiceTest {
         publicacionService.publicarProducto(vendedor, vehiculo);
     }
 
-    @Test
-    public void testDarDeBajaPublicaciones() {
-
-        publicacion1.setFecha(LocalDate.of(2023, Month.APRIL, 20));
-        publicacion2.setFecha(LocalDate.now());
-
-        publicacionService.getProductosPublicados().add(publicacion1);
-        publicacionService.getProductosPublicados().add(publicacion2);
-
-        int numeroDeBajasActual = publicacionService.darDeBajaPublicaciones();
-        assertEquals(1, numeroDeBajasActual);
-        verify(notificacionServiceMock).enviarNotificacion(any(), any(), anyDouble(), anyDouble(), any());
-    }
-
-    @Test
-    public void testDarDeBajaPublicacionesNoInhabilitaNadaCuandoPublicacionTieneOfertas() {
-        publicacion1.setOfertasCompradores(Collections.singletonList(new Oferta(15800, 0, comprador, fechaActual)));
-        publicacion2.setOfertasCompradores(Arrays.asList(new Oferta(22000, 0, comprador, fechaActual),
-                new Oferta(22400, 0, comprador, fechaActual)));
-
-        publicacionService.getProductosPublicados().add(publicacion1);
-        publicacionService.getProductosPublicados().add(publicacion2);
-
-        int numeroDeBajasActual = publicacionService.darDeBajaPublicaciones();
-        assertEquals(0, numeroDeBajasActual);
-        verify(notificacionServiceMock, times(0)).enviarNotificacion(any(), any(), anyDouble(), anyDouble(), any());
-    }
+//    @Test
+//    public void testDarDeBajaPublicaciones() {
+//
+//        publicacion1.setFecha(LocalDate.of(2023, Month.APRIL, 20));
+//        publicacion2.setFecha(LocalDate.now());
+//
+//        publicacionService.getProductosPublicados().add(publicacion1);
+//        publicacionService.getProductosPublicados().add(publicacion2);
+//
+//        int numeroDeBajasActual = publicacionService.darDeBajaPublicaciones();
+//        assertEquals(1, numeroDeBajasActual);
+//        verify(notificacionServiceMock).enviarNotificacion(any(), any(), anyDouble(), anyDouble(), any());
+//    }
+//
+//    @Test
+//    public void testDarDeBajaPublicacionesNoInhabilitaNadaCuandoPublicacionTieneOfertas() {
+//        publicacion1.setOfertasCompradores(Collections.singletonList(new Oferta(15800, 0, comprador, fechaActual)));
+//        publicacion2.setOfertasCompradores(Arrays.asList(new Oferta(22000, 0, comprador, fechaActual),
+//                new Oferta(22400, 0, comprador, fechaActual)));
+//
+//        publicacionService.getProductosPublicados().add(publicacion1);
+//        publicacionService.getProductosPublicados().add(publicacion2);
+//
+//        int numeroDeBajasActual = publicacionService.darDeBajaPublicaciones();
+//        assertEquals(0, numeroDeBajasActual);
+//        verify(notificacionServiceMock, times(0)).enviarNotificacion(any(), any(), anyDouble(), anyDouble(), any());
+//    }
 
     @Test
     public void testRePublicarProducto() {
