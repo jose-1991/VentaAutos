@@ -4,13 +4,10 @@ import com.car.sales.company.exceptions.DatoInvalidoException;
 import com.car.sales.company.models.TipoUsuario;
 import com.car.sales.company.models.Vehiculo;
 
-import java.time.LocalDate;
-import java.time.temporal.ChronoUnit;
-
 public class ValidacionHelper {
 
     private static final String VALIDAR_VIN = "^[A-Z\\d]{8}[\\dX][A-Z\\d]{2}\\d{6}$";
-    private static final long MAX_DIAS_SIN_OFERTA = 5;
+    public static final long MAX_DIAS_SIN_OFERTA = 5;
 
 
     public static void validarVehiculo(Vehiculo vehiculo) {
@@ -39,10 +36,6 @@ public class ValidacionHelper {
         if (tipoUsuario == null) {
             throw new DatoInvalidoException("El Tipo de Usuario no debe ser nulo");
         }
-    }
-
-    public static boolean tieneMaximoDiasSinOfertas(LocalDate fechaPublicacion) {
-        return ChronoUnit.DAYS.between(fechaPublicacion, LocalDate.now()) >= MAX_DIAS_SIN_OFERTA;
     }
 
     public static void validarEnteroPositivo(int valor) {

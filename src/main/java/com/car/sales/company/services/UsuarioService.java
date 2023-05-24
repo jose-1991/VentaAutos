@@ -34,7 +34,6 @@ public class UsuarioService {
         if (usuario != null) {
             validarUsuario(usuario);
             usuarioDAO.registrarUsuario(usuario);
-            usuarioDAO.registrarUnsuscripciones(usuario.getUnsuscripcionesSms(), usuario.getIdentificacion());
             return usuario;
         }
         throw new DatoInvalidoException("El usuario no debe ser nulo");

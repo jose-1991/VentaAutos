@@ -9,9 +9,9 @@ import com.car.sales.company.models.Usuario;
 import com.car.sales.company.models.Vehiculo;
 
 import java.time.LocalDate;
+import java.util.ArrayList;
 import java.util.List;
 
-import static com.car.sales.company.helper.ValidacionHelper.tieneMaximoDiasSinOfertas;
 import static com.car.sales.company.helper.ValidacionHelper.validarVehiculo;
 import static com.car.sales.company.models.NombreNotificacion.NUEVO_VEHICULO_EN_VENTA;
 import static com.car.sales.company.models.NombreNotificacion.VEHICULO_EXPIRADO;
@@ -32,7 +32,7 @@ public class PublicacionService {
         this.usuarioDAO = usuarioDAO;
     }
 
-    public Publicacion publicarProducto(Usuario vendedor, Producto producto) {
+    public Publicacion publicarProducto(Usuario vendedor, Producto producto, double precio) {
         Publicacion publicacion = new Publicacion();
         if (vendedor != null && vendedor.getTipoUsuario().equals(VENDEDOR) && producto != null) {
             if (producto instanceof Vehiculo) {
@@ -42,7 +42,9 @@ public class PublicacionService {
             publicacion.setProducto(producto);
             publicacion.setVendedor(vendedor);
             publicacion.setFecha(LocalDate.now());
+            publicacion.setPrecio(precio);
             publicacion.setEstaDisponibleEnLaWeb(true);
+            publicacion.setOfertasCompradores(new ArrayList<>());
             publicacionDAO.registrarPublicacion(publicacion);
             List<Usuario> listaCompradores = usuarioDAO.obtenerCompradores();
             if (listaCompradores.isEmpty()) {
@@ -54,19 +56,14 @@ public class PublicacionService {
     }
 
 
-//    public int darDeBajaPublicaciones() {
-//        int publicacionesDeBaja = 0;
-//        List<Publicacion> listaPublicacionesDeBaja = publicacionDAO.obtenerPublicacionDeBaja();
-//        for (Publicacion publicacion : ProductosPublicados) {
-//            if (publicacion.getOfertasCompradores().size() < 1 && tieneMaximoDiasSinOfertas(publicacion.getFecha())) {
-//                publicacion.setEstaDisponibleEnLaWeb(false);
-//                notificacionService.enviarNotificacion(publicacion.getVendedor(), publicacion.getProducto(), 0, 0,
-//                        VEHICULO_EXPIRADO);
-//                publicacionesDeBaja++;
-//            }
-//        }
-//        return publicacionesDeBaja;
-//    }
+    public int darDeBajaPublicaciones() {
+        List<Publicacion> listaPublicacionesDeBaja = publicacionDAO.obtenerPublicacionesDeBaja();
+        for (Publicacion publicacion : listaPublicacionesDeBaja) {
+            notificacionService.enviarNotificacion(publicacion.getVendedor(), publicacion.getProducto(), 0, 0,
+                    VEHICULO_EXPIRADO);
+        }
+        return listaPublicacionesDeBaja.size();
+    }
 
     public Publicacion rePublicarProducto(Publicacion publicacion, double nuevoPrecioProducto) {
         if (nuevoPrecioProducto < publicacion.getPrecio()) {

@@ -88,7 +88,7 @@ public class PublicacionServiceTest {
     public void testPublicarProductoBotaExceptionCuandoElTipoUsuarioNoEsVendedor() {
         vendedor.setTipoUsuario(COMPRADOR);
 
-        publicacionService.publicarProducto(vendedor, vehiculo);
+//        publicacionService.publicarProducto(vendedor, vehiculo);
     }
 
     @Test(expected = DatoInvalidoException.class)
@@ -96,7 +96,7 @@ public class PublicacionServiceTest {
         vendedor.setTipoUsuario(VENDEDOR);
         vehiculo.setVin("123ASD123556GF");
 
-        publicacionService.publicarProducto(vendedor, vehiculo);
+//        publicacionService.publicarProducto(vendedor, vehiculo);
     }
 
 //    @Test

@@ -55,6 +55,18 @@ public class UsuarioDAO {
             statement.setBoolean(8, usuario.isAceptaNotificacionSms());
             statement.executeUpdate();
 
+            query = "INSERT INTO comercio.unsuscripcion VALUES(?,?,?)";
+            statement = obtenerConexion().prepareStatement(query);
+            obtenerConexion().setAutoCommit(false);
+            for (NombreNotificacion nombreNotificacion : usuario.getUnsuscripcionesSms()) {
+                statement.setString(1, usuario.getIdentificacion());
+                statement.setString(2, nombreNotificacion.toString());
+                statement.setString(3, SMS.toString());
+                statement.addBatch();
+            }
+            statement.executeBatch();
+            obtenerConexion().commit();
+            statement.close();
             System.out.println("Usuario registrado con exito!");
         } catch (SQLException exception) {
             System.out.println("Error al registrar usuario");
@@ -64,7 +76,7 @@ public class UsuarioDAO {
 
     public void eliminarUsuario(String identificacion) {
 
-        query = "DELETE FROM comercio.usuario WHERE usuario_ID = ?";
+        query = "DELETE FROM comercio.usuario WHERE id = ?";
         try (PreparedStatement statement = obtenerConexion().prepareStatement(query)) {
             statement.setString(1, identificacion);
             statement.executeUpdate();
@@ -78,10 +90,9 @@ public class UsuarioDAO {
     }
 
     public Usuario modificarUsuario(String identificacion, String celular) {
-
         Usuario usuario = new Usuario();
         query = "SELECT * FROM comercio.usuario WHERE id = '" + identificacion + "'";
-        try  {
+        try {
             Statement statement = obtenerConexion().createStatement();
             ResultSet resultSet = statement.executeQuery(query);
             if (resultSet.next()) {
@@ -99,6 +110,7 @@ public class UsuarioDAO {
                 updateStatement.setString(1, celular);
                 updateStatement.setString(2, identificacion);
                 updateStatement.executeUpdate();
+                updateStatement.close();
             }
             resultSet.close();
             statement.close();
@@ -108,28 +120,5 @@ public class UsuarioDAO {
             e.printStackTrace();
         }
         return usuario;
-    }
-
-
-    public void registrarUnsuscripciones(List<NombreNotificacion> unsuscripcionesSms, String usuarioId) {
-        query = "INSERT INTO comercio.unsuscripcion VALUES(?,?,?)";
-
-        try {
-            PreparedStatement statement = obtenerConexion().prepareStatement(query);
-            obtenerConexion().setAutoCommit(false);
-            for (NombreNotificacion nombreNotificacion : unsuscripcionesSms) {
-                statement.setString(1, usuarioId);
-                statement.setString(2, nombreNotificacion.toString());
-                statement.setString(3, SMS.toString());
-                statement.addBatch();
-            }
-            statement.executeBatch();
-            obtenerConexion().commit();
-            statement.close();
-        } catch (SQLException e) {
-            e.printStackTrace();
-        }
-
-
     }
 }
