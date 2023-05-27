@@ -45,9 +45,9 @@ public class PublicacionService {
             publicacion.setPrecio(precio);
             publicacion.setEstaDisponibleEnLaWeb(true);
             publicacion.setOfertasCompradores(new ArrayList<>());
-            publicacionDAO.registrarPublicacion(publicacion);
+            publicacionDAO.registrarPublicacionProducto(publicacion);
             List<Usuario> listaCompradores = usuarioDAO.obtenerCompradores();
-            if (listaCompradores.isEmpty()) {
+            if (!listaCompradores.isEmpty()) {
                 notificacionService.notificarTodosLosCompradores(listaCompradores, producto, NUEVO_VEHICULO_EN_VENTA);
             }
             return publicacion;
@@ -67,8 +67,7 @@ public class PublicacionService {
 
     public Publicacion rePublicarProducto(Publicacion publicacion, double nuevoPrecioProducto) {
         if (nuevoPrecioProducto < publicacion.getPrecio()) {
-            publicacion.setPrecio(nuevoPrecioProducto);
-            publicacionDAO.actualizarEstadoPublicacionEnWeb(publicacion.getId(), true);
+            publicacionDAO.rePublicarProducto(publicacion.getId(), nuevoPrecioProducto);
             notificacionService.notificarTodosLosCompradores(usuarioDAO.obtenerCompradores(), publicacion.getProducto(),
                     NUEVO_VEHICULO_EN_VENTA);
         } else {

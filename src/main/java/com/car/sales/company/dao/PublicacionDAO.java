@@ -1,17 +1,18 @@
 package com.car.sales.company.dao;
 
-import com.car.sales.company.models.Producto;
 import com.car.sales.company.models.Publicacion;
+import com.car.sales.company.models.TipoUsuario;
+import com.car.sales.company.models.Usuario;
 import com.car.sales.company.models.Vehiculo;
 
 import java.sql.*;
 import java.time.LocalDate;
-import java.time.ZoneId;
 import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 
+import static com.car.sales.company.dao.UsuarioDAO.obtenerUsuario;
 import static com.car.sales.company.helper.ValidacionHelper.MAX_DIAS_SIN_OFERTA;
 
 public class PublicacionDAO {
@@ -21,7 +22,7 @@ public class PublicacionDAO {
         return ConexionDB.obtenerInstancia();
     }
 
-    public void registrarPublicacion(Publicacion publicacion) {
+    public void registrarPublicacionProducto(Publicacion publicacion) {
         Vehiculo vehiculo = (Vehiculo) publicacion.getProducto();
         query = "INSERT INTO comercio.producto VALUES(?,?,?,?,?)";
         try {
@@ -40,7 +41,7 @@ public class PublicacionDAO {
             statement.setString(1, String.valueOf(UUID.randomUUID()));
             statement.setString(2, publicacion.getVendedor().getIdentificacion());
             statement.setString(3, vehiculo.getVin());
-            statement.setDate(4, Date.valueOf(LocalDate.now()));
+            statement.setDate(4, Date.valueOf(publicacion.getFecha()));
             statement.setDouble(5, publicacion.getPrecio());
             statement.setBoolean(6, publicacion.isEstaDisponibleEnLaWeb());
             statement.executeUpdate();
@@ -53,15 +54,13 @@ public class PublicacionDAO {
         }
     }
 
-    private String obtenerIdProducto(Producto producto) {
-        return ((Vehiculo) producto).getVin();
-    }
-
-    public void actualizarEstadoPublicacionEnWeb(UUID id, boolean activo) {
-        query = "UPDATE comercio.publicacion SET esta_disponible_web = ? WHERE publicacion_ID = " + id;
+    public void rePublicarProducto(UUID id, double precio) {
+        query = "UPDATE comercio.publicacion SET esta_disponible_web = ?, precio = ? WHERE id = '" + id + "'";
 
         try (PreparedStatement statement = obtenerConexion().prepareStatement(query)) {
-            statement.setBoolean(1, activo);
+            statement.setBoolean(1, true);
+            statement.setDouble(2, precio);
+            statement.executeUpdate();
         } catch (SQLException e) {
             e.printStackTrace();
         }
@@ -70,33 +69,74 @@ public class PublicacionDAO {
 
     public List<Publicacion> obtenerPublicacionesDeBaja() {
         List<Publicacion> publicacionesDeBaja = new ArrayList<>();
-        query = "SELECT * FROM comercio.publicacion INNER JOIN ";
-        try {
-            Statement statement = obtenerConexion().createStatement();
-            ResultSet resultSet = statement.executeQuery(query);
+        query = "SELECT * FROM publicacion AS p INNER JOIN usuario AS u ON p.usuario_id = u.identificacion INNER JOIN" +
+                " producto ON" +
+                " p.producto_id = producto.vin";
+        try (Statement statement = obtenerConexion().createStatement();
+            ResultSet resultSet = statement.executeQuery(query)){
+            UUID publicacionId;
+            LocalDate fechaPublicacion;
             while (resultSet.next()) {
-                Publicacion publicacion = new Publicacion();
-                publicacion.setId(UUID.fromString(resultSet.getString("id")));
-                publicacion.setFecha(resultSet.getDate("fecha").toInstant().atZone(ZoneId.systemDefault()).toLocalDate());
-                publicacion.setPrecio(resultSet.getDouble("precio"));
-                String usuarioId = resultSet.getString("usuario_id");
-                String productoId = resultSet.getString("producto_id");
+                publicacionId = UUID.fromString(resultSet.getString("id"));
+                fechaPublicacion = (resultSet.getDate("fecha")).toLocalDate();
+                int numeroOfertas = obtenerNumeroOfertas(publicacionId);
 
-                boolean tieneOferta;
-                query = "SELECT * FROM comercio.oferta WHERE publicacion_id = " + publicacion.getId();
-                ResultSet resultSetOferta = statement.executeQuery(query);
-                tieneOferta = resultSetOferta.next();
-
-                if (!tieneOferta && tieneMaximoDiasSinOfertas(publicacion.getFecha())) {
-
+                if (numeroOfertas < 1 && tieneMaximoDiasSinOfertas(fechaPublicacion)) {
+                    Publicacion publicacion = obtenerPublicacion(resultSet);
+                    Usuario vendedor = obtenerUsuario(resultSet);
+                    Vehiculo vehiculo = obtenerVehiculo(resultSet);
+                    publicacion.setVendedor(vendedor);
+                    publicacion.setProducto(vehiculo);
+                    inhabilitarPublicacion(publicacionId);
+                    publicacionesDeBaja.add(publicacion);
                 }
-
-
             }
         } catch (SQLException e) {
             e.printStackTrace();
         }
         return publicacionesDeBaja;
+    }
+
+    private void inhabilitarPublicacion(UUID publicacionId) throws SQLException {
+        query = "UPDATE comercio.publicacion SET esta_disponible_web = ? WHERE id = '" + publicacionId + "'";
+
+        PreparedStatement statement = obtenerConexion().prepareStatement(query);
+            statement.setBoolean(1, false);
+            statement.executeUpdate();
+    }
+
+    private Publicacion obtenerPublicacion(ResultSet resultSet) throws SQLException {
+        Publicacion publicacion = new Publicacion();
+        publicacion.setId(UUID.fromString(resultSet.getString("id")));
+        publicacion.setFecha((resultSet.getDate("fecha")).toLocalDate());
+        publicacion.setPrecio(resultSet.getDouble("precio"));
+        publicacion.setEstaDisponibleEnLaWeb(resultSet.getBoolean("esta_disponible_web"));
+        return publicacion;
+    }
+
+    private Vehiculo obtenerVehiculo(ResultSet resultSet) throws SQLException {
+        Vehiculo vehiculo = new Vehiculo();
+        vehiculo.setVin(resultSet.getString("vin"));
+        vehiculo.setStockNumber(UUID.fromString(resultSet.getString("stock_number")));
+        vehiculo.setMarca(resultSet.getString("marca"));
+        vehiculo.setModelo(resultSet.getString("modelo"));
+        vehiculo.setAnio(resultSet.getInt("anio"));
+        return vehiculo;
+    }
+
+
+
+
+    private int obtenerNumeroOfertas(UUID publicacionId) throws SQLException {
+        String queryOferta = "SELECT count(*) FROM comercio.oferta WHERE publicacion_id = '" + publicacionId + "'";
+        int numeroOfertas = 0;
+        Statement statementOferta = obtenerConexion().createStatement();
+        ResultSet resultSetOferta = statementOferta.executeQuery(queryOferta);
+        while (resultSetOferta.next()) {
+            numeroOfertas = resultSetOferta.getInt(1);
+        }
+        return numeroOfertas;
+
     }
 
     private boolean tieneMaximoDiasSinOfertas(LocalDate fechaPublicacion) {

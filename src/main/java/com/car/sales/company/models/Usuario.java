@@ -1,6 +1,5 @@
 package com.car.sales.company.models;
 
-import java.util.ArrayList;
 import java.util.List;
 
 public class Usuario {
@@ -12,8 +11,8 @@ public class Usuario {
     private String email;
     private String celular;
     private boolean aceptaNotificacionSms;
-    private  List<NombreNotificacion> unsuscribcionesEmail;
-    private  List<NombreNotificacion> unsuscribcionesSms;
+    private List<NombreNotificacion> unsuscribcionesEmail;
+    private List<NombreNotificacion> unsuscribcionesSms;
 
     public Usuario() {
     }
@@ -119,7 +118,9 @@ public class Usuario {
                 ", tipoUsuario=" + tipoUsuario +
                 ", email='" + email + '\'' +
                 ", celular='" + celular + '\'' +
-                ", aceptaNotificacionSms=" + aceptaNotificacionSms +
+                ", aceptaNotificacionSms=" + aceptaNotificacionSms + '\'' +
+                ", unsuscripcionesSms=" + unsuscribcionesSms + '\'' +
+                ", unsuscripcionesEmail=" + unsuscribcionesEmail +
                 '}';
     }
 }

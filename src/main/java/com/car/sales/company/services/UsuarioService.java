@@ -7,15 +7,19 @@ import com.car.sales.company.models.NombreNotificacion;
 import com.car.sales.company.models.TipoNotificacion;
 import com.car.sales.company.models.Usuario;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 import static com.car.sales.company.helper.ValidacionHelper.validarString;
 import static com.car.sales.company.helper.ValidacionHelper.validarTipoUsuario;
 import static com.car.sales.company.models.Accion.SUSCRIBIR;
 import static com.car.sales.company.models.NombreNotificacion.*;
+import static com.car.sales.company.models.TipoNotificacion.SMS;
+import static com.car.sales.company.models.TipoUsuario.COMPRADOR;
 import static com.car.sales.company.models.TipoUsuario.VENDEDOR;
-import static com.car.sales.company.services.NotificacionService.NOTIFICACIONES_EMAIL_LIST;
-import static com.car.sales.company.services.NotificacionService.NOTIFICACIONES_SMS_LIST;
+import static com.car.sales.company.services.NotificacionService.*;
 
 public class UsuarioService {
 
@@ -48,8 +52,7 @@ public class UsuarioService {
         validarEmail(usuario.getEmail());
         usuario.setUnsuscribcionesEmail(new ArrayList<>());
         validarTipoUsuario(usuario.getTipoUsuario());
-        if (usuario.getCelular() != null && !usuario.getCelular().trim().isEmpty()) {
-            validarCelular(usuario.getCelular());
+        if (validarCelular(usuario.getCelular()) != null) {
             usuario.setAceptaNotificacionSms(true);
             usuario.setUnsuscribcionesSms(new ArrayList<>());
             if (usuario.getTipoUsuario().equals(VENDEDOR)) {
@@ -72,45 +75,52 @@ public class UsuarioService {
 
     public Usuario modificarUsuario(String identificacion, String celular) {
         validarString(identificacion);
-        validarCelular(celular);
-        return usuarioDAO.modificarUsuario(identificacion, celular);
+        return usuarioDAO.modificarUsuario(identificacion, validarCelular(celular));
     }
 
-    public Usuario actualizarSuscripcion(Usuario usuario, NombreNotificacion nombreNotificacion, Accion accion, TipoNotificacion tipoNotificacion) {
-
+    public Usuario interaccionSuscripciones(Usuario usuario, NombreNotificacion nombreNotificacion, Accion accion, TipoNotificacion tipoNotificacion) {
         switch (accion) {
             case SUSCRIBIR:
             case UNSUSCRIBIR:
                 suscripcionOrUnsuscripcionNotificacion(usuario, nombreNotificacion, accion, tipoNotificacion);
                 break;
             case SUSCRIBIR_TODO:
-                usuario.getUnsuscripcionesEmail().clear();
-                if (usuario.isAceptaNotificacionSms()) {
-                    usuario.getUnsuscripcionesSms().clear();
-                }
+                usuarioDAO.suscribirTodo(usuario);
                 break;
             case UNSUSCRIBIR_TODO:
-                usuario.setUnsuscribcionesEmail(NOTIFICACIONES_EMAIL_LIST);
-                if (usuario.isAceptaNotificacionSms()) {
-                    usuario.setUnsuscribcionesSms(NOTIFICACIONES_SMS_LIST);
+                List<NombreNotificacion> listaNotificacionesEmail;
+                List<NombreNotificacion> listaNotificacionesSms = null;
+                if (usuario.getTipoUsuario().equals(COMPRADOR)) {
+                    listaNotificacionesEmail = NOTIFICACIONES_EMAIL_COMPRADOR;
+                    if (usuario.isAceptaNotificacionSms()) {
+                        listaNotificacionesSms = NOTIFICACIONES_SMS_COMPRADOR;
+                    }
+                } else {
+                    listaNotificacionesEmail = NOTIFICACIONES_EMAIL_VENDEDOR;
+                    if (usuario.isAceptaNotificacionSms()) {
+                        listaNotificacionesSms = NOTIFICACIONES_SMS_VENDEDOR;
+                    }
                 }
+                usuarioDAO.unsuscribirTodo(usuario.getIdentificacion(), listaNotificacionesEmail, listaNotificacionesSms);
                 break;
         }
         return usuario;
     }
 
-    private void suscripcionOrUnsuscripcionNotificacion(Usuario usuario, NombreNotificacion nombreNotificacion, Accion accion, TipoNotificacion tipoNotificacion) {
+    private void suscripcionOrUnsuscripcionNotificacion1(Usuario usuario, NombreNotificacion nombreNotificacion,
+                                                         Accion accion, TipoNotificacion tipoNotificacion) {
 
         switch (tipoNotificacion) {
             case EMAIL:
                 if (accion.equals(SUSCRIBIR)) {
                     usuario.getUnsuscripcionesEmail().remove(nombreNotificacion);
+//                    usuarioDAO.suscribirNotificacion(usuario.getIdentificacion(),nombreNotificacion);
                 } else {
                     usuario.getUnsuscripcionesEmail().add(nombreNotificacion);
                 }
                 break;
             case SMS:
-                if (usuario.isAceptaNotificacionSms() && NOTIFICACIONES_SMS_LIST.contains(nombreNotificacion)) {
+                if (usuario.isAceptaNotificacionSms() && NOTIFICACIONES_SMS_VENDEDOR.contains(nombreNotificacion)) {
                     if (accion.equals(SUSCRIBIR)) {
                         usuario.getUnsuscripcionesSms().remove(nombreNotificacion);
                     } else {
@@ -123,18 +133,47 @@ public class UsuarioService {
         }
     }
 
-    private void validarEmail(String email) {
-        validarString(email);
-        if (email.matches(VALIDAR_EMAIL)) {
-            return;
+    private void suscripcionOrUnsuscripcionNotificacion(Usuario usuario, NombreNotificacion nombreNotificacion,
+                                                        Accion accion, TipoNotificacion tipoNotificacion) {
+        switch (usuario.getTipoUsuario()) {
+            case COMPRADOR:
+                if (tipoNotificacion.equals(SMS)) {
+                    if (usuario.isAceptaNotificacionSms() && NOTIFICACIONES_SMS_COMPRADOR.contains(nombreNotificacion)) {
+                        usuarioDAO.actualizarSuscripcion(usuario.getIdentificacion(), nombreNotificacion, accion, tipoNotificacion);
+                    }
+                } else {
+                    if (NOTIFICACIONES_EMAIL_COMPRADOR.contains(nombreNotificacion)) {
+                        usuarioDAO.actualizarSuscripcion(usuario.getIdentificacion(), nombreNotificacion, accion, tipoNotificacion);
+                    }
+                }
+                break;
+            case VENDEDOR:
+                if (tipoNotificacion.equals(SMS)) {
+                    if (usuario.isAceptaNotificacionSms() && NOTIFICACIONES_SMS_VENDEDOR.contains(nombreNotificacion)) {
+                        usuarioDAO.actualizarSuscripcion(usuario.getIdentificacion(), nombreNotificacion, accion, tipoNotificacion);
+                    }
+                } else {
+                    if (NOTIFICACIONES_EMAIL_VENDEDOR.contains(nombreNotificacion)) {
+                        usuarioDAO.actualizarSuscripcion(usuario.getIdentificacion(), nombreNotificacion, accion, tipoNotificacion);
+                    }
+                }
+                break;
         }
-        throw new RuntimeException(email + " -> no es un email valido");
     }
 
-    private void validarCelular(String celular) {
-        validarString(celular);
+    private void validarEmail(String email) {
+        validarString(email);
+        if (!email.matches(VALIDAR_EMAIL)) {
+            throw new RuntimeException(email + " -> no es un email valido");
+        }
+    }
+
+    private String validarCelular(String celular) {
+        if (celular == null || celular.trim().isEmpty()) {
+            return null;
+        }
         if (celular.matches(VALIDAR_CELULAR)) {
-            return;
+            return celular;
         }
         throw new RuntimeException(celular + " -> no tiene el formato adecuado");
     }

@@ -22,9 +22,14 @@ public class NotificacionService {
         this.notificacionDAO = notificacionDAO;
     }
 
-    static final List<NombreNotificacion> NOTIFICACIONES_SMS_LIST = Arrays.asList(COMPRADOR_PRIMERA_OFERTA, COMPRADOR_ACEPTA_OFERTA,
-            NUEVO_VEHICULO_EN_VENTA, VENDEDOR_ACEPTA_OFERTA);
-    static final List<NombreNotificacion> NOTIFICACIONES_EMAIL_LIST = Arrays.asList(NombreNotificacion.values());
+    public static final List<NombreNotificacion> NOTIFICACIONES_SMS_VENDEDOR = Arrays.asList(COMPRADOR_PRIMERA_OFERTA,
+            COMPRADOR_ACEPTA_OFERTA);
+    public static final List<NombreNotificacion> NOTIFICACIONES_SMS_COMPRADOR = Arrays.asList(NUEVO_VEHICULO_EN_VENTA,
+            VENDEDOR_ACEPTA_OFERTA);
+    public static final List<NombreNotificacion> NOTIFICACIONES_EMAIL_VENDEDOR = Arrays.asList(COMPRADOR_PRIMERA_OFERTA,
+            COMPRADOR_ACEPTA_OFERTA, COMPRADOR_RETIRA_OFERTA, VEHICULO_EXPIRADO, COMPRADOR_NUEVA_OFERTA);
+    public static final List<NombreNotificacion> NOTIFICACIONES_EMAIL_COMPRADOR = Arrays.asList(NUEVO_VEHICULO_EN_VENTA,
+            VENDEDOR_CONTRAOFERTA, VENDEDOR_ACEPTA_OFERTA, VENDEDOR_DECLINA_OFERTA, VEHICULO_NO_DISPONIBLE);
 
     public Notificacion enviarNotificacion(Usuario usuario, Producto producto, double montoOferta, double montoContraOferta,
                                            NombreNotificacion nombreNotificacion) {
@@ -32,7 +37,7 @@ public class NotificacionService {
         if (nombreNotificacion == null) {
             throw new DatoInvalidoException("Nombre de notificacion invalido");
         }
-        if (NOTIFICACIONES_SMS_LIST.contains(nombreNotificacion)) {
+        if (NOTIFICACIONES_SMS_VENDEDOR.contains(nombreNotificacion) || NOTIFICACIONES_SMS_COMPRADOR.contains(nombreNotificacion)) {
             if (usuario.isAceptaNotificacionSms() && !usuario.getUnsuscripcionesSms().contains(nombreNotificacion)) {
                 notificacion.setCelular(usuario.getCelular());
             }
@@ -55,7 +60,7 @@ public class NotificacionService {
     public void notificarTodosLosCompradores(List<Usuario> compradores, Producto producto,
                                              NombreNotificacion nombreNotificacion) {
         for (Usuario usuario : compradores) {
-                enviarNotificacion(usuario, producto, 0, 0, nombreNotificacion);
+            enviarNotificacion(usuario, producto, 0, 0, nombreNotificacion);
         }
     }
 

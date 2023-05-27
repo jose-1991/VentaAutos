@@ -9,6 +9,9 @@ public class Vehiculo implements Producto {
     private String modelo;
     private int anio;
 
+    public Vehiculo() {
+    }
+
     public Vehiculo(String vin, String marca, String modelo, int anio) {
         this.stockNumber = UUID.randomUUID();
         this.vin = vin;

@@ -69,4 +69,16 @@ public class Publicacion {
     public void setEstaDisponibleEnLaWeb(boolean estaDisponibleEnLaWeb) {
         this.estaDisponibleEnLaWeb = estaDisponibleEnLaWeb;
     }
+
+    @Override
+    public String toString() {
+        return "Publicacion{" +
+                "id=" + id +
+                ", vendedor=" + vendedor +
+                ", producto=" + producto +
+                ", fecha=" + fecha +
+                ", precio=" + precio +
+                ", estaDisponibleEnLaWeb=" + estaDisponibleEnLaWeb +
+                '}';
+    }
 }

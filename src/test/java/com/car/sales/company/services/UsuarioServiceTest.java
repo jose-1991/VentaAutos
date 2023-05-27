@@ -148,7 +148,7 @@ public class UsuarioServiceTest {
     public void testActualizarSuscripcionCaseUnsuscribirEmail() {
         nombreNotificacion = VENDEDOR_ACEPTA_OFERTA;
 
-        Usuario usuarioEsperado = usuarioService.actualizarSuscripcion(usuario2, nombreNotificacion, UNSUSCRIBIR, EMAIL);
+        Usuario usuarioEsperado = usuarioService.interaccionSuscripciones(usuario2, nombreNotificacion, UNSUSCRIBIR, EMAIL);
 
         assertNotNull(usuarioEsperado);
         assertTrue(usuarioEsperado.getUnsuscripcionesEmail().contains(nombreNotificacion));
@@ -158,7 +158,7 @@ public class UsuarioServiceTest {
     public void testActualizarSuscripcionCaseUnsuscribirSms() {
         nombreNotificacion = VENDEDOR_ACEPTA_OFERTA;
 
-        Usuario usuarioEsperado = usuarioService.actualizarSuscripcion(usuario2, nombreNotificacion, UNSUSCRIBIR, SMS);
+        Usuario usuarioEsperado = usuarioService.interaccionSuscripciones(usuario2, nombreNotificacion, UNSUSCRIBIR, SMS);
 
         assertNotNull(usuarioEsperado);
         assertTrue(usuarioEsperado.getUnsuscripcionesSms().contains(nombreNotificacion));
@@ -168,7 +168,7 @@ public class UsuarioServiceTest {
     public void testActualizarSuscripcionCaseSuscribirEmail() {
         nombreNotificacion = VENDEDOR_CONTRAOFERTA;
 
-        Usuario usuarioEsperado = usuarioService.actualizarSuscripcion(usuario2, nombreNotificacion, SUSCRIBIR, EMAIL);
+        Usuario usuarioEsperado = usuarioService.interaccionSuscripciones(usuario2, nombreNotificacion, SUSCRIBIR, EMAIL);
 
         assertNotNull(usuarioEsperado);
         assertFalse(usuarioEsperado.getUnsuscripcionesEmail().contains(nombreNotificacion));
@@ -179,7 +179,7 @@ public class UsuarioServiceTest {
     public void testActualizarSuscripcionCaseSuscribirSms() {
         nombreNotificacion = NUEVO_VEHICULO_EN_VENTA;
 
-        Usuario usuarioEsperado = usuarioService.actualizarSuscripcion(usuario2, nombreNotificacion, SUSCRIBIR, SMS);
+        Usuario usuarioEsperado = usuarioService.interaccionSuscripciones(usuario2, nombreNotificacion, SUSCRIBIR, SMS);
 
         assertNotNull(usuarioEsperado);
         assertFalse(usuarioEsperado.getUnsuscripcionesSms().contains(nombreNotificacion));
@@ -190,13 +190,13 @@ public class UsuarioServiceTest {
     public void testActualizarBotaExceptionCuandoNoExisteNotificacionSms() {
         nombreNotificacion = VENDEDOR_CONTRAOFERTA;
 
-        usuarioService.actualizarSuscripcion(usuario2, nombreNotificacion, SUSCRIBIR, SMS);
+        usuarioService.interaccionSuscripciones(usuario2, nombreNotificacion, SUSCRIBIR, SMS);
     }
 
     @Test
     public void testActualizarSuscripcionCaseUnsuscribirTodo() {
 
-        Usuario usuarioEsperado = usuarioService.actualizarSuscripcion(usuario1, null, UNSUSCRIBIR_TODO, null);
+        Usuario usuarioEsperado = usuarioService.interaccionSuscripciones(usuario1, null, UNSUSCRIBIR_TODO, null);
 
         assertNotNull(usuarioEsperado);
         assertTrue(usuarioEsperado.getUnsuscripcionesEmail().containsAll(Arrays.asList(NombreNotificacion.values())));
@@ -205,7 +205,7 @@ public class UsuarioServiceTest {
     @Test
     public void testActualizarSuscripcionCaseSuscribirTodo() {
 
-        Usuario usuarioEsperado = usuarioService.actualizarSuscripcion(usuario1, null, SUSCRIBIR_TODO, null);
+        Usuario usuarioEsperado = usuarioService.interaccionSuscripciones(usuario1, null, SUSCRIBIR_TODO, null);
         assertTrue(usuarioEsperado.getUnsuscripcionesSms().isEmpty());
     }
 }
