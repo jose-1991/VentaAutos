@@ -46,13 +46,14 @@ public class UsuarioDAO {
             statement.setBoolean(8, usuario.isAceptaNotificacionSms());
             statement.executeUpdate();
 
-            query = "INSERT INTO comercio.unsuscripcion VALUES(?,?,?)";
+            query = "INSERT INTO comercio.unsuscripcion VALUES(?,?,?,?)";
             statement = obtenerConexion().prepareStatement(query);
             obtenerConexion().setAutoCommit(false);
-            for (NombreNotificacion nombreNotificacion : usuario.getUnsuscripcionesSms()) {
+            for (Notificacion notificacion : usuario.getListaUnsuscribciones()) {
                 statement.setString(1, usuario.getIdentificacion());
-                statement.setString(2, nombreNotificacion.toString());
-                statement.setString(3, SMS.toString());
+                statement.setString(2, notificacion.getNombreNotificacion().toString());
+                statement.setString(3, notificacion.getTipoNotificacion().toString());
+                statement.setString(4, notificacion.getTipoUsuario().toString());
                 statement.addBatch();
             }
             statement.executeBatch();
@@ -204,4 +205,19 @@ public class UsuarioDAO {
             e.printStackTrace();
         }
     }
+
+    public void suscribirNotificacion(String identificacion, Notificacion notificacion) {
+        query = "DELETE FROM comercio.unsuscripcion WHERE usuario_id = ? AND nombre_notificacion = ? AND " +
+                "tipo =?";
+
+        try (PreparedStatement statement = obtenerConexion().prepareStatement(query)) {
+            statement.setString(1, identificacion);
+            statement.setString(2, notificacion.getNombreNotificacion().toString());
+            statement.setString(3, notificacion.getTipoNotificacion().toString());
+            statement.executeUpdate();
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+    }
+
 }

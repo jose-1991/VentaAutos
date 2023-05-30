@@ -12,7 +12,6 @@ import com.car.sales.company.services.VentaService;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.Collections;
-import java.util.UUID;
 
 import static com.car.sales.company.models.NombreNotificacion.COMPRADOR_PRIMERA_OFERTA;
 import static com.car.sales.company.models.TipoUsuario.COMPRADOR;
@@ -47,7 +46,7 @@ public class UserStore {
         publicacion.setPrecio(80);
         publicacion.setFecha(LocalDate.now().minusDays(8));
 
-        Notificacion notificacion = new Notificacion(COMPRADOR_PRIMERA_OFERTA, vehiculo, 120, 0, "javi.31_82@hotmail" +
+        InputNotificacion inputNotificacion = new InputNotificacion(COMPRADOR_PRIMERA_OFERTA, vehiculo, 120, 0, "javi.31_82@hotmail" +
                 ".com", "8771824");
 
 //        System.out.println(LocalDate.now().minusDays(6));

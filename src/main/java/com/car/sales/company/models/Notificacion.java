@@ -1,21 +1,17 @@
 package com.car.sales.company.models;
 
 public class Notificacion {
-    private NombreNotificacion nombreNotificacion;
-    private Producto producto;
-    private double montoOferta;
-    private double montoContraOferta;
-    private String email;
-    private String celular;
+    NombreNotificacion nombreNotificacion;
+    TipoNotificacion tipoNotificacion;
+    TipoUsuario tipoUsuario;
 
-    public Notificacion(NombreNotificacion nombreNotificacion, Producto producto, double montoOferta,
-                        double montoContraOferta, String email, String celular) {
+    public Notificacion() {
+    }
+
+    public Notificacion(NombreNotificacion nombreNotificacion, TipoNotificacion tipoNotificacion, TipoUsuario tipoUsuario) {
         this.nombreNotificacion = nombreNotificacion;
-        this.producto = producto;
-        this.montoOferta = montoOferta;
-        this.montoContraOferta = montoContraOferta;
-        this.email = email;
-        this.celular = celular;
+        this.tipoNotificacion = tipoNotificacion;
+        this.tipoUsuario = tipoUsuario;
     }
 
     public NombreNotificacion getNombreNotificacion() {
@@ -26,43 +22,19 @@ public class Notificacion {
         this.nombreNotificacion = nombreNotificacion;
     }
 
-    public String getEmail() {
-        return email;
+    public TipoNotificacion getTipoNotificacion() {
+        return tipoNotificacion;
     }
 
-    public void setEmail(String email) {
-        this.email = email;
+    public void setTipoNotificacion(TipoNotificacion tipoNotificacion) {
+        this.tipoNotificacion = tipoNotificacion;
     }
 
-    public String getCelular() {
-        return celular;
+    public TipoUsuario getTipoUsuario() {
+        return tipoUsuario;
     }
 
-    public void setCelular(String celular) {
-        this.celular = celular;
-    }
-
-    public Producto getProducto() {
-        return producto;
-    }
-
-    public void setProducto(Producto producto) {
-        this.producto = producto;
-    }
-
-    public double getMontoOferta() {
-        return montoOferta;
-    }
-
-    public void setMontoOferta(double montoOferta) {
-        this.montoOferta = montoOferta;
-    }
-
-    public double getMontoContraOferta() {
-        return montoContraOferta;
-    }
-
-    public void setMontoContraOferta(double montoContraOferta) {
-        this.montoContraOferta = montoContraOferta;
+    public void setTipoUsuario(TipoUsuario tipoUsuario) {
+        this.tipoUsuario = tipoUsuario;
     }
 }

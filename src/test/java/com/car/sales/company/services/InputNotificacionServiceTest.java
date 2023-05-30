@@ -9,7 +9,6 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
 
-import java.time.LocalDateTime;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
@@ -22,7 +21,7 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
 
 @RunWith(MockitoJUnitRunner.class)
-public class NotificacionServiceTest {
+public class InputNotificacionServiceTest {
 
     double montoOferta;
     double montoContraOferta;
@@ -71,12 +70,12 @@ public class NotificacionServiceTest {
         montoOferta = 14000;
         vendedor.setAceptaNotificacionSms(false);
 
-        Notificacion notificacionActual = notificacionService.enviarNotificacion(vendedor, vehiculo, montoOferta, 0, nombreNotificacion);
+        InputNotificacion inputNotificacionActual = notificacionService.enviarNotificacion(vendedor, vehiculo, montoOferta, 0, nombreNotificacion);
 
-        assertNotNull(notificacionActual.getEmail());
-        assertNull(notificacionActual.getCelular());
-        assertEquals(nombreNotificacion, notificacionActual.getNombreNotificacion());
-        assertEquals(montoOferta, notificacionActual.getMontoOferta(), 0.0);
+        assertNotNull(inputNotificacionActual.getEmail());
+        assertNull(inputNotificacionActual.getCelular());
+        assertEquals(nombreNotificacion, inputNotificacionActual.getNombreNotificacion());
+        assertEquals(montoOferta, inputNotificacionActual.getMontoOferta(), 0.0);
     }
 
     @Test
@@ -86,12 +85,12 @@ public class NotificacionServiceTest {
         vendedor.setAceptaNotificacionSms(true);
         vendedor.setUnsuscribcionesEmail(Collections.singletonList(nombreNotificacion));
 
-        Notificacion notificacionActual = notificacionService.enviarNotificacion(vendedor, vehiculo, montoOferta, 0, nombreNotificacion);
+        InputNotificacion inputNotificacionActual = notificacionService.enviarNotificacion(vendedor, vehiculo, montoOferta, 0, nombreNotificacion);
 
-        assertNotNull(notificacionActual.getCelular());
-        assertNull(notificacionActual.getEmail());
-        assertEquals(nombreNotificacion, notificacionActual.getNombreNotificacion());
-        assertEquals(montoOferta, notificacionActual.getMontoOferta(), 0.0);
+        assertNotNull(inputNotificacionActual.getCelular());
+        assertNull(inputNotificacionActual.getEmail());
+        assertEquals(nombreNotificacion, inputNotificacionActual.getNombreNotificacion());
+        assertEquals(montoOferta, inputNotificacionActual.getMontoOferta(), 0.0);
     }
 
     @Test
@@ -100,12 +99,12 @@ public class NotificacionServiceTest {
         vendedor.setAceptaNotificacionSms(true);
         montoOferta = 14000;
 
-        Notificacion notificacionActual = notificacionService.enviarNotificacion(vendedor, vehiculo, montoOferta, 0, nombreNotificacion);
+        InputNotificacion inputNotificacionActual = notificacionService.enviarNotificacion(vendedor, vehiculo, montoOferta, 0, nombreNotificacion);
 
-        assertNotNull(notificacionActual.getEmail());
-        assertNotNull(notificacionActual.getCelular());
-        assertEquals(nombreNotificacion, notificacionActual.getNombreNotificacion());
-        assertEquals(montoOferta, notificacionActual.getMontoOferta(), 0.0);
+        assertNotNull(inputNotificacionActual.getEmail());
+        assertNotNull(inputNotificacionActual.getCelular());
+        assertEquals(nombreNotificacion, inputNotificacionActual.getNombreNotificacion());
+        assertEquals(montoOferta, inputNotificacionActual.getMontoOferta(), 0.0);
     }
 
     @Test
@@ -114,12 +113,12 @@ public class NotificacionServiceTest {
         vendedor.setAceptaNotificacionSms(false);
 
 
-        Notificacion notificacionActual = notificacionService.enviarNotificacion(vendedor, vehiculo, montoOferta, montoContraOferta, nombreNotificacion);
+        InputNotificacion inputNotificacionActual = notificacionService.enviarNotificacion(vendedor, vehiculo, montoOferta, montoContraOferta, nombreNotificacion);
 
-        assertNotNull(notificacionActual.getEmail());
-        assertNull(notificacionActual.getCelular());
-        assertEquals(nombreNotificacion, notificacionActual.getNombreNotificacion());
-        assertEquals(montoOferta, notificacionActual.getMontoOferta(), 0.0);
+        assertNotNull(inputNotificacionActual.getEmail());
+        assertNull(inputNotificacionActual.getCelular());
+        assertEquals(nombreNotificacion, inputNotificacionActual.getNombreNotificacion());
+        assertEquals(montoOferta, inputNotificacionActual.getMontoOferta(), 0.0);
     }
 
     @Test
@@ -129,12 +128,12 @@ public class NotificacionServiceTest {
         vendedor.setUnsuscribcionesEmail(Collections.singletonList(nombreNotificacion));
 
 
-        Notificacion notificacionActual = notificacionService.enviarNotificacion(vendedor, vehiculo, montoOferta, montoContraOferta, nombreNotificacion);
+        InputNotificacion inputNotificacionActual = notificacionService.enviarNotificacion(vendedor, vehiculo, montoOferta, montoContraOferta, nombreNotificacion);
 
-        assertNotNull(notificacionActual.getCelular());
-        assertNull(notificacionActual.getEmail());
-        assertEquals(nombreNotificacion, notificacionActual.getNombreNotificacion());
-        assertEquals(montoOferta, notificacionActual.getMontoOferta(), 0.0);
+        assertNotNull(inputNotificacionActual.getCelular());
+        assertNull(inputNotificacionActual.getEmail());
+        assertEquals(nombreNotificacion, inputNotificacionActual.getNombreNotificacion());
+        assertEquals(montoOferta, inputNotificacionActual.getMontoOferta(), 0.0);
     }
 
     @Test
@@ -143,12 +142,12 @@ public class NotificacionServiceTest {
         montoOferta = 14000;
         vendedor.setAceptaNotificacionSms(true);
 
-        Notificacion notificacionActual = notificacionService.enviarNotificacion(vendedor, vehiculo, montoOferta, montoContraOferta, nombreNotificacion);
+        InputNotificacion inputNotificacionActual = notificacionService.enviarNotificacion(vendedor, vehiculo, montoOferta, montoContraOferta, nombreNotificacion);
 
-        assertNotNull(notificacionActual.getEmail());
-        assertNotNull(notificacionActual.getCelular());
-        assertEquals(nombreNotificacion, notificacionActual.getNombreNotificacion());
-        assertEquals(montoOferta, notificacionActual.getMontoOferta(), 0.0);
+        assertNotNull(inputNotificacionActual.getEmail());
+        assertNotNull(inputNotificacionActual.getCelular());
+        assertEquals(nombreNotificacion, inputNotificacionActual.getNombreNotificacion());
+        assertEquals(montoOferta, inputNotificacionActual.getMontoOferta(), 0.0);
     }
 
     @Test
@@ -156,11 +155,11 @@ public class NotificacionServiceTest {
         nombreNotificacion = COMPRADOR_RETIRA_OFERTA;
 
 
-        Notificacion notificacionActual = notificacionService.enviarNotificacion(vendedor, vehiculo, oferta.getMontoOferta(),
+        InputNotificacion inputNotificacionActual = notificacionService.enviarNotificacion(vendedor, vehiculo, oferta.getMontoOferta(),
                 0, nombreNotificacion);
 
-        assertNotNull(notificacionActual.getEmail());
-        assertEquals(nombreNotificacion, notificacionActual.getNombreNotificacion());
+        assertNotNull(inputNotificacionActual.getEmail());
+        assertEquals(nombreNotificacion, inputNotificacionActual.getNombreNotificacion());
 
     }
 
@@ -169,11 +168,11 @@ public class NotificacionServiceTest {
         nombreNotificacion = VEHICULO_EXPIRADO;
 
 
-        Notificacion notificacionActual = notificacionService.enviarNotificacion(vendedor, vehiculo, 0,
+        InputNotificacion inputNotificacionActual = notificacionService.enviarNotificacion(vendedor, vehiculo, 0,
                 0, nombreNotificacion);
 
-        assertNotNull(notificacionActual.getEmail());
-        assertEquals(nombreNotificacion, notificacionActual.getNombreNotificacion());
+        assertNotNull(inputNotificacionActual.getEmail());
+        assertEquals(nombreNotificacion, inputNotificacionActual.getNombreNotificacion());
 
     }
 
@@ -182,12 +181,12 @@ public class NotificacionServiceTest {
         nombreNotificacion = NUEVO_VEHICULO_EN_VENTA;
         comprador.setAceptaNotificacionSms(false);
 
-        Notificacion notificacionActual = notificacionService.enviarNotificacion(comprador, vehiculo, 0,
+        InputNotificacion inputNotificacionActual = notificacionService.enviarNotificacion(comprador, vehiculo, 0,
                 0, nombreNotificacion);
 
-        assertNotNull(notificacionActual.getEmail());
-        assertNull(notificacionActual.getCelular());
-        assertEquals(nombreNotificacion, notificacionActual.getNombreNotificacion());
+        assertNotNull(inputNotificacionActual.getEmail());
+        assertNull(inputNotificacionActual.getCelular());
+        assertEquals(nombreNotificacion, inputNotificacionActual.getNombreNotificacion());
     }
 
     @Test
@@ -196,12 +195,12 @@ public class NotificacionServiceTest {
         comprador.setAceptaNotificacionSms(true);
         comprador.setUnsuscribcionesEmail(Collections.singletonList(nombreNotificacion));
 
-        Notificacion notificacionActual = notificacionService.enviarNotificacion(comprador, vehiculo, 0,
+        InputNotificacion inputNotificacionActual = notificacionService.enviarNotificacion(comprador, vehiculo, 0,
                 0, nombreNotificacion);
 
-        assertNotNull(notificacionActual.getCelular());
-        assertNull(notificacionActual.getEmail());
-        assertEquals(nombreNotificacion, notificacionActual.getNombreNotificacion());
+        assertNotNull(inputNotificacionActual.getCelular());
+        assertNull(inputNotificacionActual.getEmail());
+        assertEquals(nombreNotificacion, inputNotificacionActual.getNombreNotificacion());
     }
 
     @Test
@@ -210,23 +209,23 @@ public class NotificacionServiceTest {
         comprador.setCelular("69587463");
         comprador.setAceptaNotificacionSms(true);
 
-        Notificacion notificacionActual = notificacionService.enviarNotificacion(comprador, vehiculo, 0,
+        InputNotificacion inputNotificacionActual = notificacionService.enviarNotificacion(comprador, vehiculo, 0,
                 0, nombreNotificacion);
 
-        assertNotNull(notificacionActual.getEmail());
-        assertNotNull(notificacionActual.getCelular());
-        assertEquals(nombreNotificacion, notificacionActual.getNombreNotificacion());
+        assertNotNull(inputNotificacionActual.getEmail());
+        assertNotNull(inputNotificacionActual.getCelular());
+        assertEquals(nombreNotificacion, inputNotificacionActual.getNombreNotificacion());
     }
 
     @Test
     public void testEnviarNotificacionVendedorContraOfertaSoloEmail() {
         nombreNotificacion = VENDEDOR_CONTRAOFERTA;
 
-        Notificacion notificacionActual = notificacionService.enviarNotificacion(comprador, vehiculo, montoOferta,
+        InputNotificacion inputNotificacionActual = notificacionService.enviarNotificacion(comprador, vehiculo, montoOferta,
                 montoContraOferta, nombreNotificacion);
 
-        assertNotNull(notificacionActual.getEmail());
-        assertEquals(nombreNotificacion, notificacionActual.getNombreNotificacion());
+        assertNotNull(inputNotificacionActual.getEmail());
+        assertEquals(nombreNotificacion, inputNotificacionActual.getNombreNotificacion());
     }
 
     @Test
@@ -234,12 +233,12 @@ public class NotificacionServiceTest {
         nombreNotificacion = VENDEDOR_ACEPTA_OFERTA;
         comprador.setAceptaNotificacionSms(false);
 
-        Notificacion notificacionActual = notificacionService.enviarNotificacion(comprador, vehiculo, montoOferta,
+        InputNotificacion inputNotificacionActual = notificacionService.enviarNotificacion(comprador, vehiculo, montoOferta,
                 0, nombreNotificacion);
 
-        assertNotNull(notificacionActual.getEmail());
-        assertNull(notificacionActual.getCelular());
-        assertEquals(nombreNotificacion, notificacionActual.getNombreNotificacion());
+        assertNotNull(inputNotificacionActual.getEmail());
+        assertNull(inputNotificacionActual.getCelular());
+        assertEquals(nombreNotificacion, inputNotificacionActual.getNombreNotificacion());
     }
 
     @Test
@@ -248,12 +247,12 @@ public class NotificacionServiceTest {
         comprador.setAceptaNotificacionSms(true);
         comprador.setUnsuscribcionesEmail(Collections.singletonList(nombreNotificacion));
 
-        Notificacion notificacionActual = notificacionService.enviarNotificacion(comprador, vehiculo, montoOferta,
+        InputNotificacion inputNotificacionActual = notificacionService.enviarNotificacion(comprador, vehiculo, montoOferta,
                 0, nombreNotificacion);
 
-        assertNotNull(notificacionActual.getCelular());
-        assertNull(notificacionActual.getEmail());
-        assertEquals(nombreNotificacion, notificacionActual.getNombreNotificacion());
+        assertNotNull(inputNotificacionActual.getCelular());
+        assertNull(inputNotificacionActual.getEmail());
+        assertEquals(nombreNotificacion, inputNotificacionActual.getNombreNotificacion());
     }
 
     @Test
@@ -262,23 +261,23 @@ public class NotificacionServiceTest {
         comprador.setCelular("69587463");
         comprador.setAceptaNotificacionSms(true);
 
-        Notificacion notificacionActual = notificacionService.enviarNotificacion(comprador, vehiculo, montoOferta,
+        InputNotificacion inputNotificacionActual = notificacionService.enviarNotificacion(comprador, vehiculo, montoOferta,
                 0, nombreNotificacion);
 
-        assertNotNull(notificacionActual.getEmail());
-        assertNotNull(notificacionActual.getCelular());
-        assertEquals(nombreNotificacion, notificacionActual.getNombreNotificacion());
+        assertNotNull(inputNotificacionActual.getEmail());
+        assertNotNull(inputNotificacionActual.getCelular());
+        assertEquals(nombreNotificacion, inputNotificacionActual.getNombreNotificacion());
     }
 
     @Test
     public void testEnviarNotificacionVehiculoNoDisponibleSoloEmail() {
         nombreNotificacion = VEHICULO_NO_DISPONIBLE;
 
-        Notificacion notificacionActual = notificacionService.enviarNotificacion(comprador, vehiculo, 0,
+        InputNotificacion inputNotificacionActual = notificacionService.enviarNotificacion(comprador, vehiculo, 0,
                 0, nombreNotificacion);
 
-        assertNotNull(notificacionActual.getEmail());
-        assertEquals(nombreNotificacion, notificacionActual.getNombreNotificacion());
+        assertNotNull(inputNotificacionActual.getEmail());
+        assertEquals(nombreNotificacion, inputNotificacionActual.getNombreNotificacion());
     }
 
     @Test(expected = DatoInvalidoException.class)

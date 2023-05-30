@@ -11,8 +11,7 @@ public class Usuario {
     private String email;
     private String celular;
     private boolean aceptaNotificacionSms;
-    private List<NombreNotificacion> unsuscribcionesEmail;
-    private List<NombreNotificacion> unsuscribcionesSms;
+    private List<Notificacion> listaUnsuscribciones;
 
     public Usuario() {
     }
@@ -92,20 +91,12 @@ public class Usuario {
         this.tipoUsuario = tipoUsuario;
     }
 
-    public List<NombreNotificacion> getUnsuscripcionesEmail() {
-        return unsuscribcionesEmail;
+    public List<Notificacion> getListaUnsuscribciones() {
+        return listaUnsuscribciones;
     }
 
-    public void setUnsuscribcionesEmail(List<NombreNotificacion> unsuscribcionesEmail) {
-        this.unsuscribcionesEmail = unsuscribcionesEmail;
-    }
-
-    public List<NombreNotificacion> getUnsuscripcionesSms() {
-        return unsuscribcionesSms;
-    }
-
-    public void setUnsuscribcionesSms(List<NombreNotificacion> unsuscribcionesSms) {
-        this.unsuscribcionesSms = unsuscribcionesSms;
+    public void setListaUnsuscribciones(List<Notificacion> listaUnsuscribciones) {
+        this.listaUnsuscribciones = listaUnsuscribciones;
     }
 
     @Override
@@ -118,9 +109,9 @@ public class Usuario {
                 ", tipoUsuario=" + tipoUsuario +
                 ", email='" + email + '\'' +
                 ", celular='" + celular + '\'' +
-                ", aceptaNotificacionSms=" + aceptaNotificacionSms + '\'' +
-                ", unsuscripcionesSms=" + unsuscribcionesSms + '\'' +
-                ", unsuscripcionesEmail=" + unsuscribcionesEmail +
+                ", aceptaNotificacionSms=" + aceptaNotificacionSms +
+                ", ListaUnsuscribciones=" + listaUnsuscribciones +
                 '}';
     }
 }
+

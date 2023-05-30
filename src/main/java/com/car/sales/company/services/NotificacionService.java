@@ -1,16 +1,15 @@
 package com.car.sales.company.services;
 
 import com.car.sales.company.exceptions.DatoInvalidoException;
-import com.car.sales.company.models.NombreNotificacion;
-import com.car.sales.company.models.Notificacion;
-import com.car.sales.company.models.Producto;
-import com.car.sales.company.models.Usuario;
+import com.car.sales.company.models.*;
 
 import java.util.Arrays;
 import java.util.List;
 
 import static com.car.sales.company.models.NombreNotificacion.*;
+import static com.car.sales.company.models.TipoNotificacion.*;
 import static com.car.sales.company.models.TipoUsuario.COMPRADOR;
+import static com.car.sales.company.models.TipoUsuario.VENDEDOR;
 
 public class NotificacionService {
     private UsuarioService usuarioService;
@@ -18,41 +17,42 @@ public class NotificacionService {
     public NotificacionService(UsuarioService usuarioService) {
         this.usuarioService = usuarioService;
     }
+    Notificacion notificacion1 = new Notificacion(COMPRADOR_PRIMERA_OFERTA,AMBOS,VENDEDOR);
+    Notificacion notificacion2 = new Notificacion(COMPRADOR_ACEPTA_OFERTA,AMBOS,VENDEDOR);
+    Notificacion notificacion3 = new Notificacion(COMPRADOR_RETIRA_OFERTA,EMAIL,VENDEDOR);
+    Notificacion notificacion4 = new Notificacion(VEHICULO_EXPIRADO,EMAIL,VENDEDOR);
+    Notificacion notificacion5 = new Notificacion(COMPRADOR_NUEVA_OFERTA,EMAIL,VENDEDOR);
+    Notificacion notificacion6 = new Notificacion(NUEVO_VEHICULO_EN_VENTA,AMBOS,COMPRADOR);
+    Notificacion notificacion7 = new Notificacion(VENDEDOR_ACEPTA_OFERTA,AMBOS,COMPRADOR);
+    Notificacion notificacion8 = new Notificacion(VENDEDOR_CONTRAOFERTA,EMAIL,COMPRADOR);
+    Notificacion notificacion9 = new Notificacion(VENDEDOR_DECLINA_OFERTA,EMAIL,COMPRADOR);
+    Notificacion notificacion10 = new Notificacion(VEHICULO_NO_DISPONIBLE,EMAIL,COMPRADOR);
 
-    public static final List<NombreNotificacion> NOTIFICACIONES_SMS_VENDEDOR = Arrays.asList(COMPRADOR_PRIMERA_OFERTA,
-            COMPRADOR_ACEPTA_OFERTA);
+    public  final List<Notificacion> NOTIFICACIONES_LIST = Arrays.asList(notificacion1, notificacion2, notificacion3,
+            notificacion4, notificacion5,notificacion6,notificacion7,notificacion8,notificacion9,notificacion10);
 
-    public static final List<NombreNotificacion> NOTIFICACIONES_SMS_COMPRADOR = Arrays.asList(NUEVO_VEHICULO_EN_VENTA,
-            VENDEDOR_ACEPTA_OFERTA);
-
-    public static final List<NombreNotificacion> NOTIFICACIONES_EMAIL_VENDEDOR = Arrays.asList(COMPRADOR_PRIMERA_OFERTA,
-            COMPRADOR_ACEPTA_OFERTA, COMPRADOR_RETIRA_OFERTA, VEHICULO_EXPIRADO, COMPRADOR_NUEVA_OFERTA);
-
-    public static final List<NombreNotificacion> NOTIFICACIONES_EMAIL_COMPRADOR = Arrays.asList(NUEVO_VEHICULO_EN_VENTA,
-            VENDEDOR_CONTRAOFERTA, VENDEDOR_ACEPTA_OFERTA, VENDEDOR_DECLINA_OFERTA, VEHICULO_NO_DISPONIBLE);
-
-    public Notificacion enviarNotificacion(Usuario usuario, Producto producto, double montoOferta, double montoContraOferta,
-                                           NombreNotificacion nombreNotificacion) {
-        Notificacion notificacion = new Notificacion(nombreNotificacion, producto, montoOferta, montoContraOferta, null, null);
+    public InputNotificacion enviarNotificacion(Usuario usuario, Producto producto, double montoOferta, double montoContraOferta,
+                                                NombreNotificacion nombreNotificacion) {
+        InputNotificacion inputNotificacion = new InputNotificacion(nombreNotificacion, producto, montoOferta, montoContraOferta, null, null);
         if (nombreNotificacion == null) {
             throw new DatoInvalidoException("Nombre de notificacion invalido");
         }
         if (NOTIFICACIONES_SMS_VENDEDOR.contains(nombreNotificacion) || NOTIFICACIONES_SMS_COMPRADOR.contains(nombreNotificacion)) {
             if (usuario.isAceptaNotificacionSms() && !usuario.getUnsuscripcionesSms().contains(nombreNotificacion)) {
-                notificacion.setCelular(usuario.getCelular());
+                inputNotificacion.setCelular(usuario.getCelular());
             }
         }
         if (!usuario.getUnsuscripcionesEmail().contains(nombreNotificacion)) {
-            notificacion.setEmail(usuario.getEmail());
+            inputNotificacion.setEmail(usuario.getEmail());
         }
-        if (notificacion.getEmail() == null && notificacion.getCelular() == null) {
+        if (inputNotificacion.getEmail() == null && inputNotificacion.getCelular() == null) {
             throw new DatoInvalidoException("El usuario no esta suscrito a la notificacion ingresada");
         }
-        enviar(notificacion);
-        return notificacion;
+        enviar(inputNotificacion);
+        return inputNotificacion;
     }
 
-    public void enviar(Notificacion notificacion) {
+    public void enviar(InputNotificacion inputNotificacion) {
 
     }
 

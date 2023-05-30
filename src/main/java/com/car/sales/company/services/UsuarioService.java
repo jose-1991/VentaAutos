@@ -2,10 +2,7 @@ package com.car.sales.company.services;
 
 import com.car.sales.company.dao.UsuarioDAO;
 import com.car.sales.company.exceptions.DatoInvalidoException;
-import com.car.sales.company.models.Accion;
-import com.car.sales.company.models.NombreNotificacion;
-import com.car.sales.company.models.TipoNotificacion;
-import com.car.sales.company.models.Usuario;
+import com.car.sales.company.models.*;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -50,17 +47,16 @@ public class UsuarioService {
 
         validarIdentificacion(usuario.getIdentificacion(), validarString(usuario.getTipoIdentificacion()));
         validarEmail(usuario.getEmail());
-        usuario.setUnsuscribcionesEmail(new ArrayList<>());
+        usuario.setListaUnsuscribciones(new ArrayList<>());
         validarTipoUsuario(usuario.getTipoUsuario());
         if (validarCelular(usuario.getCelular()) != null) {
             usuario.setAceptaNotificacionSms(true);
-            usuario.setUnsuscribcionesSms(new ArrayList<>());
             if (usuario.getTipoUsuario().equals(VENDEDOR)) {
-                usuario.getUnsuscripcionesSms().add(COMPRADOR_PRIMERA_OFERTA);
-                usuario.getUnsuscripcionesSms().add(COMPRADOR_ACEPTA_OFERTA);
+                usuario.getListaUnsuscribciones().add(new Notificacion(COMPRADOR_PRIMERA_OFERTA, SMS, VENDEDOR));
+                usuario.getListaUnsuscribciones().add(new Notificacion(COMPRADOR_ACEPTA_OFERTA, SMS, VENDEDOR));
             } else {
-                usuario.getUnsuscripcionesSms().add(NUEVO_VEHICULO_EN_VENTA);
-                usuario.getUnsuscripcionesSms().add(VENDEDOR_ACEPTA_OFERTA);
+                usuario.getListaUnsuscribciones().add(new Notificacion(NUEVO_VEHICULO_EN_VENTA, SMS, COMPRADOR));
+                usuario.getListaUnsuscribciones().add(new Notificacion(VENDEDOR_ACEPTA_OFERTA, SMS, COMPRADOR));
             }
         } else {
             usuario.setCelular(null);
@@ -78,10 +74,11 @@ public class UsuarioService {
         return usuarioDAO.modificarUsuario(identificacion, validarCelular(celular));
     }
 
-    public Usuario interaccionSuscripciones(Usuario usuario, NombreNotificacion nombreNotificacion, Accion accion, TipoNotificacion tipoNotificacion) {
+    public Usuario interaccionSuscripciones(Usuario usuario, Notificacion notificacion , Accion accion,) {
         // TODO: 30/5/2023  crear objeto notificacion
         switch (accion) {
             case SUSCRIBIR:
+                usuarioDAO.suscribirNotificacion(usuario.getIdentificacion(), notificacion);
             case UNSUSCRIBIR:
                 suscripcionOrUnsuscripcionNotificacion(usuario, nombreNotificacion, accion, tipoNotificacion);
                 break;
@@ -106,32 +103,6 @@ public class UsuarioService {
                 break;
         }
         return usuario;
-    }
-
-    private void suscripcionOrUnsuscripcionNotificacion1(Usuario usuario, NombreNotificacion nombreNotificacion,
-                                                         Accion accion, TipoNotificacion tipoNotificacion) {
-
-        switch (tipoNotificacion) {
-            case EMAIL:
-                if (accion.equals(SUSCRIBIR)) {
-                    usuario.getUnsuscripcionesEmail().remove(nombreNotificacion);
-//                    usuarioDAO.suscribirNotificacion(usuario.getIdentificacion(),nombreNotificacion);
-                } else {
-                    usuario.getUnsuscripcionesEmail().add(nombreNotificacion);
-                }
-                break;
-            case SMS:
-                if (usuario.isAceptaNotificacionSms() && NOTIFICACIONES_SMS_VENDEDOR.contains(nombreNotificacion)) {
-                    if (accion.equals(SUSCRIBIR)) {
-                        usuario.getUnsuscripcionesSms().remove(nombreNotificacion);
-                    } else {
-                        usuario.getUnsuscripcionesSms().add(nombreNotificacion);
-                    }
-                } else {
-                    throw new DatoInvalidoException("La notificacion ingresada no es valida");
-                }
-                break;
-        }
     }
 
     private void suscripcionOrUnsuscripcionNotificacion(Usuario usuario, NombreNotificacion nombreNotificacion,
