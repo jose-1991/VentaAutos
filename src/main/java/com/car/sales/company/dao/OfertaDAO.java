@@ -46,6 +46,7 @@ public class OfertaDAO {
     }
 
     public void actualizarOferta(UUID id, String identificacion, Accion accion) {
+        // TODO: 30/5/2023 optimizar queries, revisar String.format
         switch (accion) {
             case ACEPTAR_OFERTA:
                 query = "UPDATE comercio.oferta SET inactivo = ? WHERE (usuario_id <> ? AND publicacion_id = ?)";
@@ -54,6 +55,7 @@ public class OfertaDAO {
                 query = "UPDATE comercio.oferta SET inactivo = ? WHERE usuario_id = ? AND publicacion_id = ?";
                 break;
         }
+
         try (PreparedStatement statement = obtenerConexion().prepareStatement(query)) {
             statement.setBoolean(1, true);
             statement.setString(2, identificacion);

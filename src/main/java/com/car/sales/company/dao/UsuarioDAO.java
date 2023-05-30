@@ -112,6 +112,7 @@ public class UsuarioDAO {
                         "tipo =?";
                 break;
             case UNSUSCRIBIR:
+                // TODO: 30/5/2023 no repetir queries
                 query = "INSERT INTO comercio.unsuscripcion VALUES(?,?,?)";
                 break;
         }
@@ -125,6 +126,7 @@ public class UsuarioDAO {
         }
     }
 
+    // TODO: 30/5/2023 cambiar nombre metodo
     public static Usuario obtenerUsuario(ResultSet resultSet) throws SQLException {
         Usuario usuario = new Usuario();
         usuario.setUnsuscribcionesSms(new ArrayList<>());
@@ -161,6 +163,7 @@ public class UsuarioDAO {
         try (PreparedStatement statement = obtenerConexion().prepareStatement(query)) {
             statement.setString(1, usuario.getIdentificacion());
             statement.executeUpdate();
+
 
         } catch (SQLException e) {
             e.printStackTrace();

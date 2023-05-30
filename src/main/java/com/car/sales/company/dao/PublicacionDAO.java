@@ -54,6 +54,7 @@ public class PublicacionDAO {
     }
 
     public void rePublicarProducto(UUID id, double precio) {
+        // TODO: 30/5/2023 update fecha
         query = "UPDATE comercio.publicacion SET esta_disponible_web = ?, precio = ? WHERE id = '" + id + "'";
 
         try (PreparedStatement statement = obtenerConexion().prepareStatement(query)) {
@@ -66,8 +67,9 @@ public class PublicacionDAO {
 
     }
 
-    public List<Publicacion> obtenerPublicacionesDeBaja() {
+    public List<Publicacion> obtenerPublicacionesParaDarDeBaja() {
         List<Publicacion> publicacionesDeBaja = new ArrayList<>();
+        // TODO: 30/5/2023 update query para que retorne lo necesario
         query = "SELECT * FROM publicacion AS p INNER JOIN usuario AS u ON p.usuario_id = u.identificacion INNER JOIN" +
                 " producto ON" +
                 " p.producto_id = producto.vin";
@@ -86,7 +88,6 @@ public class PublicacionDAO {
                     Vehiculo vehiculo = obtenerVehiculo(resultSet);
                     publicacion.setVendedor(vendedor);
                     publicacion.setProducto(vehiculo);
-                    inhabilitarPublicacion(publicacionId);
                     publicacionesDeBaja.add(publicacion);
                 }
             }
@@ -96,8 +97,9 @@ public class PublicacionDAO {
         return publicacionesDeBaja;
     }
 
-    public void inhabilitarPublicacion(UUID publicacionId) {
-        query = "UPDATE comercio.publicacion SET esta_disponible_web = ? WHERE id = '" + publicacionId + "'";
+    public void inhabilitarPublicacion(List<Publicacion> listaPublicaciones) {
+        // TODO: 30/5/2023 actualizar el query
+        query = "UPDATE comercio.publicacion SET esta_disponible_web = ? WHERE id = '" + listaPublicaciones + "'";
 
         try {
             PreparedStatement statement = obtenerConexion().prepareStatement(query);
@@ -108,6 +110,8 @@ public class PublicacionDAO {
         }
     }
 
+    // TODO: 30/5/2023 cambiar nombre de metodos
+
     private Publicacion obtenerPublicacion(ResultSet resultSet) throws SQLException {
         Publicacion publicacion = new Publicacion();
         publicacion.setId(UUID.fromString(resultSet.getString("id")));
@@ -117,6 +121,7 @@ public class PublicacionDAO {
         return publicacion;
     }
 
+    // TODO: 30/5/2023 cambiar nombre de metodos
     private Vehiculo obtenerVehiculo(ResultSet resultSet) throws SQLException {
         Vehiculo vehiculo = new Vehiculo();
         vehiculo.setVin(resultSet.getString("vin"));

@@ -32,6 +32,7 @@ public class PublicacionService {
         this.usuarioDAO = usuarioDAO;
     }
 
+    // TODO: 30/5/2023 metodo para crear vehiculo random, o modificar metodo
     public Publicacion publicarProducto(Usuario vendedor, Producto producto, double precio) {
         Publicacion publicacion = new Publicacion();
         if (vendedor != null && vendedor.getTipoUsuario().equals(VENDEDOR) && producto != null) {
@@ -56,11 +57,13 @@ public class PublicacionService {
     }
 
     public int darDeBajaPublicaciones() {
-        List<Publicacion> listaPublicacionesDeBaja = publicacionDAO.obtenerPublicacionesDeBaja();
+        List<Publicacion> listaPublicacionesDeBaja = publicacionDAO.obtenerPublicacionesParaDarDeBaja();
+        // TODO: 30/5/2023 optimizar para que solo llame a la DB una sola vez
         for (Publicacion publicacion : listaPublicacionesDeBaja) {
             notificacionService.enviarNotificacion(publicacion.getVendedor(), publicacion.getProducto(), 0, 0,
                     VEHICULO_EXPIRADO);
         }
+        publicacionDAO.inhabilitarPublicacion(listaPublicacionesDeBaja);
         return listaPublicacionesDeBaja.size();
     }
 

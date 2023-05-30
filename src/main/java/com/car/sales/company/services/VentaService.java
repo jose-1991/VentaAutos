@@ -6,6 +6,7 @@ import com.car.sales.company.exceptions.DatoInvalidoException;
 import com.car.sales.company.models.*;
 
 import java.time.LocalDateTime;
+import java.util.Collections;
 import java.util.List;
 
 import static com.car.sales.company.helper.ValidacionHelper.validarPositivoDecimal;
@@ -89,7 +90,7 @@ public class VentaService {
                 mejorOferta.getMontoOferta(), mejorOferta.getMontoContraOferta(), nombreNotificacion);
         notificarCompradoresVehiculoVendido(publicacion, mejorOferta);
         publicacion.setEstaDisponibleEnLaWeb(false);
-        publicacionDAO.inhabilitarPublicacion(publicacion.getId());
+        publicacionDAO.inhabilitarPublicacion(Collections.singletonList(publicacion));
         ofertaDAO.actualizarOferta(publicacion.getId(), usuario.getIdentificacion(), ACEPTAR_OFERTA);
 
         return publicacion;

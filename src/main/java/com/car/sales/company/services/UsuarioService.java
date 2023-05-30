@@ -79,6 +79,7 @@ public class UsuarioService {
     }
 
     public Usuario interaccionSuscripciones(Usuario usuario, NombreNotificacion nombreNotificacion, Accion accion, TipoNotificacion tipoNotificacion) {
+        // TODO: 30/5/2023  crear objeto notificacion
         switch (accion) {
             case SUSCRIBIR:
             case UNSUSCRIBIR:
@@ -190,9 +191,7 @@ public class UsuarioService {
         throw new RuntimeException(identificacion + " -> identificacion invalida");
     }
 
-    //    nombreNotificacion = llave  Integer = contador
-//    si notificacion existe -> contador++
-//    sino nuevo registro y devolver la lista de llaves
+//  ignorar
     public int guardarNotificaciones(NombreNotificacion nombreNotificacion) {
         Map<NombreNotificacion, Integer> mapa = new HashMap<>();
 

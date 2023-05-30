@@ -62,7 +62,7 @@ public class NotificacionService {
             enviarNotificacion(usuario, producto, 0, 0, nombreNotificacion);
         }
     }
-
+// ignorar
     public int notificarSinExcederLimite(List<Usuario> usuarios, Producto producto,
                                          NombreNotificacion nombreNotificacion) {
         int notificacionesEnviadas = 0;
