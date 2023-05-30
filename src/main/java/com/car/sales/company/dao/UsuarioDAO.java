@@ -168,7 +168,7 @@ public class UsuarioDAO {
 
     }
 
-    public void unsuscribirTodo(String identificacion, List<NombreNotificacion> listaNotificacionesEmail,
+    public void unsuscribirTodo(Usuario usuario, List<NombreNotificacion> listaNotificacionesEmail,
                                 List<NombreNotificacion> listaNotificacionesSms) {
         query = "INSERT INTO comercio.unsuscripcion VALUES(?,?,?)";
 
@@ -177,17 +177,21 @@ public class UsuarioDAO {
             obtenerConexion().setAutoCommit(false);
 
             for (NombreNotificacion nombreNotificacion : listaNotificacionesEmail) {
-                statement.setString(1, identificacion);
-                statement.setString(2, nombreNotificacion.toString());
-                statement.setString(3, EMAIL.toString());
-                statement.addBatch();
+                if (!usuario.getUnsuscripcionesEmail().contains(nombreNotificacion)) {
+                    statement.setString(1, usuario.getIdentificacion());
+                    statement.setString(2, nombreNotificacion.toString());
+                    statement.setString(3, EMAIL.toString());
+                    statement.addBatch();
+                }
             }
             if (listaNotificacionesSms != null) {
                 for (NombreNotificacion nombreNotificacion : listaNotificacionesSms) {
-                    statement.setString(1, identificacion);
-                    statement.setString(2, nombreNotificacion.toString());
-                    statement.setString(3, SMS.toString());
-                    statement.addBatch();
+                    if (!usuario.getUnsuscripcionesSms().contains(nombreNotificacion)) {
+                        statement.setString(1, usuario.getIdentificacion());
+                        statement.setString(2, nombreNotificacion.toString());
+                        statement.setString(3, SMS.toString());
+                        statement.addBatch();
+                    }
                 }
             }
             statement.executeBatch();

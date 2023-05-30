@@ -1,6 +1,5 @@
 package com.car.sales.company.services;
 
-import com.car.sales.company.dao.NotificacionDAO;
 import com.car.sales.company.exceptions.DatoInvalidoException;
 import com.car.sales.company.models.NombreNotificacion;
 import com.car.sales.company.models.Notificacion;
@@ -15,19 +14,20 @@ import static com.car.sales.company.models.TipoUsuario.COMPRADOR;
 
 public class NotificacionService {
     private UsuarioService usuarioService;
-    private NotificacionDAO notificacionDAO;
 
-    public NotificacionService(UsuarioService usuarioService, NotificacionDAO notificacionDAO) {
+    public NotificacionService(UsuarioService usuarioService) {
         this.usuarioService = usuarioService;
-        this.notificacionDAO = notificacionDAO;
     }
 
     public static final List<NombreNotificacion> NOTIFICACIONES_SMS_VENDEDOR = Arrays.asList(COMPRADOR_PRIMERA_OFERTA,
             COMPRADOR_ACEPTA_OFERTA);
+
     public static final List<NombreNotificacion> NOTIFICACIONES_SMS_COMPRADOR = Arrays.asList(NUEVO_VEHICULO_EN_VENTA,
             VENDEDOR_ACEPTA_OFERTA);
+
     public static final List<NombreNotificacion> NOTIFICACIONES_EMAIL_VENDEDOR = Arrays.asList(COMPRADOR_PRIMERA_OFERTA,
             COMPRADOR_ACEPTA_OFERTA, COMPRADOR_RETIRA_OFERTA, VEHICULO_EXPIRADO, COMPRADOR_NUEVA_OFERTA);
+
     public static final List<NombreNotificacion> NOTIFICACIONES_EMAIL_COMPRADOR = Arrays.asList(NUEVO_VEHICULO_EN_VENTA,
             VENDEDOR_CONTRAOFERTA, VENDEDOR_ACEPTA_OFERTA, VENDEDOR_DECLINA_OFERTA, VEHICULO_NO_DISPONIBLE);
 
@@ -48,7 +48,6 @@ public class NotificacionService {
         if (notificacion.getEmail() == null && notificacion.getCelular() == null) {
             throw new DatoInvalidoException("El usuario no esta suscrito a la notificacion ingresada");
         }
-        notificacionDAO.registrarNotificacionEnDb(notificacion);
         enviar(notificacion);
         return notificacion;
     }

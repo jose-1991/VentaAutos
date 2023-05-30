@@ -101,7 +101,7 @@ public class UsuarioService {
                         listaNotificacionesSms = NOTIFICACIONES_SMS_VENDEDOR;
                     }
                 }
-                usuarioDAO.unsuscribirTodo(usuario.getIdentificacion(), listaNotificacionesEmail, listaNotificacionesSms);
+                usuarioDAO.unsuscribirTodo(usuario, listaNotificacionesEmail, listaNotificacionesSms);
                 break;
         }
         return usuario;

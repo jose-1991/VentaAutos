@@ -1,19 +1,21 @@
 package com.car.sales.company.models;
 
-import java.time.LocalDate;
 import java.time.LocalDateTime;
 
 public class Oferta {
+
     private double montoOferta;
     private double montoContraOferta;
     private Usuario comprador;
     private LocalDateTime fechaOferta;
     private boolean inactivo;
 
-    public Oferta(double montoOferta, double montoContraOferta, Usuario comprador, LocalDateTime fechaOferta) {
+    public Oferta(Usuario comprador, double montoOferta, double montoContraOferta,
+                  LocalDateTime fechaOferta) {
+
+        this.comprador = comprador;
         this.montoOferta = montoOferta;
         this.montoContraOferta = montoContraOferta;
-        this.comprador = comprador;
         this.fechaOferta = fechaOferta;
     }
 

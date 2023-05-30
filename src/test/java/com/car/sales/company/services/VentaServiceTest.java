@@ -63,9 +63,9 @@ public class VentaServiceTest {
 
         vehiculo = new Vehiculo("1HGBH41JXMN109716", "Toyota", "Scion", 2020);
 
-        oferta = new Oferta(17000, 0, comprador, LocalDateTime.now());
-        oferta2 = new Oferta(14000, 0, comprador2, LocalDateTime.now());
-        oferta3 = new Oferta(18600, 0, comprador3, LocalDateTime.now());
+//        oferta = new Oferta(17000, 0, comprador, LocalDateTime.now());
+//        oferta2 = new Oferta(14000, 0, comprador2, LocalDateTime.now());
+//        oferta3 = new Oferta(18600, 0, comprador3, LocalDateTime.now());
 
         publicacion = new Publicacion();
         publicacion.setVendedor(vendedor);

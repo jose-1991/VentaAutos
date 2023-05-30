@@ -55,7 +55,6 @@ public class PublicacionService {
         throw new DatoInvalidoException("El usuario debe ser de tipo vendedor");
     }
 
-
     public int darDeBajaPublicaciones() {
         List<Publicacion> listaPublicacionesDeBaja = publicacionDAO.obtenerPublicacionesDeBaja();
         for (Publicacion publicacion : listaPublicacionesDeBaja) {

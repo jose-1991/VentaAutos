@@ -60,7 +60,7 @@ public class NotificacionServiceTest {
 
         vehiculo = new Vehiculo("1HGBH41JXMN109716", "Toyota", "Scion", 2020);
 
-        oferta = new Oferta(14000, 14500, comprador, LocalDateTime.now());
+//        oferta = new Oferta(14000, 14500, comprador, LocalDateTime.now());
 
         listaUsuarios = Arrays.asList(comprador, comprador2, comprador3, vendedor);
     }

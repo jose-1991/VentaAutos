@@ -1,7 +1,6 @@
 package com.car.sales.company.dao;
 
 import com.car.sales.company.models.Publicacion;
-import com.car.sales.company.models.TipoUsuario;
 import com.car.sales.company.models.Usuario;
 import com.car.sales.company.models.Vehiculo;
 
@@ -73,7 +72,7 @@ public class PublicacionDAO {
                 " producto ON" +
                 " p.producto_id = producto.vin";
         try (Statement statement = obtenerConexion().createStatement();
-            ResultSet resultSet = statement.executeQuery(query)){
+             ResultSet resultSet = statement.executeQuery(query)) {
             UUID publicacionId;
             LocalDate fechaPublicacion;
             while (resultSet.next()) {
@@ -97,12 +96,16 @@ public class PublicacionDAO {
         return publicacionesDeBaja;
     }
 
-    private void inhabilitarPublicacion(UUID publicacionId) throws SQLException {
+    public void inhabilitarPublicacion(UUID publicacionId) {
         query = "UPDATE comercio.publicacion SET esta_disponible_web = ? WHERE id = '" + publicacionId + "'";
 
-        PreparedStatement statement = obtenerConexion().prepareStatement(query);
+        try {
+            PreparedStatement statement = obtenerConexion().prepareStatement(query);
             statement.setBoolean(1, false);
             statement.executeUpdate();
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
     }
 
     private Publicacion obtenerPublicacion(ResultSet resultSet) throws SQLException {
@@ -123,8 +126,6 @@ public class PublicacionDAO {
         vehiculo.setAnio(resultSet.getInt("anio"));
         return vehiculo;
     }
-
-
 
 
     private int obtenerNumeroOfertas(UUID publicacionId) throws SQLException {
