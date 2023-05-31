@@ -8,8 +8,11 @@ import java.sql.PreparedStatement;
 import java.sql.SQLException;
 import java.util.UUID;
 
+import static com.car.sales.company.models.Accion.RETIRAR_OFERTA;
+
 public class OfertaDAO {
 
+    private final String UPDATE_OFERTA = "UPDATE comercio.oferta SET ";
     String query;
 
     private Connection obtenerConexion() throws SQLException {
@@ -35,7 +38,7 @@ public class OfertaDAO {
     }
 
     public void interaccionContraOferta(String identificacion, UUID id, double nuevoMonto) {
-        query = "UPDATE comercio.oferta SET monto_contra_oferta = ? WHERE publicacion_id = '" + id + "' AND usuario_id = "
+        query = UPDATE_OFERTA + "monto_contra_oferta = ? WHERE publicacion_id = '" + id + "' AND usuario_id = "
                 + identificacion;
         try (PreparedStatement statement = obtenerConexion().prepareStatement(query)) {
             statement.setDouble(1, nuevoMonto);
@@ -47,13 +50,9 @@ public class OfertaDAO {
 
     public void actualizarOferta(UUID id, String identificacion, Accion accion) {
         // TODO: 30/5/2023 optimizar queries, revisar String.format
-        switch (accion) {
-            case ACEPTAR_OFERTA:
-                query = "UPDATE comercio.oferta SET inactivo = ? WHERE (usuario_id <> ? AND publicacion_id = ?)";
-                break;
-            case RETIRAR_OFERTA:
-                query = "UPDATE comercio.oferta SET inactivo = ? WHERE usuario_id = ? AND publicacion_id = ?";
-                break;
+        query = UPDATE_OFERTA + "inactivo = ? WHERE (usuario_id <> ? AND publicacion_id = ?)";
+        if (accion.equals(RETIRAR_OFERTA)) {
+            query = query.replace("<>", "=");
         }
 
         try (PreparedStatement statement = obtenerConexion().prepareStatement(query)) {

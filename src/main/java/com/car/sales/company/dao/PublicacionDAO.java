@@ -54,12 +54,13 @@ public class PublicacionDAO {
     }
 
     public void rePublicarProducto(UUID id, double precio) {
-        // TODO: 30/5/2023 update fecha
-        query = "UPDATE comercio.publicacion SET esta_disponible_web = ?, precio = ? WHERE id = '" + id + "'";
+        // TODO: 30/5/2023 update fecha  /hecho
+        query = "UPDATE comercio.publicacion SET esta_disponible_web = ?, precio = ?,fecha = ? WHERE id = '" + id + "'";
 
         try (PreparedStatement statement = obtenerConexion().prepareStatement(query)) {
             statement.setBoolean(1, true);
             statement.setDouble(2, precio);
+            statement.setDate(3, Date.valueOf(LocalDate.now()));
             statement.executeUpdate();
         } catch (SQLException e) {
             e.printStackTrace();
@@ -97,21 +98,28 @@ public class PublicacionDAO {
         return publicacionesDeBaja;
     }
 
-    public void inhabilitarPublicacion(List<Publicacion> listaPublicaciones) {
+    public void darDeBajaPublicacion(List<Publicacion> listaPublicaciones) {
         // TODO: 30/5/2023 actualizar el query
-        query = "UPDATE comercio.publicacion SET esta_disponible_web = ? WHERE id = '" + listaPublicaciones + "'";
+        query = "UPDATE comercio.publicacion SET esta_disponible_web = ? WHERE id = ?";
 
         try {
             PreparedStatement statement = obtenerConexion().prepareStatement(query);
-            statement.setBoolean(1, false);
-            statement.executeUpdate();
+            obtenerConexion().setAutoCommit(false);
+
+            for (Publicacion publicacion: listaPublicaciones){
+                statement.setBoolean(1, false);
+                statement.setString(2, publicacion.getId().toString());
+                statement.addBatch();
+            }
+            statement.executeBatch();
+            obtenerConexion().commit();
+            statement.close();
         } catch (SQLException e) {
             e.printStackTrace();
         }
     }
 
     // TODO: 30/5/2023 cambiar nombre de metodos
-
     private Publicacion obtenerPublicacion(ResultSet resultSet) throws SQLException {
         Publicacion publicacion = new Publicacion();
         publicacion.setId(UUID.fromString(resultSet.getString("id")));
@@ -132,7 +140,6 @@ public class PublicacionDAO {
         return vehiculo;
     }
 
-
     private int obtenerNumeroOfertas(UUID publicacionId) throws SQLException {
         String queryOferta = "SELECT count(*) FROM comercio.oferta WHERE publicacion_id = '" + publicacionId + "'";
         int numeroOfertas = 0;
@@ -142,7 +149,6 @@ public class PublicacionDAO {
             numeroOfertas = resultSetOferta.getInt(1);
         }
         return numeroOfertas;
-
     }
 
     private boolean tieneMaximoDiasSinOfertas(LocalDate fechaPublicacion) {

@@ -13,9 +13,9 @@ import java.util.ArrayList;
 import java.util.List;
 
 import static com.car.sales.company.helper.ValidacionHelper.validarVehiculo;
-import static com.car.sales.company.models.NombreNotificacion.NUEVO_VEHICULO_EN_VENTA;
-import static com.car.sales.company.models.NombreNotificacion.VEHICULO_EXPIRADO;
 import static com.car.sales.company.models.TipoUsuario.VENDEDOR;
+import static com.car.sales.company.services.NotificacionService.N_VEHICULO_VENTA;
+import static com.car.sales.company.services.NotificacionService.V_EXPIRADO;
 
 public class PublicacionService {
 
@@ -49,7 +49,7 @@ public class PublicacionService {
             publicacionDAO.registrarPublicacionProducto(publicacion);
             List<Usuario> listaCompradores = usuarioDAO.obtenerCompradores();
             if (!listaCompradores.isEmpty()) {
-                notificacionService.notificarTodosLosCompradores(listaCompradores, producto, NUEVO_VEHICULO_EN_VENTA);
+                notificacionService.notificarTodosLosCompradores(listaCompradores, producto, N_VEHICULO_VENTA);
             }
             return publicacion;
         }
@@ -61,9 +61,9 @@ public class PublicacionService {
         // TODO: 30/5/2023 optimizar para que solo llame a la DB una sola vez
         for (Publicacion publicacion : listaPublicacionesDeBaja) {
             notificacionService.enviarNotificacion(publicacion.getVendedor(), publicacion.getProducto(), 0, 0,
-                    VEHICULO_EXPIRADO);
+                    V_EXPIRADO);
         }
-        publicacionDAO.inhabilitarPublicacion(listaPublicacionesDeBaja);
+        publicacionDAO.darDeBajaPublicacion(listaPublicacionesDeBaja);
         return listaPublicacionesDeBaja.size();
     }
 
@@ -71,7 +71,7 @@ public class PublicacionService {
         if (nuevoPrecioProducto < publicacion.getPrecio()) {
             publicacionDAO.rePublicarProducto(publicacion.getId(), nuevoPrecioProducto);
             notificacionService.notificarTodosLosCompradores(usuarioDAO.obtenerCompradores(), publicacion.getProducto(),
-                    NUEVO_VEHICULO_EN_VENTA);
+                    N_VEHICULO_VENTA);
         } else {
             throw new DatoInvalidoException("el nuevo precio debe ser menor al precio actual");
         }

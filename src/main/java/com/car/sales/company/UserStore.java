@@ -25,8 +25,8 @@ public class UserStore {
         UsuarioService usuarioService = new UsuarioService(usuarioDAO);
         NotificacionService notificacionService = new NotificacionService(usuarioService);
         VentaService ventaService = new VentaService(notificacionService, ofertaDAO, publicacionDAO);
-        PublicacionService publicacionService = new PublicacionService(notificacionService,usuarioService,
-                publicacionDAO,usuarioDAO);
+        PublicacionService publicacionService = new PublicacionService(notificacionService, usuarioService,
+                publicacionDAO, usuarioDAO);
         Usuario usuario = new Usuario("Javier", "Rodriguez", "licencia", "45123984",
                 "javi.31_82@hotmail.com", VENDEDOR, "77426426");
         usuario.setAceptaNotificacionSms(true);
@@ -67,12 +67,16 @@ public class UserStore {
 //        publicacionDAO.registarPublicacionEnDb(publicacion);
 //        notificacionDAO.registrarNotificacionEnDb(notificacion);
 //        usuarioService.interaccionSuscripciones(usuario, COMPRADOR_PRIMERA_OFERTA, Accion.UNSUSCRIBIR_TODO, null);
-        publicacionService.darDeBajaPublicaciones();
+//        publicacionService.darDeBajaPublicaciones();
 //        ofertaDAO.agregarOferta(new Oferta(usuario1, 90,
 //                0, LocalDateTime.now()), UUID.fromString("c408b45e-2d67-44fd-85da-93a73ed644b3"));
 //        ofertaDAO.interaccionContraOferta("40123984", UUID.fromString("564847e8-187d-4783-90d0-d38708f949bb"), 80);
 //        Publicacion publicacion1 = ventaService.interactuar(publicacion,usuario1,Accion.CONTRA_OFERTAR,80);
 //        System.out.println(publicacion1.getOfertasCompradores().get(0).getMontoContraOferta());
 //        ofertaDAO.actualizarOferta(UUID.fromString("564847e8-187d-4783-90d0-d38708f949bb"), "40123984", Accion.RETIRAR_OFERTA);
+        String query = "UPDATE comercio.oferta SET inactivo = ? WHERE (usuario_id <> ? AND publicacion_id = ?)";
+
+        query = query.replace("<>", "=");
+        System.out.println(query);
     }
 }

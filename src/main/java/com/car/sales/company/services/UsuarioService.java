@@ -6,12 +6,10 @@ import com.car.sales.company.models.*;
 
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 
 import static com.car.sales.company.helper.ValidacionHelper.validarString;
 import static com.car.sales.company.helper.ValidacionHelper.validarTipoUsuario;
-import static com.car.sales.company.models.Accion.SUSCRIBIR;
 import static com.car.sales.company.models.NombreNotificacion.*;
 import static com.car.sales.company.models.TipoNotificacion.SMS;
 import static com.car.sales.company.models.TipoUsuario.COMPRADOR;
@@ -74,63 +72,30 @@ public class UsuarioService {
         return usuarioDAO.modificarUsuario(identificacion, validarCelular(celular));
     }
 
-    public Usuario interaccionSuscripciones(Usuario usuario, Notificacion notificacion , Accion accion,) {
+    public Usuario actualizarSuscripciones(Usuario usuario, Notificacion notificacion , Accion accion) {
         // TODO: 30/5/2023  crear objeto notificacion
+        if (!usuario.getTipoUsuario().equals(notificacion.getTipoUsuario())){
+            throw new DatoInvalidoException("La notificacion ingresada no es valida");
+        }
         switch (accion) {
             case SUSCRIBIR:
-                usuarioDAO.suscribirNotificacion(usuario.getIdentificacion(), notificacion);
+                if (usuario.getListaUnsuscribciones().contains(notificacion)) {
+                    usuarioDAO.suscribirNotificacion(usuario.getIdentificacion(), notificacion);
+                }
+                break;
             case UNSUSCRIBIR:
-                suscripcionOrUnsuscripcionNotificacion(usuario, nombreNotificacion, accion, tipoNotificacion);
+                if (!usuario.getListaUnsuscribciones().contains(notificacion)) {
+                    usuarioDAO.unsucribirNotificacion(usuario.getIdentificacion(), notificacion);
+                }
                 break;
             case SUSCRIBIR_TODO:
                 usuarioDAO.suscribirTodo(usuario);
                 break;
             case UNSUSCRIBIR_TODO:
-                List<NombreNotificacion> listaNotificacionesEmail;
-                List<NombreNotificacion> listaNotificacionesSms = null;
-                if (usuario.getTipoUsuario().equals(COMPRADOR)) {
-                    listaNotificacionesEmail = NOTIFICACIONES_EMAIL_COMPRADOR;
-                    if (usuario.isAceptaNotificacionSms()) {
-                        listaNotificacionesSms = NOTIFICACIONES_SMS_COMPRADOR;
-                    }
-                } else {
-                    listaNotificacionesEmail = NOTIFICACIONES_EMAIL_VENDEDOR;
-                    if (usuario.isAceptaNotificacionSms()) {
-                        listaNotificacionesSms = NOTIFICACIONES_SMS_VENDEDOR;
-                    }
-                }
-                usuarioDAO.unsuscribirTodo(usuario, listaNotificacionesEmail, listaNotificacionesSms);
+                usuarioDAO.unsuscribirTodo(usuario, NOTIFICACIONES_LIST);
                 break;
         }
         return usuario;
-    }
-
-    private void suscripcionOrUnsuscripcionNotificacion(Usuario usuario, NombreNotificacion nombreNotificacion,
-                                                        Accion accion, TipoNotificacion tipoNotificacion) {
-        switch (usuario.getTipoUsuario()) {
-            case COMPRADOR:
-                if (tipoNotificacion.equals(SMS)) {
-                    if (usuario.isAceptaNotificacionSms() && NOTIFICACIONES_SMS_COMPRADOR.contains(nombreNotificacion)) {
-                        usuarioDAO.actualizarSuscripcion(usuario.getIdentificacion(), nombreNotificacion, accion, tipoNotificacion);
-                    }
-                } else {
-                    if (NOTIFICACIONES_EMAIL_COMPRADOR.contains(nombreNotificacion)) {
-                        usuarioDAO.actualizarSuscripcion(usuario.getIdentificacion(), nombreNotificacion, accion, tipoNotificacion);
-                    }
-                }
-                break;
-            case VENDEDOR:
-                if (tipoNotificacion.equals(SMS)) {
-                    if (usuario.isAceptaNotificacionSms() && NOTIFICACIONES_SMS_VENDEDOR.contains(nombreNotificacion)) {
-                        usuarioDAO.actualizarSuscripcion(usuario.getIdentificacion(), nombreNotificacion, accion, tipoNotificacion);
-                    }
-                } else {
-                    if (NOTIFICACIONES_EMAIL_VENDEDOR.contains(nombreNotificacion)) {
-                        usuarioDAO.actualizarSuscripcion(usuario.getIdentificacion(), nombreNotificacion, accion, tipoNotificacion);
-                    }
-                }
-                break;
-        }
     }
 
     private void validarEmail(String email) {
@@ -160,19 +125,6 @@ public class UsuarioService {
             return;
         }
         throw new RuntimeException(identificacion + " -> identificacion invalida");
-    }
-
-//  ignorar
-    public int guardarNotificaciones(NombreNotificacion nombreNotificacion) {
-        Map<NombreNotificacion, Integer> mapa = new HashMap<>();
-
-        if (mapa.containsKey(nombreNotificacion)) {
-            mapa.put(nombreNotificacion, mapa.get(nombreNotificacion) + 1);
-        } else {
-            throw new IllegalArgumentException();
-        }
-        return mapa.get(nombreNotificacion);
-
     }
 }
 
