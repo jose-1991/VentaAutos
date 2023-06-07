@@ -1,5 +1,7 @@
 package com.car.sales.company.services;
 
+import com.car.sales.company.dao.OfertaDAO;
+import com.car.sales.company.dao.PublicacionDAO;
 import com.car.sales.company.exceptions.DatoInvalidoException;
 import com.car.sales.company.models.Oferta;
 import com.car.sales.company.models.Publicacion;
@@ -21,8 +23,7 @@ import static com.car.sales.company.models.Accion.*;
 import static com.car.sales.company.models.TipoUsuario.COMPRADOR;
 import static com.car.sales.company.models.TipoUsuario.VENDEDOR;
 import static org.junit.Assert.*;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.anyDouble;
+import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 
@@ -42,7 +43,11 @@ public class VentaServiceTest {
     private Publicacion publicacion;
 
     @Mock
-    private NotificacionService notificacionService;
+    private PublicacionDAO publicacionDaoMock;
+    @Mock
+    private OfertaDAO ofertaDaoMock;
+    @Mock
+    private NotificacionService notificacionServiceMock;
     @InjectMocks
     private VentaService ventaService;
 
@@ -63,9 +68,9 @@ public class VentaServiceTest {
 
         vehiculo = new Vehiculo("1HGBH41JXMN109716", "Toyota", "Scion", 2020);
 
-//        oferta = new Oferta(17000, 0, comprador, LocalDateTime.now());
-//        oferta2 = new Oferta(14000, 0, comprador2, LocalDateTime.now());
-//        oferta3 = new Oferta(18600, 0, comprador3, LocalDateTime.now());
+        oferta = new Oferta( comprador,17000, 0, LocalDateTime.now());
+        oferta2 = new Oferta(comprador2, 14000, 0,  LocalDateTime.now());
+        oferta3 = new Oferta(comprador3, 18600, 0,  LocalDateTime.now());
 
         publicacion = new Publicacion();
         publicacion.setVendedor(vendedor);
@@ -87,12 +92,19 @@ public class VentaServiceTest {
         Publicacion publicacionActual = ventaService.interactuar(publicacion, comprador, CONTRA_OFERTAR, montoContraOferta);
 
         assertEquals(montoContraOferta, publicacionActual.getOfertasCompradores().get(0).getMontoContraOferta(), 0.0);
-        verify(notificacionService).enviarNotificacion(any(), any(), anyDouble(), anyDouble(), any());
+        verify(ofertaDaoMock).interaccionContraOferta(anyString(),any(), anyDouble());
+        verify(notificacionServiceMock).enviarNotificacion(any(), any(), anyDouble(), anyDouble(), any());
     }
 
     @Test(expected = DatoInvalidoException.class)
     public void testInteractuarCaseContraOfertarBotaExceptionCuandoElUsuarioEsVendedor() {
-        montoContraOferta = 19000;
+
+        ventaService.interactuar(publicacion, vendedor, CONTRA_OFERTAR, montoContraOferta);
+    }
+
+    @Test(expected = DatoInvalidoException.class)
+    public void testInteractuarCaseContraOfertarBotaExceptionCuandoElUsuarioNoTieneOfertaEnLaPublicacion() {
+        publicacion.setOfertasCompradores(Collections.EMPTY_LIST);
 
         ventaService.interactuar(publicacion, vendedor, CONTRA_OFERTAR, montoContraOferta);
     }
@@ -106,15 +118,17 @@ public class VentaServiceTest {
         assertEquals(19000, publicacionActual.getOfertasCompradores().get(2).getMontoOferta(), 0.0);
         assertTrue(publicacionActual.getOfertasCompradores().get(0).isInactivo());
         assertTrue(publicacionActual.getOfertasCompradores().get(1).isInactivo());
-        verify(notificacionService, times(3)).enviarNotificacion(any(), any(), anyDouble(), anyDouble(), any());
+        verify(notificacionServiceMock, times(3)).enviarNotificacion(any(), any(), anyDouble(), anyDouble(), any());
+        verify(publicacionDaoMock).darDeBajaPublicaciones(anyList());
+        verify(ofertaDaoMock).actualizarOferta(any(),anyString(),any());
     }
 
     @Test
     public void testInteractuarCaseAceptarOfertaCaseVendedorCuandoHayDosMejoresOfertas() {
-        oferta3.setMontoOferta(19000);
-        oferta3.setFechaOferta(LocalDateTime.now());
         oferta2.setMontoOferta(19000);
         oferta2.setFechaOferta(LocalDateTime.now().minusHours(3));
+        oferta3.setMontoOferta(19000);
+        oferta3.setFechaOferta(LocalDateTime.now());
 
         Publicacion publicacionActual = ventaService.interactuar(publicacion, vendedor, ACEPTAR_OFERTA, 0);
 
@@ -122,7 +136,9 @@ public class VentaServiceTest {
         assertEquals(19000, publicacionActual.getOfertasCompradores().get(1).getMontoOferta(), 0.0);
         assertTrue(publicacionActual.getOfertasCompradores().get(0).isInactivo());
         assertTrue(publicacionActual.getOfertasCompradores().get(2).isInactivo());
-        verify(notificacionService, times(3)).enviarNotificacion(any(), any(), anyDouble(), anyDouble(), any());
+        verify(notificacionServiceMock, times(3)).enviarNotificacion(any(), any(), anyDouble(), anyDouble(), any());
+        verify(publicacionDaoMock).darDeBajaPublicaciones(anyList());
+        verify(ofertaDaoMock).actualizarOferta(any(),anyString(),any());
     }
 
     @Test
@@ -135,13 +151,20 @@ public class VentaServiceTest {
         assertEquals(20000, publicacionActual.getOfertasCompradores().get(2).getMontoContraOferta(), 0.0);
         assertTrue(publicacionActual.getOfertasCompradores().get(0).isInactivo());
         assertTrue(publicacionActual.getOfertasCompradores().get(1).isInactivo());
-        verify(notificacionService, times(3)).enviarNotificacion(any(), any(), anyDouble(), anyDouble(), any());
+        verify(notificacionServiceMock, times(3)).enviarNotificacion(any(), any(), anyDouble(), anyDouble(), any());
+        verify(publicacionDaoMock).darDeBajaPublicaciones(anyList());
+        verify(ofertaDaoMock).actualizarOferta(any(),anyString(),any());
 
     }
 
     @Test(expected = DatoInvalidoException.class)
     public void testInteractuarCaseRetirarOfertaBotaExceptionCuandoElUsuarioEsVendedor() {
+        ventaService.interactuar(publicacion, vendedor, RETIRAR_OFERTA, 0);
+    }
 
+    @Test(expected = DatoInvalidoException.class)
+    public void testInteractuarCaseRetirarOfertaBotaExceptionCuandoElUsuarioNoTieneOfertaEnLaPublicacion() {
+        publicacion.setOfertasCompradores(Collections.EMPTY_LIST);
         ventaService.interactuar(publicacion, vendedor, RETIRAR_OFERTA, 0);
     }
 
@@ -151,18 +174,20 @@ public class VentaServiceTest {
         Publicacion publicacionActual = ventaService.interactuar(publicacion, comprador, RETIRAR_OFERTA, 0);
 
         assertTrue(publicacionActual.getOfertasCompradores().get(0).isInactivo());
-        verify(notificacionService).enviarNotificacion(any(), any(), anyDouble(), anyDouble(), any());
+        verify(ofertaDaoMock).actualizarOferta(any(),anyString(),any());
+        verify(notificacionServiceMock).enviarNotificacion(any(), any(), anyDouble(), anyDouble(), any());
     }
 
     @Test
     public void testInteractuarCaseOfertarCaseCompradorPrimeraOferta() {
-        publicacion.setOfertasCompradores(Collections.EMPTY_LIST);
+        publicacion.setOfertasCompradores(new ArrayList<>());
         montoOferta = 18000;
 
         Publicacion publicacionActual = ventaService.interactuar(publicacion, comprador, OFERTAR, montoOferta);
 
         assertEquals(1, publicacionActual.getOfertasCompradores().size());
-        verify(notificacionService).enviarNotificacion(any(), any(), anyDouble(), anyDouble(), any());
+        verify(ofertaDaoMock).agregarOferta(any(),any());
+        verify(notificacionServiceMock).enviarNotificacion(any(), any(), anyDouble(), anyDouble(), any());
     }
 
     @Test
@@ -172,14 +197,20 @@ public class VentaServiceTest {
         Publicacion publicacionActual = ventaService.interactuar(publicacion, comprador, OFERTAR, montoOferta);
 
         assertEquals(4, publicacionActual.getOfertasCompradores().size());
-        verify(notificacionService).enviarNotificacion(any(), any(), anyDouble(), anyDouble(), any());
+        verify(ofertaDaoMock).agregarOferta(any(),any());
+        verify(notificacionServiceMock).enviarNotificacion(any(), any(), anyDouble(), anyDouble(), any());
     }
 
     @Test(expected = DatoInvalidoException.class)
-    public void testRealizarPrimeraOfertaBotaExceptionCuandoNoSeIngresaUnMontoValido() {
+    public void testInteractuarCaseOfertarBotaExceptionCuandoNoSeIngresaUnMontoValido() {
         montoOferta = -4650;
-
         ventaService.interactuar(publicacion, comprador, OFERTAR, montoOferta);
+    }
+
+    @Test(expected = DatoInvalidoException.class)
+    public void testInteractuarCaseOfertarBotaExceptionCuandoElUsuarioEsVendedor() {
+
+        ventaService.interactuar(publicacion, vendedor, OFERTAR, montoOferta);
     }
 
 }

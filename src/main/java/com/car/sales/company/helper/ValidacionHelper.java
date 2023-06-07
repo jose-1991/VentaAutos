@@ -6,7 +6,7 @@ import com.car.sales.company.models.Vehiculo;
 
 public class ValidacionHelper {
 
-    private static final String VALIDAR_VIN = "^[A-Z\\d]{8}[\\dX][A-Z\\d]{2}\\d{6}$";
+    private static final String VALIDAR_VIN = "^[0-9A-Z]{17}$";
     public static final long MAX_DIAS_SIN_OFERTA = 5;
 
 

@@ -10,7 +10,9 @@ import com.car.sales.company.models.Vehiculo;
 
 import java.time.LocalDate;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
+import java.util.Random;
 
 import static com.car.sales.company.helper.ValidacionHelper.validarVehiculo;
 import static com.car.sales.company.models.TipoUsuario.VENDEDOR;
@@ -20,14 +22,11 @@ import static com.car.sales.company.services.NotificacionService.V_EXPIRADO;
 public class PublicacionService {
 
     private NotificacionService notificacionService;
-    private UsuarioService usuarioService;
     private PublicacionDAO publicacionDAO;
     private UsuarioDAO usuarioDAO;
 
-    public PublicacionService(NotificacionService notificacionService, UsuarioService usuarioService,
-                              PublicacionDAO publicacionDAO, UsuarioDAO usuarioDAO) {
+    public PublicacionService(NotificacionService notificacionService, PublicacionDAO publicacionDAO, UsuarioDAO usuarioDAO) {
         this.notificacionService = notificacionService;
-        this.usuarioService = usuarioService;
         this.publicacionDAO = publicacionDAO;
         this.usuarioDAO = usuarioDAO;
     }
@@ -63,12 +62,15 @@ public class PublicacionService {
             notificacionService.enviarNotificacion(publicacion.getVendedor(), publicacion.getProducto(), 0, 0,
                     V_EXPIRADO);
         }
-        publicacionDAO.darDeBajaPublicacion(listaPublicacionesDeBaja);
+        publicacionDAO.darDeBajaPublicaciones(listaPublicacionesDeBaja);
         return listaPublicacionesDeBaja.size();
     }
 
     public Publicacion rePublicarProducto(Publicacion publicacion, double nuevoPrecioProducto) {
         if (nuevoPrecioProducto < publicacion.getPrecio()) {
+            publicacion.setPrecio(nuevoPrecioProducto);
+            publicacion.setFecha(LocalDate.now());
+            publicacion.setEstaDisponibleEnLaWeb(true);
             publicacionDAO.rePublicarProducto(publicacion.getId(), nuevoPrecioProducto);
             notificacionService.notificarTodosLosCompradores(usuarioDAO.obtenerCompradores(), publicacion.getProducto(),
                     N_VEHICULO_VENTA);
@@ -76,6 +78,35 @@ public class PublicacionService {
             throw new DatoInvalidoException("el nuevo precio debe ser menor al precio actual");
         }
         return publicacion;
+    }
+
+    public Vehiculo obtenerVehiculoRandom() {
+        Vehiculo vehiculo = new Vehiculo();
+        List<String> listaMarcas = Arrays.asList("Toyota", "Nissan", "Mitsubishi", "Ford", "Hyundai", "Chevrolet",
+                "Kia", "Mazda", "Suzuki", "BMW");
+        List<String> listaModelos = Arrays.asList("Alto", "Scion", "Versa", "Focus", "Veloster", "Celica", "Montero",
+                "Demio", "Baleno", "CHR");
+        int indexMarca = (int) (Math.random() * listaMarcas.size());
+        int indexModelo = (int) (Math.random() * listaModelos.size());
+        int anioRandom = (int) ((Math.random() * 13) + 2010);
+        vehiculo.setVin(generarRandomVin());
+        vehiculo.setMarca(listaMarcas.get(indexMarca));
+        vehiculo.setModelo(listaModelos.get(indexModelo));
+        vehiculo.setAnio(anioRandom);
+        return vehiculo;
+    }
+
+    public String generarRandomVin() {
+        String characters = "0123456789ABCDEFGHJKLMNPRSTUVWXYZ";
+        Random random = new Random();
+        StringBuilder sb = new StringBuilder(17);
+
+        for (int i = 0; i < 17; i++) {
+            int index = random.nextInt(characters.length());
+            char randomChar = characters.charAt(index);
+            sb.append(randomChar);
+        }
+        return sb.toString();
     }
 
 

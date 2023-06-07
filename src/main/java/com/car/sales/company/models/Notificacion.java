@@ -1,5 +1,7 @@
 package com.car.sales.company.models;
 
+import java.util.Objects;
+
 public class Notificacion {
     NombreNotificacion nombreNotificacion;
     TipoNotificacion tipoNotificacion;
@@ -37,4 +39,13 @@ public class Notificacion {
     public void setTipoUsuario(TipoUsuario tipoUsuario) {
         this.tipoUsuario = tipoUsuario;
     }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (!(o instanceof Notificacion)) return false;
+        Notificacion that = (Notificacion) o;
+        return nombreNotificacion == that.nombreNotificacion && tipoNotificacion == that.tipoNotificacion;
+    }
+
 }

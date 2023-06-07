@@ -2,11 +2,11 @@ package com.car.sales.company.services;
 
 import com.car.sales.company.dao.UsuarioDAO;
 import com.car.sales.company.exceptions.DatoInvalidoException;
-import com.car.sales.company.models.*;
+import com.car.sales.company.models.Accion;
+import com.car.sales.company.models.Notificacion;
+import com.car.sales.company.models.Usuario;
 
 import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.Map;
 
 import static com.car.sales.company.helper.ValidacionHelper.validarString;
 import static com.car.sales.company.helper.ValidacionHelper.validarTipoUsuario;
@@ -14,7 +14,7 @@ import static com.car.sales.company.models.NombreNotificacion.*;
 import static com.car.sales.company.models.TipoNotificacion.SMS;
 import static com.car.sales.company.models.TipoUsuario.COMPRADOR;
 import static com.car.sales.company.models.TipoUsuario.VENDEDOR;
-import static com.car.sales.company.services.NotificacionService.*;
+import static com.car.sales.company.services.NotificacionService.NOTIFICACIONES_LIST;
 
 public class UsuarioService {
 
@@ -72,15 +72,17 @@ public class UsuarioService {
         return usuarioDAO.modificarUsuario(identificacion, validarCelular(celular));
     }
 
-    public Usuario actualizarSuscripciones(Usuario usuario, Notificacion notificacion , Accion accion) {
+    public Usuario actualizarSuscripciones(Usuario usuario, Notificacion notificacion, Accion accion) {
         // TODO: 30/5/2023  crear objeto notificacion
-        if (!usuario.getTipoUsuario().equals(notificacion.getTipoUsuario())){
+        if (!usuario.getTipoUsuario().equals(notificacion.getTipoUsuario())) {
             throw new DatoInvalidoException("La notificacion ingresada no es valida");
         }
         switch (accion) {
             case SUSCRIBIR:
                 if (usuario.getListaUnsuscribciones().contains(notificacion)) {
-                    usuarioDAO.suscribirNotificacion(usuario.getIdentificacion(), notificacion);
+                    if (usuario.isAceptaNotificacionSms()) {
+                        usuarioDAO.suscribirNotificacion(usuario, notificacion);
+                    }
                 }
                 break;
             case UNSUSCRIBIR:

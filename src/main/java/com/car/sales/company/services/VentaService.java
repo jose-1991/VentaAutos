@@ -12,7 +12,6 @@ import java.util.List;
 import static com.car.sales.company.helper.ValidacionHelper.validarPositivoDecimal;
 import static com.car.sales.company.models.Accion.ACEPTAR_OFERTA;
 import static com.car.sales.company.models.Accion.RETIRAR_OFERTA;
-import static com.car.sales.company.models.NombreNotificacion.*;
 import static com.car.sales.company.models.TipoUsuario.COMPRADOR;
 import static com.car.sales.company.models.TipoUsuario.VENDEDOR;
 import static com.car.sales.company.services.NotificacionService.*;
@@ -56,6 +55,8 @@ public class VentaService {
             ofertaDAO.agregarOferta(oferta, publicacion.getId());
             notificacionService.enviarNotificacion(publicacion.getVendedor(), publicacion.getProducto(), monto,
                     0, notificacion);
+        }else {
+            throw new DatoInvalidoException("El usuario debe ser Comprador");
         }
         return publicacion;
     }
@@ -91,7 +92,7 @@ public class VentaService {
                 mejorOferta.getMontoOferta(), mejorOferta.getMontoContraOferta(), notificacion);
         notificarCompradoresVehiculoVendido(publicacion, mejorOferta);
         publicacion.setEstaDisponibleEnLaWeb(false);
-        publicacionDAO.darDeBajaPublicacion(Collections.singletonList(publicacion));
+        publicacionDAO.darDeBajaPublicaciones(Collections.singletonList(publicacion));
         ofertaDAO.actualizarOferta(publicacion.getId(), usuario.getIdentificacion(), ACEPTAR_OFERTA);
 
         return publicacion;

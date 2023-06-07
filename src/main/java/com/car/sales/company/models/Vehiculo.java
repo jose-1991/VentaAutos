@@ -10,6 +10,7 @@ public class Vehiculo implements Producto {
     private int anio;
 
     public Vehiculo() {
+        this.stockNumber = UUID.randomUUID();
     }
 
     public Vehiculo(String vin, String marca, String modelo, int anio) {

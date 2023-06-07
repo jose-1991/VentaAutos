@@ -1,7 +1,8 @@
 package com.car.sales.company.services;
 
+import com.car.sales.company.dao.PublicacionDAO;
+import com.car.sales.company.dao.UsuarioDAO;
 import com.car.sales.company.exceptions.DatoInvalidoException;
-import com.car.sales.company.exceptions.UsuarioNoEncontradoException;
 import com.car.sales.company.models.Oferta;
 import com.car.sales.company.models.Publicacion;
 import com.car.sales.company.models.Usuario;
@@ -15,7 +16,6 @@ import org.mockito.junit.MockitoJUnitRunner;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
-import java.time.Month;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -32,15 +32,21 @@ import static org.mockito.Mockito.*;
 public class PublicacionServiceTest {
 
     private LocalDateTime fechaActual;
-    private Integer nuevoPrecio;
+    private double nuevoPrecio;
+    private double precio;
     private Publicacion publicacion1;
     private Publicacion publicacion2;
     private Usuario vendedor;
     private Usuario comprador;
+    private Usuario comprador2;
     private Vehiculo vehiculo;
+    private List<Usuario> listaUsuariosEsperada;
+    List<Publicacion> listaPublicacionesEsperada;
 
     @Mock
-    private UsuarioService usuarioServiceMock;
+    private UsuarioDAO usuarioDaoMock;
+    @Mock
+    private PublicacionDAO publicacionDaoMock;
     @Mock
     private NotificacionService notificacionServiceMock;
     @InjectMocks
@@ -48,11 +54,13 @@ public class PublicacionServiceTest {
 
     @Before
     public void setUp() {
-
         fechaActual = LocalDateTime.now();
+        precio = 10;
 
         comprador = new Usuario("Ruben", "Sanchez", "ci", "5203746",
                 "rube.123-122@gmail.com", COMPRADOR, null);
+        comprador2 = new Usuario("Jaime", "Mendoza", "ci", "5398547",
+                "jmp.123-122@gmail.com", COMPRADOR, null);
 
         vendedor = new Usuario("Jorge", "Lopez", "ci", "5203717",
                 "jorgito-122@gmail.com", VENDEDOR, null);
@@ -70,62 +78,63 @@ public class PublicacionServiceTest {
         publicacion2.setProducto(new Vehiculo("1HGBH41JXMN109716", "Toyota", "CH-R", 2021));
         publicacion2.setOfertasCompradores(new ArrayList<>());
         publicacion2.setEstaDisponibleEnLaWeb(true);
+
+        listaUsuariosEsperada = Arrays.asList(comprador, comprador2);
     }
 
-//    @Test
-//    public void testPublicarProducto() {
-//        List<Usuario> listaUsuarios = Collections.singletonList(comprador);
-//        when(usuarioServiceMock.getListaUsuariosRegistrados()).thenReturn(listaUsuarios);
-//        Publicacion publicacionActual = publicacionService.publicarProducto(vendedor, vehiculo);
-//
-//        assertNotNull(publicacionActual);
-//        assertTrue(publicacionActual.isEstaDisponibleEnLaWeb());
-//        assertTrue(publicacionService.getProductosPublicados().contains(publicacionActual));
-//        verify(notificacionServiceMock).notificarTodosLosCompradores(any(), any(), any());
-//    }
+    @Test
+    public void testPublicarProducto() {
+
+        when(usuarioDaoMock.obtenerCompradores()).thenReturn(listaUsuariosEsperada);
+        Publicacion publicacionActual = publicacionService.publicarProducto(vendedor, vehiculo, precio);
+
+        assertNotNull(publicacionActual);
+        assertTrue(publicacionActual.isEstaDisponibleEnLaWeb());
+        verify(publicacionDaoMock).registrarPublicacionProducto(any());
+        verify(notificacionServiceMock).notificarTodosLosCompradores(any(), any(), any());
+    }
 
     @Test(expected = DatoInvalidoException.class)
     public void testPublicarProductoBotaExceptionCuandoElTipoUsuarioNoEsVendedor() {
-        vendedor.setTipoUsuario(COMPRADOR);
 
-//        publicacionService.publicarProducto(vendedor, vehiculo);
+        publicacionService.publicarProducto(comprador, vehiculo, precio);
     }
 
     @Test(expected = DatoInvalidoException.class)
     public void testPublicarProductoBotaExceptionCuandoIngresaVinConFormatoInvalido() {
         vendedor.setTipoUsuario(VENDEDOR);
-        vehiculo.setVin("123ASD123556GF");
+        vehiculo.setVin("12323556GF");
 
-//        publicacionService.publicarProducto(vendedor, vehiculo);
+        publicacionService.publicarProducto(vendedor, vehiculo, precio);
     }
 
-//    @Test
-//    public void testDarDeBajaPublicaciones() {
-//
-//        publicacion1.setFecha(LocalDate.of(2023, Month.APRIL, 20));
-//        publicacion2.setFecha(LocalDate.now());
-//
-//        publicacionService.getProductosPublicados().add(publicacion1);
-//        publicacionService.getProductosPublicados().add(publicacion2);
-//
-//        int numeroDeBajasActual = publicacionService.darDeBajaPublicaciones();
-//        assertEquals(1, numeroDeBajasActual);
-//        verify(notificacionServiceMock).enviarNotificacion(any(), any(), anyDouble(), anyDouble(), any());
-//    }
-//
-//    @Test
-//    public void testDarDeBajaPublicacionesNoInhabilitaNadaCuandoPublicacionTieneOfertas() {
-//        publicacion1.setOfertasCompradores(Collections.singletonList(new Oferta(15800, 0, comprador, fechaActual)));
-//        publicacion2.setOfertasCompradores(Arrays.asList(new Oferta(22000, 0, comprador, fechaActual),
-//                new Oferta(22400, 0, comprador, fechaActual)));
-//
-//        publicacionService.getProductosPublicados().add(publicacion1);
-//        publicacionService.getProductosPublicados().add(publicacion2);
-//
-//        int numeroDeBajasActual = publicacionService.darDeBajaPublicaciones();
-//        assertEquals(0, numeroDeBajasActual);
-//        verify(notificacionServiceMock, times(0)).enviarNotificacion(any(), any(), anyDouble(), anyDouble(), any());
-//    }
+    @Test
+    public void testDarDeBajaPublicaciones() {
+        listaPublicacionesEsperada = Collections.singletonList(publicacion1);
+        publicacion1.setFecha(LocalDate.now().minusDays(9));
+        publicacion2.setFecha(LocalDate.now());
+
+        when(publicacionDaoMock.obtenerPublicacionesParaDarDeBaja()).thenReturn(listaPublicacionesEsperada);
+        int numeroDeBajasActual = publicacionService.darDeBajaPublicaciones();
+
+        assertEquals(listaPublicacionesEsperada.size(), numeroDeBajasActual);
+        verify(notificacionServiceMock).enviarNotificacion(any(), any(), anyDouble(), anyDouble(), any());
+        verify(publicacionDaoMock).darDeBajaPublicaciones(anyList());
+
+    }
+
+    @Test
+    public void testDarDeBajaPublicacionesNoInhabilitaNadaCuandoPublicacionTieneOfertas() {
+        listaPublicacionesEsperada = Collections.EMPTY_LIST;
+        publicacion1.setOfertasCompradores(Collections.singletonList(new Oferta(comprador, 15800, 0, fechaActual)));
+        publicacion2.setOfertasCompradores(Arrays.asList(new Oferta(comprador, 22000, 0, fechaActual),
+                new Oferta(comprador, 22400, 0, fechaActual)));
+
+        when(publicacionDaoMock.obtenerPublicacionesParaDarDeBaja()).thenReturn(listaPublicacionesEsperada);
+        int numeroDeBajasActual = publicacionService.darDeBajaPublicaciones();
+        assertEquals(listaPublicacionesEsperada.size(), numeroDeBajasActual);
+        verify(notificacionServiceMock, times(0)).enviarNotificacion(any(), any(), anyDouble(), anyDouble(), any());
+    }
 
     @Test
     public void testRePublicarProducto() {
@@ -135,8 +144,11 @@ public class PublicacionServiceTest {
         nuevoPrecio = 14000;
 
         Publicacion publicacionActual = publicacionService.rePublicarProducto(publicacion1, nuevoPrecio);
+
         assertNotNull(publicacionActual);
         assertTrue(publicacionActual.isEstaDisponibleEnLaWeb());
+        assertEquals(LocalDate.now(), publicacionActual.getFecha());
+        verify(publicacionDaoMock).rePublicarProducto(any(), anyDouble());
         verify(notificacionServiceMock).notificarTodosLosCompradores(any(), any(), any());
     }
 

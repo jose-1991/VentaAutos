@@ -13,6 +13,9 @@ public class Publicacion {
     private List<Oferta> ofertasCompradores;
     private boolean estaDisponibleEnLaWeb;
 
+    public Publicacion() {
+        this.id = UUID.randomUUID();
+    }
 
     public UUID getId() {
         return id;

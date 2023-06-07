@@ -71,26 +71,18 @@ public class PublicacionDAO {
     public List<Publicacion> obtenerPublicacionesParaDarDeBaja() {
         List<Publicacion> publicacionesDeBaja = new ArrayList<>();
         // TODO: 30/5/2023 update query para que retorne lo necesario
-        query = "SELECT * FROM publicacion AS p INNER JOIN usuario AS u ON p.usuario_id = u.identificacion INNER JOIN" +
-                " producto ON" +
-                " p.producto_id = producto.vin";
+        query = "SELECT * FROM publicacion AS p INNER JOIN usuario AS u ON p.usuario_id = u.identificacion INNER JOIN " +
+                "producto ON p.producto_id = producto.vin WHERE id NOT IN (SELECT DISTINCT publicacion_id FROM comercio.oferta) AND" +
+                "fecha  NOT BETWEEN DATE_SUB(curdate(), INTERVAL 5 DAY) AND curdate()";
         try (Statement statement = obtenerConexion().createStatement();
              ResultSet resultSet = statement.executeQuery(query)) {
-            UUID publicacionId;
-            LocalDate fechaPublicacion;
             while (resultSet.next()) {
-                publicacionId = UUID.fromString(resultSet.getString("id"));
-                fechaPublicacion = (resultSet.getDate("fecha")).toLocalDate();
-                int numeroOfertas = obtenerNumeroOfertas(publicacionId);
-
-                if (numeroOfertas < 1 && tieneMaximoDiasSinOfertas(fechaPublicacion)) {
-                    Publicacion publicacion = obtenerPublicacion(resultSet);
-                    Usuario vendedor = obtenerUsuario(resultSet);
-                    Vehiculo vehiculo = obtenerVehiculo(resultSet);
-                    publicacion.setVendedor(vendedor);
-                    publicacion.setProducto(vehiculo);
-                    publicacionesDeBaja.add(publicacion);
-                }
+                Publicacion publicacion = obtenerPublicacion(resultSet);
+                Usuario vendedor = obtenerUsuario(resultSet);
+                Vehiculo vehiculo = obtenerVehiculo(resultSet);
+                publicacion.setVendedor(vendedor);
+                publicacion.setProducto(vehiculo);
+                publicacionesDeBaja.add(publicacion);
             }
         } catch (SQLException e) {
             e.printStackTrace();
@@ -98,7 +90,7 @@ public class PublicacionDAO {
         return publicacionesDeBaja;
     }
 
-    public void darDeBajaPublicacion(List<Publicacion> listaPublicaciones) {
+    public void darDeBajaPublicaciones(List<Publicacion> listaPublicaciones) {
         // TODO: 30/5/2023 actualizar el query
         query = "UPDATE comercio.publicacion SET esta_disponible_web = ? WHERE id = ?";
 
@@ -106,7 +98,7 @@ public class PublicacionDAO {
             PreparedStatement statement = obtenerConexion().prepareStatement(query);
             obtenerConexion().setAutoCommit(false);
 
-            for (Publicacion publicacion: listaPublicaciones){
+            for (Publicacion publicacion : listaPublicaciones) {
                 statement.setBoolean(1, false);
                 statement.setString(2, publicacion.getId().toString());
                 statement.addBatch();

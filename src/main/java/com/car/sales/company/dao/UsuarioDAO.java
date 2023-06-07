@@ -6,6 +6,7 @@ import java.sql.*;
 import java.util.ArrayList;
 import java.util.List;
 
+import static com.car.sales.company.models.TipoNotificacion.AMBOS;
 import static com.car.sales.company.models.TipoNotificacion.EMAIL;
 
 
@@ -153,16 +154,19 @@ public class UsuarioDAO {
 
     public void unsuscribirTodo(Usuario usuario, List<Notificacion> notificacionList) {
         query = REGISTRAR_UNSUSCRIPCION;
-
+        TipoNotificacion tipoNotificacion = EMAIL;
+        if (usuario.isAceptaNotificacionSms()){
+            tipoNotificacion  = AMBOS;
+        }
         try {
             PreparedStatement statement = obtenerConexion().prepareStatement(query);
             obtenerConexion().setAutoCommit(false);
 
             for (Notificacion notificacion : notificacionList) {
-                if (!usuario.getListaUnsuscribciones().contains(notificacion)) {
+                if (usuario.getListaUnsuscribciones().contains(notificacion)){
                     statement.setString(1, usuario.getIdentificacion());
                     statement.setString(2, notificacion.toString());
-                    statement.setString(3, EMAIL.toString());
+                    statement.setString(3, tipoNotificacion.toString());
                     statement.setString(4, notificacion.getTipoUsuario().toString());
                     statement.addBatch();
                 }
@@ -175,14 +179,17 @@ public class UsuarioDAO {
         }
     }
 
-    public void suscribirNotificacion(String identificacion, Notificacion notificacion) {
+    public void suscribirNotificacion(Usuario usuario, Notificacion notificacion) {
         query = ELIMINAR_UNSUSCRIPCION + "AND nombre_notificacion = ? AND tipo = ?";
-        ;
 
         try (PreparedStatement statement = obtenerConexion().prepareStatement(query)) {
-            statement.setString(1, identificacion);
+            statement.setString(1, usuario.getIdentificacion());
             statement.setString(2, notificacion.getNombreNotificacion().toString());
-            statement.setString(3, notificacion.getTipoNotificacion().toString());
+            if (usuario.isAceptaNotificacionSms()) {
+                statement.setString(3, notificacion.getTipoNotificacion().toString());
+            }else if (notificacion.getTipoNotificacion().equals(EMAIL)){
+                statement.setString(3, EMAIL.toString());
+            }
             statement.executeUpdate();
         } catch (SQLException e) {
             e.printStackTrace();
