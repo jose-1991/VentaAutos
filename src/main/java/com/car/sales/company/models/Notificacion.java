@@ -1,19 +1,29 @@
 package com.car.sales.company.models;
 
-import java.util.Objects;
 
 public class Notificacion {
-    NombreNotificacion nombreNotificacion;
-    TipoNotificacion tipoNotificacion;
-    TipoUsuario tipoUsuario;
+    private String id;
+    private NombreNotificacion nombreNotificacion;
+    private TipoNotificacion tipoNotificacion;
+    private TipoUsuario tipoUsuario;
 
     public Notificacion() {
     }
 
-    public Notificacion(NombreNotificacion nombreNotificacion, TipoNotificacion tipoNotificacion, TipoUsuario tipoUsuario) {
+    public Notificacion(String id, NombreNotificacion nombreNotificacion, TipoNotificacion tipoNotificacion,
+                        TipoUsuario tipoUsuario) {
+        this.id = id;
         this.nombreNotificacion = nombreNotificacion;
         this.tipoNotificacion = tipoNotificacion;
         this.tipoUsuario = tipoUsuario;
+    }
+
+    public String getId() {
+        return id;
+    }
+
+    public void setId(String id) {
+        this.id = id;
     }
 
     public NombreNotificacion getNombreNotificacion() {

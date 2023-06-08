@@ -16,8 +16,7 @@ import java.util.Random;
 
 import static com.car.sales.company.helper.ValidacionHelper.validarVehiculo;
 import static com.car.sales.company.models.TipoUsuario.VENDEDOR;
-import static com.car.sales.company.services.NotificacionService.N_VEHICULO_VENTA;
-import static com.car.sales.company.services.NotificacionService.V_EXPIRADO;
+
 
 public class PublicacionService {
 
@@ -48,7 +47,7 @@ public class PublicacionService {
             publicacionDAO.registrarPublicacionProducto(publicacion);
             List<Usuario> listaCompradores = usuarioDAO.obtenerCompradores();
             if (!listaCompradores.isEmpty()) {
-                notificacionService.notificarTodosLosCompradores(listaCompradores, producto, N_VEHICULO_VENTA);
+//                notificacionService.notificarTodosLosCompradores(listaCompradores, producto, N_VEHICULO_VENTA);
             }
             return publicacion;
         }
@@ -59,8 +58,8 @@ public class PublicacionService {
         List<Publicacion> listaPublicacionesDeBaja = publicacionDAO.obtenerPublicacionesParaDarDeBaja();
         // TODO: 30/5/2023 optimizar para que solo llame a la DB una sola vez
         for (Publicacion publicacion : listaPublicacionesDeBaja) {
-            notificacionService.enviarNotificacion(publicacion.getVendedor(), publicacion.getProducto(), 0, 0,
-                    V_EXPIRADO);
+//            notificacionService.enviarNotificacion(publicacion.getVendedor(), publicacion.getProducto(), 0, 0,
+//                    V_EXPIRADO);
         }
         publicacionDAO.darDeBajaPublicaciones(listaPublicacionesDeBaja);
         return listaPublicacionesDeBaja.size();
@@ -72,8 +71,8 @@ public class PublicacionService {
             publicacion.setFecha(LocalDate.now());
             publicacion.setEstaDisponibleEnLaWeb(true);
             publicacionDAO.rePublicarProducto(publicacion.getId(), nuevoPrecioProducto);
-            notificacionService.notificarTodosLosCompradores(usuarioDAO.obtenerCompradores(), publicacion.getProducto(),
-                    N_VEHICULO_VENTA);
+//            notificacionService.notificarTodosLosCompradores(usuarioDAO.obtenerCompradores(), publicacion.getProducto(),
+//                    N_VEHICULO_VENTA);
         } else {
             throw new DatoInvalidoException("el nuevo precio debe ser menor al precio actual");
         }

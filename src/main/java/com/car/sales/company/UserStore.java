@@ -13,7 +13,9 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.Collections;
 
-import static com.car.sales.company.models.NombreNotificacion.COMPRADOR_PRIMERA_OFERTA;
+import static com.car.sales.company.models.Accion.*;
+import static com.car.sales.company.models.NombreNotificacion.*;
+import static com.car.sales.company.models.TipoNotificacion.SMS;
 import static com.car.sales.company.models.TipoUsuario.COMPRADOR;
 import static com.car.sales.company.models.TipoUsuario.VENDEDOR;
 
@@ -27,9 +29,9 @@ public class UserStore {
         VentaService ventaService = new VentaService(notificacionService, ofertaDAO, publicacionDAO);
         PublicacionService publicacionService = new PublicacionService(notificacionService,
                 publicacionDAO, usuarioDAO);
-        Usuario usuario = new Usuario("Javier", "Rodriguez", "licencia", "45123984",
+        Usuario usuario = new Usuario("Javier", "Rodriguez", "licencia", "111111222",
                 "javi.31_82@hotmail.com", VENDEDOR, "77426426");
-        usuario.setAceptaNotificacionSms(true);
+//        usuario.setAceptaNotificacionSms(true);
         Usuario usuario1 = new Usuario("jose", "sanz", "licencia", "40123984",
                 "javi.31_82@hotmail.com", COMPRADOR, "77426426");
 //        usuario.setUnsuscribcionesSms(new ArrayList<>());
@@ -49,6 +51,8 @@ public class UserStore {
         InputNotificacion inputNotificacion = new InputNotificacion(COMPRADOR_PRIMERA_OFERTA, vehiculo, 120, 0, "javi.31_82@hotmail" +
                 ".com", "8771824");
 
+//        usuarioService.registrarUsuario(usuario);
+        usuarioService.actualizarSuscripciones(usuario,COMPRADOR_PRIMERA_OFERTA, SMS, UNSUSCRIBIR);
 //        System.out.println(LocalDate.now().minusDays(6));
 //        usuarioService.registrarUsuario(usuario);
 //        publicacionDAO.registrarPublicacionProducto(publicacion);
@@ -74,6 +78,6 @@ public class UserStore {
 //        Publicacion publicacion1 = ventaService.interactuar(publicacion,usuario1,Accion.CONTRA_OFERTAR,80);
 //        System.out.println(publicacion1.getOfertasCompradores().get(0).getMontoContraOferta());
 //        ofertaDAO.actualizarOferta(UUID.fromString("564847e8-187d-4783-90d0-d38708f949bb"), "40123984", Accion.RETIRAR_OFERTA);
-        System.out.println((int) ((Math.random() * 13) + 2010));
+//        System.out.println((int) ((Math.random() * 13) + 2010));
     }
 }

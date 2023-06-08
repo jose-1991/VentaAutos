@@ -16,21 +16,6 @@ import static com.car.sales.company.models.TipoUsuario.VENDEDOR;
 
 public class NotificacionService {
 
-    public static final Notificacion C_PRIMERA_OFERTA = new Notificacion(COMPRADOR_PRIMERA_OFERTA, AMBOS, VENDEDOR);
-    public static final Notificacion C_ACEPTA_OFERTA = new Notificacion(COMPRADOR_ACEPTA_OFERTA, AMBOS, VENDEDOR);
-    public static final Notificacion C_RETIRA_OFERTA = new Notificacion(COMPRADOR_RETIRA_OFERTA, EMAIL, VENDEDOR);
-    public static final Notificacion V_EXPIRADO = new Notificacion(VEHICULO_EXPIRADO, EMAIL, VENDEDOR);
-    public static final Notificacion C_NUEVA_OFERTA = new Notificacion(COMPRADOR_NUEVA_OFERTA, AMBOS, VENDEDOR);
-    public static final Notificacion N_VEHICULO_VENTA = new Notificacion(NUEVO_VEHICULO_EN_VENTA, AMBOS, COMPRADOR);
-    public static final Notificacion V_ACEPTA_OFERTA = new Notificacion(VENDEDOR_ACEPTA_OFERTA, AMBOS, COMPRADOR);
-    public static final Notificacion V_CONTRAOFERTA = new Notificacion(VENDEDOR_CONTRAOFERTA, EMAIL, COMPRADOR);
-    public static final Notificacion V_DECLINA_OFERTA = new Notificacion(VENDEDOR_DECLINA_OFERTA, EMAIL, COMPRADOR);
-    public static final Notificacion V_NO_DISPONIBLE = new Notificacion(VEHICULO_NO_DISPONIBLE, EMAIL, COMPRADOR);
-
-    public static final List<Notificacion> NOTIFICACIONES_LIST = Arrays.asList(C_PRIMERA_OFERTA, C_ACEPTA_OFERTA, C_RETIRA_OFERTA,
-            V_EXPIRADO, C_NUEVA_OFERTA, N_VEHICULO_VENTA, V_ACEPTA_OFERTA, V_CONTRAOFERTA, V_DECLINA_OFERTA, V_NO_DISPONIBLE);
-
-
     public InputNotificacion enviarNotificacion(Usuario usuario, Producto producto, double montoOferta, double montoContraOferta,
                                                 Notificacion notificacion) {
         if (notificacion == null || usuario.getListaUnsuscribciones().contains(notificacion)) {

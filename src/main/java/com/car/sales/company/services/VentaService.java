@@ -47,14 +47,14 @@ public class VentaService {
                     LocalDateTime.now());
             Notificacion notificacion;
             if (publicacion.getOfertasCompradores().isEmpty()) {
-                notificacion = C_PRIMERA_OFERTA;
+//                notificacion = C_PRIMERA_OFERTA;
             } else {
-                notificacion = C_NUEVA_OFERTA;
+//                notificacion = C_NUEVA_OFERTA;
             }
             publicacion.getOfertasCompradores().add(oferta);
             ofertaDAO.agregarOferta(oferta, publicacion.getId());
-            notificacionService.enviarNotificacion(publicacion.getVendedor(), publicacion.getProducto(), monto,
-                    0, notificacion);
+//            notificacionService.enviarNotificacion(publicacion.getVendedor(), publicacion.getProducto(), monto,
+//                    0, notificacion);
         }else {
             throw new DatoInvalidoException("El usuario debe ser Comprador");
         }
@@ -66,8 +66,8 @@ public class VentaService {
             Oferta ofertaActual = encontrarOfertaUsuario(publicacion, comprador);
             ofertaActual.setMontoContraOferta(nuevoMonto);
             ofertaDAO.interaccionContraOferta(comprador.getIdentificacion(), publicacion.getId(), nuevoMonto);
-            notificacionService.enviarNotificacion(comprador, publicacion.getProducto(), ofertaActual.getMontoOferta(),
-                    ofertaActual.getMontoContraOferta(), V_CONTRAOFERTA);
+//            notificacionService.enviarNotificacion(comprador, publicacion.getProducto(), ofertaActual.getMontoOferta(),
+//                    ofertaActual.getMontoContraOferta(), V_CONTRAOFERTA);
         } else {
             throw new DatoInvalidoException("El usuario debe ser comprador");
         }
@@ -79,12 +79,12 @@ public class VentaService {
         Notificacion notificacion = null;
         if (usuario.getTipoUsuario().equals(VENDEDOR)) {
             mejorOferta = obtenerMayorOferta(publicacion.getOfertasCompradores());
-            notificacion = V_ACEPTA_OFERTA;
+//            notificacion = V_ACEPTA_OFERTA;
             usuario = mejorOferta.getComprador();
         } else {
             mejorOferta = encontrarOfertaUsuario(publicacion, usuario);
             if (mejorOferta.getMontoContraOferta() > 0) {
-                notificacion = C_ACEPTA_OFERTA;
+//                notificacion = C_ACEPTA_OFERTA;
                 usuario = publicacion.getVendedor();
             }
         }
@@ -112,8 +112,8 @@ public class VentaService {
             Oferta ofertaActual = encontrarOfertaUsuario(publicacion, usuario);
             ofertaActual.setInactivo(true);
             ofertaDAO.actualizarOferta(publicacion.getId(), usuario.getIdentificacion(), RETIRAR_OFERTA);
-            notificacionService.enviarNotificacion(publicacion.getVendedor(), publicacion.getProducto(),
-                    ofertaActual.getMontoOferta(), ofertaActual.getMontoContraOferta(), C_RETIRA_OFERTA);
+//            notificacionService.enviarNotificacion(publicacion.getVendedor(), publicacion.getProducto(),
+//                    ofertaActual.getMontoOferta(), ofertaActual.getMontoContraOferta(), C_RETIRA_OFERTA);
 
 
         } else {
@@ -130,8 +130,8 @@ public class VentaService {
         for (Oferta ofertaActual : publicacion.getOfertasCompradores()) {
             if (!ofertaActual.getComprador().getIdentificacion().equals(mejorOferta.getComprador().getIdentificacion())) {
                 ofertaActual.setInactivo(true);
-                notificacionService.enviarNotificacion(ofertaActual.getComprador(), publicacion.getProducto(),
-                        0, 0, V_NO_DISPONIBLE);
+//                notificacionService.enviarNotificacion(ofertaActual.getComprador(), publicacion.getProducto(),
+//                        0, 0, V_NO_DISPONIBLE);
             }
         }
     }

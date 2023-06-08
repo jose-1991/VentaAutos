@@ -2,19 +2,13 @@ package com.car.sales.company.services;
 
 import com.car.sales.company.dao.UsuarioDAO;
 import com.car.sales.company.exceptions.DatoInvalidoException;
-import com.car.sales.company.models.Accion;
-import com.car.sales.company.models.Notificacion;
-import com.car.sales.company.models.Usuario;
+import com.car.sales.company.models.*;
 
 import java.util.ArrayList;
 
 import static com.car.sales.company.helper.ValidacionHelper.validarString;
 import static com.car.sales.company.helper.ValidacionHelper.validarTipoUsuario;
-import static com.car.sales.company.models.NombreNotificacion.*;
-import static com.car.sales.company.models.TipoNotificacion.SMS;
-import static com.car.sales.company.models.TipoUsuario.COMPRADOR;
-import static com.car.sales.company.models.TipoUsuario.VENDEDOR;
-import static com.car.sales.company.services.NotificacionService.NOTIFICACIONES_LIST;
+
 
 public class UsuarioService {
 
@@ -49,13 +43,6 @@ public class UsuarioService {
         validarTipoUsuario(usuario.getTipoUsuario());
         if (validarCelular(usuario.getCelular()) != null) {
             usuario.setAceptaNotificacionSms(true);
-            if (usuario.getTipoUsuario().equals(VENDEDOR)) {
-                usuario.getListaUnsuscribciones().add(new Notificacion(COMPRADOR_PRIMERA_OFERTA, SMS, VENDEDOR));
-                usuario.getListaUnsuscribciones().add(new Notificacion(COMPRADOR_ACEPTA_OFERTA, SMS, VENDEDOR));
-            } else {
-                usuario.getListaUnsuscribciones().add(new Notificacion(NUEVO_VEHICULO_EN_VENTA, SMS, COMPRADOR));
-                usuario.getListaUnsuscribciones().add(new Notificacion(VENDEDOR_ACEPTA_OFERTA, SMS, COMPRADOR));
-            }
         } else {
             usuario.setCelular(null);
         }
@@ -72,29 +59,21 @@ public class UsuarioService {
         return usuarioDAO.modificarUsuario(identificacion, validarCelular(celular));
     }
 
-    public Usuario actualizarSuscripciones(Usuario usuario, Notificacion notificacion, Accion accion) {
+    public Usuario actualizarSuscripciones(Usuario usuario, NombreNotificacion nombreNotificacion, TipoNotificacion tipoNotificacion, Accion accion) {
         // TODO: 30/5/2023  crear objeto notificacion
-        if (!usuario.getTipoUsuario().equals(notificacion.getTipoUsuario())) {
-            throw new DatoInvalidoException("La notificacion ingresada no es valida");
-        }
+
         switch (accion) {
             case SUSCRIBIR:
-                if (usuario.getListaUnsuscribciones().contains(notificacion)) {
-                    if (usuario.isAceptaNotificacionSms()) {
-                        usuarioDAO.suscribirNotificacion(usuario, notificacion);
-                    }
-                }
+                usuarioDAO.suscribirNotificacion(usuario, nombreNotificacion, tipoNotificacion);
                 break;
             case UNSUSCRIBIR:
-                if (!usuario.getListaUnsuscribciones().contains(notificacion)) {
-                    usuarioDAO.unsucribirNotificacion(usuario.getIdentificacion(), notificacion);
-                }
+                usuarioDAO.unsucribirNotificacion(usuario, nombreNotificacion, tipoNotificacion);
                 break;
             case SUSCRIBIR_TODO:
                 usuarioDAO.suscribirTodo(usuario);
                 break;
             case UNSUSCRIBIR_TODO:
-                usuarioDAO.unsuscribirTodo(usuario, NOTIFICACIONES_LIST);
+                usuarioDAO.unsuscribirTodo(usuario);
                 break;
         }
         return usuario;
