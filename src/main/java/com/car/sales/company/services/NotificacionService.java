@@ -1,44 +1,27 @@
 package com.car.sales.company.services;
 
 import com.car.sales.company.exceptions.DatoInvalidoException;
-import com.car.sales.company.models.InputNotificacion;
-import com.car.sales.company.models.Notificacion;
-import com.car.sales.company.models.Producto;
-import com.car.sales.company.models.Usuario;
+import com.car.sales.company.models.*;
 
-import java.util.Arrays;
 import java.util.List;
 
-import static com.car.sales.company.models.NombreNotificacion.*;
 import static com.car.sales.company.models.TipoNotificacion.*;
-import static com.car.sales.company.models.TipoUsuario.COMPRADOR;
-import static com.car.sales.company.models.TipoUsuario.VENDEDOR;
 
 public class NotificacionService {
 
     public InputNotificacion enviarNotificacion(Usuario usuario, Producto producto, double montoOferta, double montoContraOferta,
-                                                Notificacion notificacion) {
-        if (notificacion == null || usuario.getListaUnsuscribciones().contains(notificacion)) {
+                                                NombreNotificacion nombreNotificacion) {
+        if (nombreNotificacion == null) {
             throw new DatoInvalidoException("Notificacion invalida");
         }
-
-        InputNotificacion inputNotificacion = new InputNotificacion(notificacion.getNombreNotificacion(), producto,
+        InputNotificacion inputNotificacion = new InputNotificacion(nombreNotificacion, producto,
                 montoOferta, montoContraOferta, null, null);
-
-        switch (notificacion.getTipoNotificacion()) {
-            case AMBOS:
-                notificacion.setTipoNotificacion(SMS);
-                if (usuario.isAceptaNotificacionSms() && !usuario.getListaUnsuscribciones().contains(notificacion)) {
-                    inputNotificacion.setCelular(usuario.getCelular());
-                }
-            case EMAIL:
-                notificacion.setTipoNotificacion(EMAIL);
-                if (!usuario.getListaUnsuscribciones().contains(notificacion)) {
-                    inputNotificacion.setEmail(usuario.getEmail());
-                }
-                break;
+        if (usuario.isAceptaNotificacionSms() && usuarioEstaSuscrito(usuario.getListaUnsuscribciones(), nombreNotificacion, SMS)) {
+            inputNotificacion.setCelular(usuario.getCelular());
         }
-
+        if (usuarioEstaSuscrito(usuario.getListaUnsuscribciones(), nombreNotificacion, EMAIL)) {
+            inputNotificacion.setEmail(usuario.getEmail());
+        }
         if (inputNotificacion.getEmail() == null && inputNotificacion.getCelular() == null) {
             throw new DatoInvalidoException("El usuario no esta suscrito a la notificacion ingresada");
         }
@@ -50,10 +33,16 @@ public class NotificacionService {
 
     }
 
+    private boolean usuarioEstaSuscrito(List<Notificacion> listaUnsuscripciones, NombreNotificacion nombreNotificacion,
+                                        TipoNotificacion tipoNotificacion) {
+        return listaUnsuscripciones.stream().noneMatch(n ->
+                n.getNombreNotificacion().equals(nombreNotificacion) && n.getTipoNotificacion().equals(tipoNotificacion));
+    }
+
     public void notificarTodosLosCompradores(List<Usuario> compradores, Producto producto,
-                                             Notificacion notificacion) {
+                                             NombreNotificacion nombreNotificacion) {
         for (Usuario usuario : compradores) {
-            enviarNotificacion(usuario, producto, 0, 0, notificacion);
+            enviarNotificacion(usuario, producto, 0, 0, nombreNotificacion);
         }
     }
 

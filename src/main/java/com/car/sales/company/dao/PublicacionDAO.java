@@ -6,15 +6,14 @@ import com.car.sales.company.models.Vehiculo;
 
 import java.sql.*;
 import java.time.LocalDate;
-import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 
-import static com.car.sales.company.dao.UsuarioDAO.obtenerUsuario;
-import static com.car.sales.company.helper.ValidacionHelper.MAX_DIAS_SIN_OFERTA;
+import static com.car.sales.company.dao.UsuarioDAO.convertirUsuario;
 
 public class PublicacionDAO {
+    String UPDATE_PUBLICACION = "UPDATE comercio.publicacion SET";
     String query;
 
     private Connection obtenerConexion() throws SQLException {
@@ -33,8 +32,7 @@ public class PublicacionDAO {
             statement.setInt(5, vehiculo.getAnio());
             statement.executeUpdate();
 
-            query = "INSERT INTO comercio.publicacion(id, usuario_id, producto_id, fecha, precio," +
-                    "esta_disponible_web) VALUES(?,?,?,?,?,?)";
+            query = "INSERT INTO comercio.publicacion VALUES(?,?,?,?,?,?)";
 
             statement = obtenerConexion().prepareStatement(query);
             statement.setString(1, String.valueOf(UUID.randomUUID()));
@@ -44,9 +42,8 @@ public class PublicacionDAO {
             statement.setDouble(5, publicacion.getPrecio());
             statement.setBoolean(6, publicacion.isEstaDisponibleEnLaWeb());
             statement.executeUpdate();
-
             statement.close();
-            System.out.println("Publicacion registrada con exito!");
+
         } catch (SQLException exception) {
             System.out.println("Error al registrar publicacion");
             exception.printStackTrace();
@@ -54,8 +51,7 @@ public class PublicacionDAO {
     }
 
     public void rePublicarProducto(UUID id, double precio) {
-        // TODO: 30/5/2023 update fecha  /hecho
-        query = "UPDATE comercio.publicacion SET esta_disponible_web = ?, precio = ?,fecha = ? WHERE id = '" + id + "'";
+        query = UPDATE_PUBLICACION +" esta_disponible_web = ?, precio = ?,fecha = ? WHERE id = '" + id + "'";
 
         try (PreparedStatement statement = obtenerConexion().prepareStatement(query)) {
             statement.setBoolean(1, true);
@@ -70,16 +66,18 @@ public class PublicacionDAO {
 
     public List<Publicacion> obtenerPublicacionesParaDarDeBaja() {
         List<Publicacion> publicacionesDeBaja = new ArrayList<>();
-        // TODO: 30/5/2023 update query para que retorne lo necesario
-        query = "SELECT * FROM publicacion AS p INNER JOIN usuario AS u ON p.usuario_id = u.identificacion INNER JOIN " +
-                "producto ON p.producto_id = producto.vin WHERE id NOT IN (SELECT DISTINCT publicacion_id FROM comercio.oferta) AND" +
+        query = "SELECT * FROM comercio.publicacion AS p INNER JOIN comercio.usuario AS u ON p.usuario_id = u" +
+                ".identificacion INNER JOIN " +
+                "comercio.producto ON p.producto_id = comerico.producto.vin WHERE id NOT IN (SELECT DISTINCT " +
+                "publicacion_id " +
+                "FROM comercio.oferta) AND" +
                 "fecha  NOT BETWEEN DATE_SUB(curdate(), INTERVAL 5 DAY) AND curdate()";
         try (Statement statement = obtenerConexion().createStatement();
              ResultSet resultSet = statement.executeQuery(query)) {
             while (resultSet.next()) {
-                Publicacion publicacion = obtenerPublicacion(resultSet);
-                Usuario vendedor = obtenerUsuario(resultSet);
-                Vehiculo vehiculo = obtenerVehiculo(resultSet);
+                Publicacion publicacion = convertirPublicacion(resultSet);
+                Usuario vendedor = convertirUsuario(resultSet);
+                Vehiculo vehiculo = convertirVehiculo(resultSet);
                 publicacion.setVendedor(vendedor);
                 publicacion.setProducto(vehiculo);
                 publicacionesDeBaja.add(publicacion);
@@ -91,8 +89,7 @@ public class PublicacionDAO {
     }
 
     public void darDeBajaPublicaciones(List<Publicacion> listaPublicaciones) {
-        // TODO: 30/5/2023 actualizar el query
-        query = "UPDATE comercio.publicacion SET esta_disponible_web = ? WHERE id = ?";
+        query = UPDATE_PUBLICACION + " esta_disponible_web = ? WHERE id = ?";
 
         try {
             PreparedStatement statement = obtenerConexion().prepareStatement(query);
@@ -111,8 +108,7 @@ public class PublicacionDAO {
         }
     }
 
-    // TODO: 30/5/2023 cambiar nombre de metodos
-    private Publicacion obtenerPublicacion(ResultSet resultSet) throws SQLException {
+    private Publicacion convertirPublicacion(ResultSet resultSet) throws SQLException {
         Publicacion publicacion = new Publicacion();
         publicacion.setId(UUID.fromString(resultSet.getString("id")));
         publicacion.setFecha((resultSet.getDate("fecha")).toLocalDate());
@@ -121,8 +117,7 @@ public class PublicacionDAO {
         return publicacion;
     }
 
-    // TODO: 30/5/2023 cambiar nombre de metodos
-    private Vehiculo obtenerVehiculo(ResultSet resultSet) throws SQLException {
+    private Vehiculo convertirVehiculo(ResultSet resultSet) throws SQLException {
         Vehiculo vehiculo = new Vehiculo();
         vehiculo.setVin(resultSet.getString("vin"));
         vehiculo.setStockNumber(UUID.fromString(resultSet.getString("stock_number")));
@@ -130,20 +125,5 @@ public class PublicacionDAO {
         vehiculo.setModelo(resultSet.getString("modelo"));
         vehiculo.setAnio(resultSet.getInt("anio"));
         return vehiculo;
-    }
-
-    private int obtenerNumeroOfertas(UUID publicacionId) throws SQLException {
-        String queryOferta = "SELECT count(*) FROM comercio.oferta WHERE publicacion_id = '" + publicacionId + "'";
-        int numeroOfertas = 0;
-        Statement statementOferta = obtenerConexion().createStatement();
-        ResultSet resultSetOferta = statementOferta.executeQuery(queryOferta);
-        while (resultSetOferta.next()) {
-            numeroOfertas = resultSetOferta.getInt(1);
-        }
-        return numeroOfertas;
-    }
-
-    private boolean tieneMaximoDiasSinOfertas(LocalDate fechaPublicacion) {
-        return ChronoUnit.DAYS.between(fechaPublicacion, LocalDate.now()) >= MAX_DIAS_SIN_OFERTA;
     }
 }

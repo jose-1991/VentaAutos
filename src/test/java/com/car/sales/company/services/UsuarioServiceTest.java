@@ -208,7 +208,7 @@ public class UsuarioServiceTest {
     @Test
     public void testActualizarSuscripcionCaseUnsuscribirTodo() {
 
-        Usuario usuarioEsperado = usuarioService.actualizarSuscripciones(usuario1, null, , UNSUSCRIBIR_TODO);
+        Usuario usuarioEsperado = usuarioService.actualizarSuscripciones(usuario1, null,null , UNSUSCRIBIR_TODO);
 
         assertNotNull(usuarioEsperado);
         assertTrue(usuarioEsperado.getListaUnsuscribciones().containsAll(Arrays.asList(NombreNotificacion.values())));
@@ -217,7 +217,7 @@ public class UsuarioServiceTest {
     @Test
     public void testActualizarSuscripcionCaseSuscribirTodo() {
 
-        Usuario usuarioEsperado = usuarioService.actualizarSuscripciones(usuario1, null, , SUSCRIBIR_TODO);
+        Usuario usuarioEsperado = usuarioService.actualizarSuscripciones(usuario1, null,null , SUSCRIBIR_TODO);
         assertTrue(usuarioEsperado.getListaUnsuscribciones().isEmpty());
     }
 }

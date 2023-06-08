@@ -60,7 +60,6 @@ public class UsuarioService {
     }
 
     public Usuario actualizarSuscripciones(Usuario usuario, NombreNotificacion nombreNotificacion, TipoNotificacion tipoNotificacion, Accion accion) {
-        // TODO: 30/5/2023  crear objeto notificacion
 
         switch (accion) {
             case SUSCRIBIR:

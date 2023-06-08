@@ -19,10 +19,8 @@ public class OfertaDAO {
         return ConexionDB.obtenerInstancia();
     }
 
-
     public void agregarOferta(Oferta oferta, UUID publicacionId) {
-        query = "INSERT INTO comercio.oferta (usuario_id, publicacion_id, monto_oferta, monto_contra_oferta, " +
-                "inactivo, fecha)  VALUES(?,?,?,?,?,?)";
+        query = "INSERT INTO comercio.oferta VALUES(?,?,?,?,?,?)";
 
         try (PreparedStatement statement = obtenerConexion().prepareStatement(query)) {
             statement.setString(1, oferta.getComprador().getIdentificacion());
@@ -49,12 +47,10 @@ public class OfertaDAO {
     }
 
     public void actualizarOferta(UUID id, String identificacion, Accion accion) {
-        // TODO: 30/5/2023 optimizar queries, revisar String.format
         query = UPDATE_OFERTA + "inactivo = ? WHERE (usuario_id <> ? AND publicacion_id = ?)";
         if (accion.equals(RETIRAR_OFERTA)) {
             query = query.replace("<>", "=");
         }
-
         try (PreparedStatement statement = obtenerConexion().prepareStatement(query)) {
             statement.setBoolean(1, true);
             statement.setString(2, identificacion);
