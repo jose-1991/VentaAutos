@@ -6,20 +6,15 @@ import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
-import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
 
-import java.time.LocalDateTime;
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
-import java.util.List;
 
 import static com.car.sales.company.models.NombreNotificacion.*;
 import static com.car.sales.company.models.TipoNotificacion.*;
 import static com.car.sales.company.models.TipoUsuario.COMPRADOR;
 import static com.car.sales.company.models.TipoUsuario.VENDEDOR;
-import static com.car.sales.company.services.NotificacionService.*;
 import static org.junit.Assert.*;
 import static org.mockito.ArgumentMatchers.any;
 
@@ -28,7 +23,8 @@ public class NotificacionServiceTest {
 
     double montoOferta;
     double montoContraOferta;
-    Notificacion notificacion;
+    Notificacion notificacionSms;
+    Notificacion notificacionEmail;
     Vehiculo vehiculo;
     Usuario vendedor;
     Usuario comprador;
@@ -52,13 +48,13 @@ public class NotificacionServiceTest {
         vehiculo = new Vehiculo("1HGBH41JXMN109716", "Toyota", "Scion", 2020);
 
 
-//        notificacion = new Notificacion(COMPRADOR_PRIMERA_OFERTA, AMBOS, VENDEDOR);
+        notificacionSms = new Notificacion("1",COMPRADOR_PRIMERA_OFERTA, SMS, VENDEDOR);
+        notificacionEmail = new Notificacion("2",COMPRADOR_PRIMERA_OFERTA, EMAIL, VENDEDOR);
     }
 
     @Test
     public void testEnviarNotificacionCompradorPrimeraOfertaSoloEmail() {
-        notificacion.setTipoNotificacion(SMS);
-        vendedor.setListaUnsuscribciones(Collections.singletonList(notificacion));
+        vendedor.setListaUnsuscribciones(Collections.singletonList(notificacionSms));
 
         InputNotificacion inputNotificacionActual = notificacionService.enviarNotificacion(vendedor, vehiculo,
                 montoOferta, 0, COMPRADOR_PRIMERA_OFERTA);
@@ -70,8 +66,7 @@ public class NotificacionServiceTest {
 
     @Test
     public void testEnviarNotificacionCompradorPrimeraOfertaSoloSms() {
-        notificacion.setTipoNotificacion(EMAIL);
-        vendedor.setListaUnsuscribciones(Collections.singletonList(notificacion));
+        vendedor.setListaUnsuscribciones(Collections.singletonList(notificacionEmail));
 
         InputNotificacion inputNotificacionActual = notificacionService.enviarNotificacion(vendedor, vehiculo,
                 montoOferta, 0, COMPRADOR_PRIMERA_OFERTA);
@@ -95,9 +90,8 @@ public class NotificacionServiceTest {
 
     @Test
     public void testEnviarNotificacionCompradorNuevaOfertaSoloEmail() {
-        notificacion.setNombreNotificacion(COMPRADOR_NUEVA_OFERTA);
-        notificacion.setTipoNotificacion(SMS);
-        vendedor.setListaUnsuscribciones(Collections.singletonList(notificacion));
+        notificacionSms.setNombreNotificacion(COMPRADOR_NUEVA_OFERTA);
+        vendedor.setListaUnsuscribciones(Collections.singletonList(notificacionSms));
 
         InputNotificacion inputNotificacionActual = notificacionService.enviarNotificacion(vendedor, vehiculo,
                 montoOferta, 0, COMPRADOR_NUEVA_OFERTA);
@@ -109,9 +103,8 @@ public class NotificacionServiceTest {
 
     @Test
     public void testEnviarNotificacionCompradorNuevaOfertaSoloSms() {
-        notificacion.setNombreNotificacion(COMPRADOR_NUEVA_OFERTA);
-        notificacion.setTipoNotificacion(EMAIL);
-        vendedor.setListaUnsuscribciones(Collections.singletonList(notificacion));
+        notificacionEmail.setNombreNotificacion(COMPRADOR_NUEVA_OFERTA);
+        vendedor.setListaUnsuscribciones(Collections.singletonList(notificacionEmail));
 
         InputNotificacion inputNotificacionActual = notificacionService.enviarNotificacion(vendedor, vehiculo,
                 montoOferta, 0, COMPRADOR_NUEVA_OFERTA);
@@ -135,9 +128,8 @@ public class NotificacionServiceTest {
 
     @Test
     public void testEnviarNotificacionCompradorAceptaOfertaSoloEmail() {
-        notificacion.setNombreNotificacion(COMPRADOR_ACEPTA_OFERTA);
-        notificacion.setTipoNotificacion(SMS);
-        vendedor.setListaUnsuscribciones(Collections.singletonList(notificacion));
+        notificacionSms.setNombreNotificacion(COMPRADOR_ACEPTA_OFERTA);
+        vendedor.setListaUnsuscribciones(Collections.singletonList(notificacionSms));
 
         InputNotificacion inputNotificacionActual = notificacionService.enviarNotificacion(vendedor, vehiculo,
                 montoOferta, montoContraOferta, COMPRADOR_ACEPTA_OFERTA);
@@ -149,9 +141,8 @@ public class NotificacionServiceTest {
 
     @Test
     public void testEnviarNotificacionCompradorAceptaOfertaSoloSms() {
-        notificacion.setNombreNotificacion(COMPRADOR_ACEPTA_OFERTA);
-        notificacion.setTipoNotificacion(EMAIL);
-        vendedor.setListaUnsuscribciones(Collections.singletonList(notificacion));
+        notificacionEmail.setNombreNotificacion(COMPRADOR_ACEPTA_OFERTA);
+        vendedor.setListaUnsuscribciones(Collections.singletonList(notificacionEmail));
 
         InputNotificacion inputNotificacionActual = notificacionService.enviarNotificacion(vendedor, vehiculo,
                 montoOferta, montoContraOferta, COMPRADOR_ACEPTA_OFERTA);
@@ -198,9 +189,8 @@ public class NotificacionServiceTest {
 
     @Test
     public void testEnviarNotificacionNuevoVehiculoEnVentaSoloEmail() {
-        notificacion.setNombreNotificacion(NUEVO_VEHICULO_EN_VENTA);
-        notificacion.setTipoNotificacion(SMS);
-        comprador.setListaUnsuscribciones(Collections.singletonList(notificacion));
+        notificacionSms.setNombreNotificacion(NUEVO_VEHICULO_EN_VENTA);
+        comprador.setListaUnsuscribciones(Collections.singletonList(notificacionSms));
 
         InputNotificacion inputNotificacionActual = notificacionService.enviarNotificacion(comprador, vehiculo, 0,
                 0, NUEVO_VEHICULO_EN_VENTA);
@@ -212,9 +202,8 @@ public class NotificacionServiceTest {
 
     @Test
     public void testEnviarNotificacionNuevoVehiculoEnVentaSoloSms() {
-        notificacion.setNombreNotificacion(NUEVO_VEHICULO_EN_VENTA);
-        notificacion.setTipoNotificacion(EMAIL);
-        comprador.setListaUnsuscribciones(Collections.singletonList(notificacion));
+        notificacionEmail.setNombreNotificacion(NUEVO_VEHICULO_EN_VENTA);
+        comprador.setListaUnsuscribciones(Collections.singletonList(notificacionEmail));
 
         InputNotificacion inputNotificacionActual = notificacionService.enviarNotificacion(comprador, vehiculo, 0,
                 0, NUEVO_VEHICULO_EN_VENTA);
@@ -249,12 +238,11 @@ public class NotificacionServiceTest {
 
     @Test
     public void testEnviarNotificacionVendedorAceptaOfertaSoloEmail() {
-        notificacion.setNombreNotificacion(VENDEDOR_ACEPTA_OFERTA);
-        notificacion.setTipoNotificacion(SMS);
-        comprador.setListaUnsuscribciones(Collections.singletonList(notificacion));
+        notificacionSms.setNombreNotificacion(VENDEDOR_ACEPTA_OFERTA);
+        comprador.setListaUnsuscribciones(Collections.singletonList(notificacionSms));
 
         InputNotificacion inputNotificacionActual = notificacionService.enviarNotificacion(comprador, vehiculo, montoOferta,
-                0, COMPRADOR_ACEPTA_OFERTA);
+                0, VENDEDOR_ACEPTA_OFERTA);
 
         assertNotNull(inputNotificacionActual.getEmail());
         assertNull(inputNotificacionActual.getCelular());
@@ -263,12 +251,11 @@ public class NotificacionServiceTest {
 
     @Test
     public void testEnviarNotificacionVendedorAceptaOfertaSoloSms() {
-        notificacion.setNombreNotificacion(VENDEDOR_ACEPTA_OFERTA);
-        notificacion.setTipoNotificacion(EMAIL);
-        comprador.setListaUnsuscribciones(Collections.singletonList(notificacion));
+        notificacionEmail.setNombreNotificacion(VENDEDOR_ACEPTA_OFERTA);
+        comprador.setListaUnsuscribciones(Collections.singletonList(notificacionEmail));
 
         InputNotificacion inputNotificacionActual = notificacionService.enviarNotificacion(comprador, vehiculo, montoOferta,
-                0, COMPRADOR_ACEPTA_OFERTA);
+                0, VENDEDOR_ACEPTA_OFERTA);
 
         assertNotNull(inputNotificacionActual.getCelular());
         assertNull(inputNotificacionActual.getEmail());
@@ -280,7 +267,7 @@ public class NotificacionServiceTest {
         comprador.setListaUnsuscribciones(Collections.EMPTY_LIST);
 
         InputNotificacion inputNotificacionActual = notificacionService.enviarNotificacion(comprador, vehiculo, montoOferta,
-                0, COMPRADOR_ACEPTA_OFERTA);
+                0, VENDEDOR_ACEPTA_OFERTA);
 
         assertNotNull(inputNotificacionActual.getEmail());
         assertNotNull(inputNotificacionActual.getCelular());
@@ -299,10 +286,8 @@ public class NotificacionServiceTest {
     }
 
     @Test(expected = DatoInvalidoException.class)
-    public void testEnviarNotificacionBotaExceptionCuandoElUsuarioNoEstaSuscritoEnAmbos() {
-        notificacion.setNombreNotificacion(COMPRADOR_PRIMERA_OFERTA);
-        notificacion.setTipoNotificacion(AMBOS);
-        vendedor.setListaUnsuscribciones(Collections.singletonList(notificacion));
+    public void testEnviarNotificacionBotaExceptionCuandoElUsuarioNoEstaSuscrito() {
+        vendedor.setListaUnsuscribciones(Arrays.asList(notificacionSms,notificacionEmail));
 
         notificacionService.enviarNotificacion(vendedor, vehiculo, montoOferta, 0, COMPRADOR_PRIMERA_OFERTA);
     }

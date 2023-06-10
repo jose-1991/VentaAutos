@@ -92,21 +92,20 @@ public class UsuarioDAO {
 
     public Usuario modificarUsuario(String identificacion, String celular) {
         query =
-                "UPDATE comercio.usuario SET celular = ?, acepta_notificacion_sms = ?  WHERE identificacion = " + identificacion;
+                "UPDATE comercio.usuario SET celular = ?, acepta_notificacion_sms = ?  WHERE identificacion = ? ";
         Usuario usuario = null;
         boolean notificacionSms = celular != null;
-        try (PreparedStatement updateStatement = obtenerConexion().prepareStatement(query)) {
-            updateStatement.setString(1, celular);
-            updateStatement.setBoolean(2, notificacionSms);
-            updateStatement.executeUpdate();
+        try {
+            PreparedStatement statement = obtenerConexion().prepareStatement(query);
+            statement.setString(1, celular);
+            statement.setBoolean(2, notificacionSms);
+            statement.setString(3, identificacion);
+            statement.executeUpdate();
+            usuario = obtenerUsuario(identificacion);
 
-            query = SELECCIONAR_USUARIOS + "identificacion = '" + identificacion + "'";
-            try (Statement statement = obtenerConexion().createStatement();
-                 ResultSet resultSet = statement.executeQuery(query)) {
-                if (resultSet.next()) {
-                    usuario = convertirUsuario(resultSet);
-                }
-            }
+            statement.close();
+            obtenerConexion().close();
+
         } catch (SQLException e) {
             System.out.println("Error al modificar Usuario");
             e.printStackTrace();
@@ -126,7 +125,7 @@ public class UsuarioDAO {
         usuario.setEmail(resultSet.getString("email"));
         usuario.setCelular(resultSet.getString("celular"));
         usuario.setAceptaNotificacionSms(resultSet.getBoolean("acepta_notificacion_sms"));
-        String query = "SELECT * FROM comercio.notificacion WHERE id IN ("+SELECT_NOTIFICACIONES_ID_DE_USUARIO +")";
+        String query = "SELECT * FROM comercio.notificacion WHERE id IN (" + SELECT_NOTIFICACIONES_ID_DE_USUARIO + ")";
         PreparedStatement statement = obtenerConexion().prepareStatement(query);
         statement.setString(1, usuario.getIdentificacion());
         ResultSet resultSetUnsuscripcion = statement.executeQuery();
@@ -141,22 +140,26 @@ public class UsuarioDAO {
         return usuario;
     }
 
-    public void suscribirTodo(Usuario usuario) {
+    public Usuario suscribirTodo(String identificacion) {
         query = ELIMINAR_UNSUSCRIPCIONES;
-
+        Usuario usuario = null;
         try (PreparedStatement statement = obtenerConexion().prepareStatement(query)) {
-            statement.setString(1, usuario.getIdentificacion());
+            statement.setString(1, identificacion);
             statement.executeUpdate();
+            usuario = obtenerUsuario(identificacion);
 
+            statement.close();
+            obtenerConexion().close();
         } catch (SQLException e) {
             e.printStackTrace();
         }
-
+        return usuario;
     }
 
-    public void unsuscribirTodo(Usuario usuario) {
-        query = SELECT_ID_NOTIFICACION +" id NOT IN" +
-                "("+SELECT_NOTIFICACIONES_ID_DE_USUARIO+") AND tipo_usuario = ?";
+    public Usuario unsuscribirTodo(Usuario usuario) {
+        query = SELECT_ID_NOTIFICACION + " id NOT IN" +
+                "(" + SELECT_NOTIFICACIONES_ID_DE_USUARIO + ") AND tipo_usuario = ?";
+        Usuario usuarioModificado = null;
         try {
             PreparedStatement statement = obtenerConexion().prepareStatement(query);
             statement.setString(1, usuario.getIdentificacion());
@@ -172,35 +175,46 @@ public class UsuarioDAO {
                 statement.addBatch();
             }
             statement.executeBatch();
+            usuarioModificado = obtenerUsuario(usuario.getIdentificacion());
+            resultSet.close();
             obtenerConexion().commit();
             statement.close();
         } catch (SQLException e) {
             e.printStackTrace();
         }
+        return usuarioModificado;
     }
 
-    public void suscribirNotificacion(Usuario usuario, NombreNotificacion nombreNotificacion, TipoNotificacion tipoNotificacion) {
+    public Usuario suscribirNotificacion(String identificacion, NombreNotificacion nombreNotificacion,
+                                         TipoNotificacion tipoNotificacion) {
         query = ELIMINAR_UNSUSCRIPCIONES + " AND notificacion_id =" +
-                "("+SELECT_ID_NOTIFICACION +" nombre = ? AND tipo_notificacion = ?)";
-
+                "(" + SELECT_ID_NOTIFICACION + " nombre = ? AND tipo_notificacion = ?)";
+        Usuario usuario = null;
         try (PreparedStatement statement = obtenerConexion().prepareStatement(query)) {
-            statement.setString(1, usuario.getIdentificacion());
+            statement.setString(1, identificacion);
             statement.setString(2, nombreNotificacion.toString());
             statement.setString(3, tipoNotificacion.toString());
             statement.executeUpdate();
+            usuario = obtenerUsuario(identificacion);
+
+            statement.close();
+            obtenerConexion().close();
         } catch (SQLException e) {
             e.printStackTrace();
         }
+        return usuario;
     }
 
-    public void unsucribirNotificacion(Usuario usuario, NombreNotificacion nombreNotificacion, TipoNotificacion tipoNotificacion) {
+    public Usuario unsucribirNotificacion(String identificacion, NombreNotificacion nombreNotificacion,
+                                          TipoNotificacion tipoNotificacion) {
         query = "SELECT * FROM comercio.usuario_notificacion u " +
                 "    RIGHT JOIN comercio.notificacion n " +
                 "    ON  u.notificacion_id = n.id AND u.usuario_id = ? " +
-                "    WHERE n.id =("+ SELECT_ID_NOTIFICACION+" nombre = ? AND tipo_notificacion = ?);";
+                "    WHERE n.id =(" + SELECT_ID_NOTIFICACION + " nombre = ? AND tipo_notificacion = ?)";
+        Usuario usuario = null;
         try {
             PreparedStatement statement = obtenerConexion().prepareStatement(query);
-            statement.setString(1, usuario.getIdentificacion());
+            statement.setString(1, identificacion);
             statement.setString(2, nombreNotificacion.toString());
             statement.setString(3, tipoNotificacion.toString());
             ResultSet resultSet = statement.executeQuery();
@@ -208,14 +222,33 @@ public class UsuarioDAO {
                 if (resultSet.getString("usuario_id") == null) {
                     query = REGISTRAR_UNSUSCRIPCION;
                     statement = obtenerConexion().prepareStatement(query);
-                    statement.setString(1, usuario.getIdentificacion());
+                    statement.setString(1, identificacion);
                     statement.setString(2, resultSet.getString("id"));
                     statement.executeUpdate();
                 }
             }
-
+            usuario = obtenerUsuario(identificacion);
+            resultSet.close();
+            statement.close();
+            obtenerConexion().close();
         } catch (SQLException e) {
             e.printStackTrace();
         }
+        return usuario;
+    }
+
+
+    public Usuario obtenerUsuario(String identificacion) throws SQLException {
+        query = SELECCIONAR_USUARIOS + "identificacion = ?";
+        Usuario usuario = null;
+        PreparedStatement statement = obtenerConexion().prepareStatement(query);
+        statement.setString(1, identificacion);
+        ResultSet resultSet = statement.executeQuery();
+        while (resultSet.next()) {
+            usuario = convertirUsuario(resultSet);
+        }
+        resultSet.close();
+        statement.close();
+        return usuario;
     }
 }

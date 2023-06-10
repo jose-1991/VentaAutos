@@ -56,26 +56,29 @@ public class UsuarioService {
 
     public Usuario modificarUsuario(String identificacion, String celular) {
         validarString(identificacion);
+        validarCelular(celular);
         return usuarioDAO.modificarUsuario(identificacion, validarCelular(celular));
     }
 
     public Usuario actualizarSuscripciones(Usuario usuario, NombreNotificacion nombreNotificacion, TipoNotificacion tipoNotificacion, Accion accion) {
-
+        Usuario usuarioModificado = null;
         switch (accion) {
             case SUSCRIBIR:
-                usuarioDAO.suscribirNotificacion(usuario, nombreNotificacion, tipoNotificacion);
+                usuarioModificado = usuarioDAO.suscribirNotificacion(usuario.getIdentificacion(), nombreNotificacion,
+                        tipoNotificacion);
                 break;
             case UNSUSCRIBIR:
-                usuarioDAO.unsucribirNotificacion(usuario, nombreNotificacion, tipoNotificacion);
+                usuarioModificado = usuarioDAO.unsucribirNotificacion(usuario.getIdentificacion(), nombreNotificacion,
+                        tipoNotificacion);
                 break;
             case SUSCRIBIR_TODO:
-                usuarioDAO.suscribirTodo(usuario);
+                usuarioModificado = usuarioDAO.suscribirTodo(usuario.getIdentificacion());
                 break;
             case UNSUSCRIBIR_TODO:
-                usuarioDAO.unsuscribirTodo(usuario);
+                usuarioModificado = usuarioDAO.unsuscribirTodo(usuario);
                 break;
         }
-        return usuario;
+        return usuarioModificado;
     }
 
     private void validarEmail(String email) {
