@@ -44,11 +44,11 @@ public class PublicacionService {
             publicacionDAO.registrarPublicacionProducto(publicacion);
             List<Usuario> listaCompradores = usuarioDAO.obtenerCompradores();
             if (!listaCompradores.isEmpty()) {
-                notificacionService.notificarTodosLosCompradores(listaCompradores, producto, NUEVO_VEHICULO_EN_VENTA);
+                notificarTodosLosCompradores(listaCompradores, producto, NUEVO_VEHICULO_EN_VENTA);
             }
             return publicacion;
         }
-        throw new DatoInvalidoException("El usuario debe ser de tipo vendedor");
+        throw new DatoInvalidoException("El usuario y el Producto no deben ser Nulos");
     }
 
     public int darDeBajaPublicaciones() {
@@ -67,7 +67,7 @@ public class PublicacionService {
             publicacion.setFecha(LocalDate.now());
             publicacion.setEstaDisponibleEnLaWeb(true);
             publicacionDAO.rePublicarProducto(publicacion.getId(), nuevoPrecioProducto);
-            notificacionService.notificarTodosLosCompradores(usuarioDAO.obtenerCompradores(), publicacion.getProducto(),
+            notificarTodosLosCompradores(usuarioDAO.obtenerCompradores(), publicacion.getProducto(),
                     NUEVO_VEHICULO_EN_VENTA);
         } else {
             throw new DatoInvalidoException("el nuevo precio debe ser menor al precio actual");
@@ -75,7 +75,7 @@ public class PublicacionService {
         return publicacion;
     }
 
-    public Vehiculo obtenerVehiculoRandom() {
+    public static Vehiculo obtenerVehiculoRandom() {
         Vehiculo vehiculo = new Vehiculo();
         List<String> listaMarcas = Arrays.asList("Toyota", "Nissan", "Mitsubishi", "Ford", "Hyundai", "Chevrolet",
                 "Kia", "Mazda", "Suzuki", "BMW");
@@ -91,7 +91,7 @@ public class PublicacionService {
         return vehiculo;
     }
 
-    public String generarRandomVin() {
+    public static String generarRandomVin() {
         String characters = "0123456789ABCDEFGHJKLMNPRSTUVWXYZ";
         Random random = new Random();
         StringBuilder sb = new StringBuilder(17);
@@ -103,6 +103,10 @@ public class PublicacionService {
         }
         return sb.toString();
     }
-
-
+    public void notificarTodosLosCompradores(List<Usuario> compradores, Producto producto,
+                                             NombreNotificacion nombreNotificacion) {
+        for (Usuario usuario : compradores) {
+            notificacionService.enviarNotificacion(usuario, producto, 0, 0, nombreNotificacion);
+        }
+    }
 }

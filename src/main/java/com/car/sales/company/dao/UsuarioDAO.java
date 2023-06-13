@@ -8,7 +8,6 @@ import java.util.List;
 
 import static com.car.sales.company.models.TipoNotificacion.SMS;
 
-
 public class UsuarioDAO {
     private final String SELECT_ID_NOTIFICACION = "SELECT id FROM comercio.notificacion WHERE";
     private static final String SELECT_NOTIFICACIONES_ID_DE_USUARIO = "SELECT notificacion_id FROM comercio" +
@@ -71,6 +70,9 @@ public class UsuarioDAO {
             obtenerConexion().commit();
             statement.close();
 
+        } catch (SQLIntegrityConstraintViolationException exception) {
+            System.out.println("El usuario ingresado con identificacion = " + usuario.getIdentificacion() + "  -> Ya " +
+                    "esta registrado");
         } catch (SQLException exception) {
             System.out.println("Error al registrar usuario");
             exception.printStackTrace();
@@ -112,7 +114,6 @@ public class UsuarioDAO {
         }
         return usuario;
     }
-
 
     public static Usuario convertirUsuario(ResultSet resultSet) throws SQLException {
         Usuario usuario = new Usuario();
@@ -190,7 +191,8 @@ public class UsuarioDAO {
         query = ELIMINAR_UNSUSCRIPCIONES + " AND notificacion_id =" +
                 "(" + SELECT_ID_NOTIFICACION + " nombre = ? AND tipo_notificacion = ?)";
         Usuario usuario = null;
-        try (PreparedStatement statement = obtenerConexion().prepareStatement(query)) {
+        try {
+            PreparedStatement statement = obtenerConexion().prepareStatement(query);
             statement.setString(1, identificacion);
             statement.setString(2, nombreNotificacion.toString());
             statement.setString(3, tipoNotificacion.toString());
@@ -231,6 +233,9 @@ public class UsuarioDAO {
             resultSet.close();
             statement.close();
             obtenerConexion().close();
+        } catch (SQLIntegrityConstraintViolationException exception) {
+            System.out.println("El usuario ya esta suscrito a la notificacion ingresada");
+            exception.printStackTrace();
         } catch (SQLException e) {
             e.printStackTrace();
         }

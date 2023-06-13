@@ -14,7 +14,7 @@ public class UsuarioService {
 
     private final String VALIDAR_EMAIL = "^[a-zA-Z0-9_!#$%&'*+/=?`{|}~^.-]+@[a-zA-Z0-9.-]+$";
     private final String VALIDAR_CELULAR = "^(\\+591)?(6|7)[0-9]{7}$";
-    private final String VALIDAR_PASAPORTE = "^\\d{7,11}([\\s-]\\d[A-Z])?$";      //"^\\d{7,11}([\\s-]\\d[A-Z])?$";
+    private final String VALIDAR_PASAPORTE = "^\\d{7,11}([\\s-]\\d[A-Z])?$";
     private final String VALIDAR_CI_LICENCIA = "^[0-9]{7,11}$";
     private final String PASAPORTE = "Pasaporte";
     private UsuarioDAO usuarioDAO;
@@ -84,7 +84,7 @@ public class UsuarioService {
     private void validarEmail(String email) {
         validarString(email);
         if (!email.matches(VALIDAR_EMAIL)) {
-            throw new RuntimeException(email + " -> no es un email valido");
+            throw new DatoInvalidoException(email + " -> no es un email valido");
         }
     }
 
@@ -95,7 +95,7 @@ public class UsuarioService {
         if (celular.matches(VALIDAR_CELULAR)) {
             return celular;
         }
-        throw new RuntimeException(celular + " -> no tiene el formato adecuado");
+        throw new DatoInvalidoException(celular + " -> no tiene el formato adecuado");
     }
 
     private void validarIdentificacion(String identificacion, String tipoIdentificacion) {
@@ -107,7 +107,7 @@ public class UsuarioService {
         if (identificacion.matches(regex)) {
             return;
         }
-        throw new RuntimeException(identificacion + " -> identificacion invalida");
+        throw new DatoInvalidoException(identificacion + " -> identificacion invalida");
     }
 }
 

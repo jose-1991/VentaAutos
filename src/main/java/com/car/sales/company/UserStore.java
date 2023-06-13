@@ -51,10 +51,10 @@ public class UserStore {
         InputNotificacion inputNotificacion = new InputNotificacion(COMPRADOR_PRIMERA_OFERTA, vehiculo, 120, 0, "javi.31_82@hotmail" +
                 ".com", "8771824");
 
-//        usuarioService.modificarUsuario("12345678", null);
-        Usuario usuario2 = usuarioService.actualizarSuscripciones(usuario,COMPRADOR_PRIMERA_OFERTA, SMS,
-                UNSUSCRIBIR_TODO);
-        System.out.println(usuario2.getListaUnsuscribciones().size());
+        usuarioService.registrarUsuario(usuario);
+//        Usuario usuario2 = usuarioService.actualizarSuscripciones(usuario, COMPRADOR_PRIMERA_OFERTA, SMS,
+//                UNSUSCRIBIR_TODO);
+//        System.out.println(usuario2.getListaUnsuscribciones().size());
 //        System.out.println(LocalDate.now().minusDays(6));
 //        usuarioService.registrarUsuario(usuario);
 //        publicacionDAO.registrarPublicacionProducto(publicacion);

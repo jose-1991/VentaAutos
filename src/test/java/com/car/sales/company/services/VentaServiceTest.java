@@ -22,6 +22,7 @@ import java.util.Collections;
 import static com.car.sales.company.models.Accion.*;
 import static com.car.sales.company.models.TipoUsuario.COMPRADOR;
 import static com.car.sales.company.models.TipoUsuario.VENDEDOR;
+import static com.car.sales.company.services.PublicacionService.obtenerVehiculoRandom;
 import static org.junit.Assert.*;
 import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.Mockito.times;
@@ -32,14 +33,11 @@ public class VentaServiceTest {
 
     private double montoOferta;
     private double montoContraOferta;
-    private Oferta oferta;
     private Oferta oferta2;
     private Oferta oferta3;
     private Usuario comprador;
-    private Usuario comprador2;
     private Usuario comprador3;
     private Usuario vendedor;
-    private Vehiculo vehiculo;
     private Publicacion publicacion;
 
     @Mock
@@ -58,7 +56,7 @@ public class VentaServiceTest {
         montoContraOferta = 1203;
         comprador = new Usuario("Ruben", "Sanchez", "ci", "5203746",
                 "rube.123-122@gmail.com", COMPRADOR, null);
-        comprador2 = new Usuario("Joel", "Sanchez", "ci", "1245362",
+        Usuario comprador2 = new Usuario("Joel", "Sanchez", "ci", "1245362",
                 "rube.123-122@gmail.com", COMPRADOR, null);
         comprador3 = new Usuario("Jenny", "Soria", "ci", "9763642",
                 "rube.123-122@gmail.com", COMPRADOR, null);
@@ -66,9 +64,9 @@ public class VentaServiceTest {
         vendedor = new Usuario("Jorge", "Lopez", "ci", "5203717",
                 "jorgito-122@gmail.com", VENDEDOR, null);
 
-        vehiculo = new Vehiculo("1HGBH41JXMN109716", "Toyota", "Scion", 2020);
+        Vehiculo vehiculo = obtenerVehiculoRandom();
 
-        oferta = new Oferta( comprador,17000, 0, LocalDateTime.now());
+        Oferta oferta = new Oferta(comprador, 17000, 0, LocalDateTime.now());
         oferta2 = new Oferta(comprador2, 14000, 0,  LocalDateTime.now());
         oferta3 = new Oferta(comprador3, 18600, 0,  LocalDateTime.now());
 
@@ -141,6 +139,11 @@ public class VentaServiceTest {
         verify(ofertaDaoMock).actualizarOferta(any(),anyString(),any());
     }
 
+    @Test(expected = DatoInvalidoException.class)
+    public void testInteractuarCaseAceptarOfertaBotaExceptionCuandoLaPublicacionNoTieneOfertas() {
+        publicacion.setOfertasCompradores(Collections.EMPTY_LIST);
+        ventaService.interactuar(publicacion, vendedor, ACEPTAR_OFERTA, 0);
+    }
     @Test
     public void testInteractuarCaseAceptarOfertaCaseComprador() {
         oferta3.setMontoOferta(19000);
@@ -158,14 +161,9 @@ public class VentaServiceTest {
     }
 
     @Test(expected = DatoInvalidoException.class)
-    public void testInteractuarCaseRetirarOfertaBotaExceptionCuandoElUsuarioEsVendedor() {
-        ventaService.interactuar(publicacion, vendedor, RETIRAR_OFERTA, 0);
-    }
-
-    @Test(expected = DatoInvalidoException.class)
-    public void testInteractuarCaseRetirarOfertaBotaExceptionCuandoElUsuarioNoTieneOfertaEnLaPublicacion() {
+    public void testInteractuarCaseAceptarOfertaBotaExceptionCuandoElUsuarioNoTieneOfertaEnLaPublicacion() {
         publicacion.setOfertasCompradores(Collections.EMPTY_LIST);
-        ventaService.interactuar(publicacion, vendedor, RETIRAR_OFERTA, 0);
+        ventaService.interactuar(publicacion, comprador, ACEPTAR_OFERTA, 0);
     }
 
     @Test
@@ -177,6 +175,19 @@ public class VentaServiceTest {
         verify(ofertaDaoMock).actualizarOferta(any(),anyString(),any());
         verify(notificacionServiceMock).enviarNotificacion(any(), any(), anyDouble(), anyDouble(), any());
     }
+
+    @Test(expected = DatoInvalidoException.class)
+    public void testInteractuarCaseRetirarOfertaBotaExceptionCuandoElUsuarioEsVendedor() {
+        ventaService.interactuar(publicacion, vendedor, RETIRAR_OFERTA, 0);
+    }
+
+    @Test(expected = DatoInvalidoException.class)
+    public void testInteractuarCaseRetirarOfertaBotaExceptionCuandoElUsuarioNoTieneOfertaEnLaPublicacion() {
+        publicacion.setOfertasCompradores(Collections.EMPTY_LIST);
+        ventaService.interactuar(publicacion, vendedor, RETIRAR_OFERTA, 0);
+    }
+
+
 
     @Test
     public void testInteractuarCaseOfertarCaseCompradorPrimeraOferta() {

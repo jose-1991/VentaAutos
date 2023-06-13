@@ -13,6 +13,7 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
 
+import java.sql.SQLIntegrityConstraintViolationException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -22,7 +23,6 @@ import static com.car.sales.company.models.Accion.*;
 import static com.car.sales.company.models.NombreNotificacion.*;
 import static com.car.sales.company.models.TipoNotificacion.EMAIL;
 import static com.car.sales.company.models.TipoNotificacion.SMS;
-import static com.car.sales.company.models.TipoUsuario.COMPRADOR;
 import static com.car.sales.company.models.TipoUsuario.VENDEDOR;
 import static org.junit.Assert.*;
 import static org.mockito.ArgumentMatchers.any;
@@ -33,10 +33,10 @@ import static org.mockito.Mockito.when;
 @RunWith(MockitoJUnitRunner.class)
 public class UsuarioServiceTest {
 
-    NombreNotificacion nombreNotificacion;
-    String identificacionEsperado;
-    Usuario usuarioEsperado;
-    Notificacion notificacion;
+    private NombreNotificacion nombreNotificacion;
+    private String identificacionEsperado;
+    private Usuario usuarioEsperado;
+    private Notificacion notificacion;
 
     @Mock
     private UsuarioDAO usuarioDaoMock;
@@ -64,6 +64,31 @@ public class UsuarioServiceTest {
         verify(usuarioDaoMock).registrarUsuario(any());
     }
 
+
+    @Test (expected = DatoInvalidoException.class)
+    public void testRegistrarUsuarioBotaExceptionCuandoElUsuarioEsNull(){
+
+        usuarioService.registrarUsuario(null);
+    }
+
+    @Test (expected = DatoInvalidoException.class)
+    public void testRegistrarUsuarioBotaExceptionCuandoElUsuarioElEmailTieneFormatoInvalido(){
+        usuarioEsperado.setEmail("sadqw");
+        usuarioService.registrarUsuario(usuarioEsperado);
+    }
+
+    @Test (expected = DatoInvalidoException.class)
+    public void testRegistrarUsuarioBotaExceptionCuandoElUsuarioElCelularTieneFormatoInvalido(){
+        usuarioEsperado.setCelular("6452");
+        usuarioService.registrarUsuario(usuarioEsperado);
+    }
+
+    @Test (expected = DatoInvalidoException.class)
+    public void testRegistrarUsuarioBotaExceptionCuandoElUsuarioLaIdentificacionTieneFormatoInvalido(){
+        usuarioEsperado.setIdentificacion("421A");
+        usuarioService.registrarUsuario(usuarioEsperado);
+    }
+
     @Test
     public void testRegistrarUsuarioCuandoCelularEsVacioNoActualizaElConsentimiento() {
 
@@ -83,6 +108,7 @@ public class UsuarioServiceTest {
 
     @Test
     public void testRegistrarUsuarioVerificaTodosLosDatosObligatoriosHanSidoIngresados() {
+        usuarioEsperado.setTipoIdentificacion("Pasaporte");
         Usuario usuarioActual = usuarioService.registrarUsuario(usuarioEsperado);
 
         Assert.assertEquals(usuarioEsperado.getNombre(), usuarioActual.getNombre());
@@ -176,6 +202,11 @@ public class UsuarioServiceTest {
         assertTrue(usuarioActual.getListaUnsuscribciones().contains(notificacion));
         assertEquals(nombreNotificacion, usuarioActual.getListaUnsuscribciones().get(0).getNombreNotificacion());
         assertEquals(SMS, usuarioActual.getListaUnsuscribciones().get(0).getTipoNotificacion());
+    }
+    @Test (expected = SQLIntegrityConstraintViolationException.class)
+    public void testActualizarSuscripcionCaseUnsuscribirBotaExceptionCuandoYaEstaUnsuscrito(){
+        when(usuarioDaoMock.unsucribirNotificacion(anyString(),any(),any())).thenThrow(SQLIntegrityConstraintViolationException.class);
+        usuarioService.actualizarSuscripciones(usuarioEsperado, nombreNotificacion, SMS, UNSUSCRIBIR);
     }
 
     @Test

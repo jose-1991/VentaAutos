@@ -23,6 +23,7 @@ import java.util.List;
 
 import static com.car.sales.company.models.TipoUsuario.COMPRADOR;
 import static com.car.sales.company.models.TipoUsuario.VENDEDOR;
+import static com.car.sales.company.services.PublicacionService.obtenerVehiculoRandom;
 import static org.junit.Assert.*;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyDouble;
@@ -41,7 +42,7 @@ public class PublicacionServiceTest {
     private Usuario comprador2;
     private Vehiculo vehiculo;
     private List<Usuario> listaUsuariosEsperada;
-    List<Publicacion> listaPublicacionesEsperada;
+    private List<Publicacion> listaPublicacionesEsperada;
 
     @Mock
     private UsuarioDAO usuarioDaoMock;
@@ -65,7 +66,7 @@ public class PublicacionServiceTest {
         vendedor = new Usuario("Jorge", "Lopez", "ci", "5203717",
                 "jorgito-122@gmail.com", VENDEDOR, null);
 
-        vehiculo = new Vehiculo("1HGBH41JXMN109716", "Toyota", "Scion", 2020);
+        vehiculo = obtenerVehiculoRandom();
 
         publicacion1 = new Publicacion();
         publicacion1.setVendedor(vendedor);
@@ -75,7 +76,7 @@ public class PublicacionServiceTest {
 
         publicacion2 = new Publicacion();
         publicacion2.setVendedor(vendedor);
-        publicacion2.setProducto(new Vehiculo("1HGBH41JXMN109716", "Toyota", "CH-R", 2021));
+        publicacion2.setProducto(obtenerVehiculoRandom());
         publicacion2.setOfertasCompradores(new ArrayList<>());
         publicacion2.setEstaDisponibleEnLaWeb(true);
 
@@ -91,7 +92,6 @@ public class PublicacionServiceTest {
         assertNotNull(publicacionActual);
         assertTrue(publicacionActual.isEstaDisponibleEnLaWeb());
         verify(publicacionDaoMock).registrarPublicacionProducto(any());
-        verify(notificacionServiceMock).notificarTodosLosCompradores(any(), any(), any());
     }
 
     @Test(expected = DatoInvalidoException.class)
@@ -149,7 +149,6 @@ public class PublicacionServiceTest {
         assertTrue(publicacionActual.isEstaDisponibleEnLaWeb());
         assertEquals(LocalDate.now(), publicacionActual.getFecha());
         verify(publicacionDaoMock).rePublicarProducto(any(), anyDouble());
-        verify(notificacionServiceMock).notificarTodosLosCompradores(any(), any(), any());
     }
 
     @Test(expected = DatoInvalidoException.class)
@@ -158,5 +157,13 @@ public class PublicacionServiceTest {
         nuevoPrecio = 18000;
 
         publicacionService.rePublicarProducto(publicacion1, nuevoPrecio);
+    }
+
+    @Test
+    public void testObtenerVehiculoRandom(){
+
+       Vehiculo vehiculoActual = obtenerVehiculoRandom();
+
+       assertNotNull(vehiculoActual);
     }
 }

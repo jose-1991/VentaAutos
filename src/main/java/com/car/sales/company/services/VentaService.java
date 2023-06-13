@@ -140,6 +140,9 @@ public class VentaService {
     private Oferta obtenerMayorOferta(List<Oferta> ofertasCompradores) {
         double montoMayor = 0;
         Oferta ofertaMontoMayor = null;
+        if (ofertasCompradores.isEmpty()){
+            throw new DatoInvalidoException("La lista de ofertas de la Publicacion esta vacia");
+        }
         for (Oferta ofertaActual : ofertasCompradores) {
             if (ofertaActual.getMontoOferta() > montoMayor) {
                 montoMayor = ofertaActual.getMontoOferta();

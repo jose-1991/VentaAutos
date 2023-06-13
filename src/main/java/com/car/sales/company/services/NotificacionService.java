@@ -39,11 +39,6 @@ public class NotificacionService {
                 n.getNombreNotificacion().equals(nombreNotificacion) && n.getTipoNotificacion().equals(tipoNotificacion));
     }
 
-    public void notificarTodosLosCompradores(List<Usuario> compradores, Producto producto,
-                                             NombreNotificacion nombreNotificacion) {
-        for (Usuario usuario : compradores) {
-            enviarNotificacion(usuario, producto, 0, 0, nombreNotificacion);
-        }
-    }
+
 
 }
