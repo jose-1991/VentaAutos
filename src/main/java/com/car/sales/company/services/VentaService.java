@@ -8,6 +8,7 @@ import com.car.sales.company.models.*;
 import java.time.LocalDateTime;
 import java.util.Collections;
 import java.util.List;
+import java.util.UUID;
 
 import static com.car.sales.company.helper.ValidacionHelper.validarPositivoDecimal;
 import static com.car.sales.company.models.Accion.ACEPTAR_OFERTA;
@@ -15,7 +16,6 @@ import static com.car.sales.company.models.Accion.RETIRAR_OFERTA;
 import static com.car.sales.company.models.NombreNotificacion.*;
 import static com.car.sales.company.models.TipoUsuario.COMPRADOR;
 import static com.car.sales.company.models.TipoUsuario.VENDEDOR;
-import static com.car.sales.company.services.NotificacionService.*;
 
 public class VentaService {
     NotificacionService notificacionService;
@@ -31,7 +31,7 @@ public class VentaService {
     public Publicacion interactuar(Publicacion publicacion, Usuario usuario, Accion accion, double nuevoMonto) {
         switch (accion) {
             case OFERTAR:
-                return interactuarConOfertar(publicacion, usuario, nuevoMonto);
+                return interactuarConOfertar(publicacion.getId(), usuario, nuevoMonto);
             case CONTRA_OFERTAR:
                 return interactuarConContraOferta(publicacion, usuario, nuevoMonto);
             case ACEPTAR_OFERTA:
@@ -42,7 +42,8 @@ public class VentaService {
         return publicacion;
     }
 
-    private Publicacion interactuarConOfertar(Publicacion publicacion, Usuario usuario, double monto) {
+    private Publicacion interactuarConOfertar(UUID publicacionId, Usuario usuario, double monto) {
+        Publicacion publicacion = publicacionDAO.obtenerPublicacion(publicacionId);
         if (usuario.getTipoUsuario().equals(COMPRADOR)) {
             Oferta oferta = new Oferta(usuario, validarPositivoDecimal(monto), 0,
                     LocalDateTime.now());
@@ -53,7 +54,7 @@ public class VentaService {
                 nombreNotificacion = COMPRADOR_NUEVA_OFERTA;
             }
             publicacion.getOfertasCompradores().add(oferta);
-            ofertaDAO.agregarOferta(oferta, publicacion.getId());
+            ofertaDAO.agregarOferta(oferta, publicacionId);
             notificacionService.enviarNotificacion(publicacion.getVendedor(), publicacion.getProducto(), monto,
                     0, nombreNotificacion);
         } else {

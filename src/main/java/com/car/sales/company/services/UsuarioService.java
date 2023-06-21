@@ -60,22 +60,23 @@ public class UsuarioService {
         return usuarioDAO.modificarUsuario(identificacion, validarCelular(celular));
     }
 
-    public Usuario actualizarSuscripciones(Usuario usuario, NombreNotificacion nombreNotificacion, TipoNotificacion tipoNotificacion, Accion accion) {
+    public Usuario actualizarSuscripciones(String usuarioId, NombreNotificacion nombreNotificacion, TipoNotificacion tipoNotificacion, Accion accion) {
+        // TODO: 21/6/2023 revisar  celular y consentimiento SMS
         Usuario usuarioModificado = null;
         switch (accion) {
             case SUSCRIBIR:
-                usuarioModificado = usuarioDAO.suscribirNotificacion(usuario.getIdentificacion(), nombreNotificacion,
+                usuarioModificado = usuarioDAO.suscribirNotificacion(usuarioId, nombreNotificacion,
                         tipoNotificacion);
                 break;
             case UNSUSCRIBIR:
-                usuarioModificado = usuarioDAO.unsucribirNotificacion(usuario.getIdentificacion(), nombreNotificacion,
+                usuarioModificado = usuarioDAO.unsucribirNotificacion(usuarioId, nombreNotificacion,
                         tipoNotificacion);
                 break;
             case SUSCRIBIR_TODO:
-                usuarioModificado = usuarioDAO.suscribirTodo(usuario.getIdentificacion());
+                usuarioModificado = usuarioDAO.suscribirTodo(usuarioId);
                 break;
             case UNSUSCRIBIR_TODO:
-                usuarioModificado = usuarioDAO.unsuscribirTodo(usuario);
+                usuarioModificado = usuarioDAO.unsuscribirTodo(usuarioId);
                 break;
         }
         return usuarioModificado;

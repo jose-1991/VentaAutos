@@ -30,12 +30,12 @@ public class UserStore {
         VentaService ventaService = new VentaService(notificacionService, ofertaDAO, publicacionDAO);
         PublicacionService publicacionService = new PublicacionService(notificacionService,
                 publicacionDAO, usuarioDAO);
-        Usuario usuario = new Usuario("Javier", "Rodriguez", "licencia", "111111222",
+        Usuario usuario = new Usuario("Javier", "Rodriguez", "licencia", "12345678",
                 "javi.31_82@hotmail.com", VENDEDOR, "77426426");
         usuario.setListaUnsuscribciones(new ArrayList<>());
         usuario.setAceptaNotificacionSms(true);
 //        usuario.setAceptaNotificacionSms(true);
-        Usuario usuario1 = new Usuario("jose", "sanz", "licencia", "111111222",
+        Usuario usuario1 = new Usuario("jose", "sanz", "licencia", "48123984",
                 "javi.31_82@hotmail.com", COMPRADOR, "77426426");
         usuario1.setAceptaNotificacionSms(true);
         usuario1.setListaUnsuscribciones(new ArrayList<>());
@@ -50,16 +50,16 @@ public class UserStore {
         publicacion.setOfertasCompradores(new ArrayList<>());
         publicacion.getOfertasCompradores().add(new Oferta(usuario1,90,80,LocalDateTime.now()));
         publicacion.setEstaDisponibleEnLaWeb(true);
-        publicacion.setPrecio(80);
-        publicacion.setFecha(LocalDate.now().minusDays(8));
-        publicacion.setId(UUID.fromString("865272c5-b716-44ca-8963-4f9030e813d8"));
+        publicacion.setPrecio(800);
+        publicacion.setFecha(LocalDate.now());
+//        publicacion.setId(UUID.fromString("865272c5-b716-44ca-8963-4f9030e813d8"));
 
 //        publicacionService.publicarProducto(usuario, vehiculo, 80);
-        ventaService.interactuar(publicacion,usuario1, ACEPTAR_OFERTA, 70);
-//            ofertaDAO.agregarOferta(new Oferta(usuario1,10,0,LocalDateTime.now()), UUID.fromString(null));
-//        usuarioService.registrarUsuario(usuario);
-//        Usuario usuario2 = usuarioService.actualizarSuscripciones(usuario, COMPRADOR_PRIMERA_OFERTA, SMS,
-//                UNSUSCRIBIR_TODO);
+//        ventaService.interactuar(publicacion,usuario1, ACEPTAR_OFERTA, 0);
+//            ofertaDAO.agregarOferta(new Oferta(usuario1,10,0,LocalDateTime.now()), UUID.fromString("d406d889-f690-4611-a7dd-cfde8d4e1509"));
+//        usuarioService.actualizarSuscripciones(usuario, "77774752");
+        Usuario usuario2 = usuarioService.actualizarSuscripciones("23527494", COMPRADOR_PRIMERA_OFERTA, SMS,
+                UNSUSCRIBIR);
 //        System.out.println(usuario2.getListaUnsuscribciones().size());
 //        System.out.println(LocalDate.now().minusDays(6));
 //        usuarioService.registrarUsuario(usuario);
@@ -67,7 +67,7 @@ public class UserStore {
 //        System.out.println(publicacionDAO.obtenerPublicacionesDeBaja());
 //                System.out.println(UUID.randomUUID());
 //        System.out.println(new Date());
-//        publicacionDAO.rePublicarProducto(UUID.fromString("cf522537-35b1-484c-94c7-04f4788b7a7e"), 70);
+//        publicacionDAO.rePublicarProducto(UUID.fromString("865272c5-b716-44ca-8963-4f9030e813d8"), 50);
 //        System.out.println(usuarioDAO.modificarUsuario("12345678", "788899765"));
 //        List<Usuario> usuarios = usuarioDAO.obtenerCompradores();
 //        System.out.println(usuarios);

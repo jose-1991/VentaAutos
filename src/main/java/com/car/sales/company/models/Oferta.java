@@ -10,6 +10,9 @@ public class Oferta {
     private LocalDateTime fechaOferta;
     private boolean inactivo;
 
+    public Oferta() {
+    }
+
     public Oferta(Usuario comprador, double montoOferta, double montoContraOferta,
                   LocalDateTime fechaOferta) {
 

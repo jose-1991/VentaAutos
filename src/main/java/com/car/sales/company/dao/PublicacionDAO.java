@@ -1,16 +1,19 @@
 package com.car.sales.company.dao;
 
 import com.car.sales.company.exceptions.DatoInvalidoException;
-import com.car.sales.company.models.Publicacion;
-import com.car.sales.company.models.Usuario;
-import com.car.sales.company.models.Vehiculo;
+import com.car.sales.company.models.*;
 
 import java.sql.*;
+import java.time.Instant;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.ZoneId;
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 
+import static com.car.sales.company.dao.OfertaDAO.ejecutarQuerySql;
 import static com.car.sales.company.dao.UsuarioDAO.convertirUsuario;
 
 public class PublicacionDAO {
@@ -23,48 +26,22 @@ public class PublicacionDAO {
 
     public void registrarPublicacionProducto(Publicacion publicacion) {
         Vehiculo vehiculo = (Vehiculo) publicacion.getProducto();
-        query = "INSERT INTO comercio.producto VALUES(?,?,?,?,?)";
-        try {
-            PreparedStatement statement = obtenerConexion().prepareStatement(query);
-            statement.setString(1, vehiculo.getVin());
-            statement.setString(2, vehiculo.getStockNumber().toString());
-            statement.setString(3, vehiculo.getMarca());
-            statement.setString(4, vehiculo.getModelo());
-            statement.setInt(5, vehiculo.getAnio());
-            statement.executeUpdate();
+        query =
+                "INSERT INTO comercio.producto VALUES('" + vehiculo.getVin() + "','" + vehiculo.getStockNumber() + "','" + vehiculo.getMarca() + "','" +
+                        vehiculo.getModelo() + "','" + vehiculo.getAnio() + "')";
+        ejecutarQuerySql(query);
 
-            query = "INSERT INTO comercio.publicacion VALUES(?,?,?,?,?,?)";
-
-            statement = obtenerConexion().prepareStatement(query);
-            statement.setString(1, String.valueOf(UUID.randomUUID()));
-            statement.setString(2, publicacion.getVendedor().getIdentificacion());
-            statement.setString(3, vehiculo.getVin());
-            statement.setDate(4, Date.valueOf(publicacion.getFecha()));
-            statement.setDouble(5, publicacion.getPrecio());
-            statement.setBoolean(6, publicacion.isEstaDisponibleEnLaWeb());
-            statement.executeUpdate();
-            statement.close();
-
-        } catch (SQLException e) {
-            if (e instanceof SQLIntegrityConstraintViolationException) {
-                throw new DatoInvalidoException("Error! La publicacion ya existe");
-            }
-            throw new DatoInvalidoException("Error al registrar publicacion");
-        }
+        query =
+                "INSERT INTO comercio.publicacion VALUES('" + publicacion.getId() + "','" + publicacion.getVendedor().getIdentificacion() + "','" +
+                        vehiculo.getVin() + "','" + publicacion.getFecha() + "','" + publicacion.getPrecio() + "','1')";
+        ejecutarQuerySql(query);
     }
 
     public void rePublicarProducto(UUID id, double precio) {
-        query = UPDATE_PUBLICACION + " esta_disponible_web = ?, precio = ?,fecha = ? WHERE id = '" + id + "'";
+        query =
+                UPDATE_PUBLICACION + " esta_disponible_web = 1, precio = '"+precio+"',fecha = '"+LocalDate.now()+"' WHERE id = '" + id + "'";
 
-        try (PreparedStatement statement = obtenerConexion().prepareStatement(query)) {
-            statement.setBoolean(1, true);
-            statement.setDouble(2, precio);
-            statement.setDate(3, Date.valueOf(LocalDate.now()));
-            statement.executeUpdate();
-        } catch (SQLException e) {
-            throw new DatoInvalidoException("Hubo un error al republicar producto! Intente nuevamente");
-        }
-
+        ejecutarQuerySql(query);
     }
 
     public List<Publicacion> obtenerPublicacionesParaDarDeBaja() {
@@ -129,5 +106,44 @@ public class PublicacionDAO {
         vehiculo.setModelo(resultSet.getString("modelo"));
         vehiculo.setAnio(resultSet.getInt("anio"));
         return vehiculo;
+    }
+
+    public Publicacion obtenerPublicacion(UUID id) {
+        Publicacion publicacion = new Publicacion();
+        Usuario usuario = new Usuario();
+        Vehiculo vehiculo = new Vehiculo();
+
+        query = "SELECT *, o.fecha AS fecha_oferta  FROM comercio.publicacion p LEFT JOIN comercio.oferta o ON  p.id = o.publicacion_id " +
+                "WHERE p.id = '" + id + "'";
+        try (Statement statement = obtenerConexion().createStatement();
+             ResultSet resultSet = statement.executeQuery(query)) {
+            while (resultSet.next()) {
+                publicacion.setId(UUID.fromString(resultSet.getString("id")));
+                usuario.setIdentificacion(resultSet.getString("usuario_id"));
+                vehiculo.setVin(resultSet.getString("producto_id"));
+                publicacion.setFecha(resultSet.getDate("fecha").toLocalDate());
+                publicacion.setPrecio(resultSet.getDouble("precio"));
+                publicacion.setEstaDisponibleEnLaWeb(resultSet.getBoolean("esta_disponible_web"));
+                publicacion.setVendedor(usuario);
+                publicacion.setProducto(vehiculo);
+                publicacion.setOfertasCompradores(new ArrayList<>());
+                //    2023-06-21T15:13:01.759
+                if (resultSet.getDate("fecha") != null) {
+                    Oferta oferta = new Oferta();
+                    usuario.setIdentificacion(resultSet.getString("usuario_id"));
+                    oferta.setComprador(usuario);
+                    oferta.setMontoOferta(resultSet.getDouble("monto_oferta"));
+                    oferta.setMontoContraOferta(resultSet.getDouble("monto_contra_oferta"));
+                    DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
+                    String dateTime = resultSet.getString("fecha_oferta");
+                    LocalDateTime localDateTime = LocalDateTime.parse(dateTime, formatter);
+                    oferta.setFechaOferta(localDateTime);
+                    publicacion.getOfertasCompradores().add(oferta);
+                }
+            }
+        } catch (SQLException e) {
+            throw new DatoInvalidoException("Hubo un error al obtener publicacicon! Intente nuevamente");
+        }
+        return publicacion;
     }
 }
