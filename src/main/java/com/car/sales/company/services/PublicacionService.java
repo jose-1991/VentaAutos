@@ -75,34 +75,7 @@ public class PublicacionService {
         return publicacion;
     }
 
-    public static Vehiculo obtenerVehiculoRandom() {
-        Vehiculo vehiculo = new Vehiculo();
-        List<String> listaMarcas = Arrays.asList("Toyota", "Nissan", "Mitsubishi", "Ford", "Hyundai", "Chevrolet",
-                "Kia", "Mazda", "Suzuki", "BMW");
-        List<String> listaModelos = Arrays.asList("Alto", "Scion", "Versa", "Focus", "Veloster", "Celica", "Montero",
-                "Demio", "Baleno", "CHR");
-        int indexMarca = (int) (Math.random() * listaMarcas.size());
-        int indexModelo = (int) (Math.random() * listaModelos.size());
-        int anioRandom = (int) ((Math.random() * 13) + 2010);
-        vehiculo.setVin(generarRandomVin());
-        vehiculo.setMarca(listaMarcas.get(indexMarca));
-        vehiculo.setModelo(listaModelos.get(indexModelo));
-        vehiculo.setAnio(anioRandom);
-        return vehiculo;
-    }
 
-    public static String generarRandomVin() {
-        String characters = "0123456789ABCDEFGHJKLMNPRSTUVWXYZ";
-        Random random = new Random();
-        StringBuilder sb = new StringBuilder(17);
-
-        for (int i = 0; i < 17; i++) {
-            int index = random.nextInt(characters.length());
-            char randomChar = characters.charAt(index);
-            sb.append(randomChar);
-        }
-        return sb.toString();
-    }
     public void notificarTodosLosCompradores(List<Usuario> compradores, Producto producto,
                                              NombreNotificacion nombreNotificacion) {
         for (Usuario usuario : compradores) {

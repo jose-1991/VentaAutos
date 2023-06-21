@@ -1,5 +1,6 @@
 package com.car.sales.company.dao;
 
+import com.car.sales.company.exceptions.DatoInvalidoException;
 import com.car.sales.company.models.*;
 
 import java.sql.*;
@@ -32,7 +33,7 @@ public class UsuarioDAO {
                 listaCompradores.add(usuario);
             }
         } catch (SQLException e) {
-            e.printStackTrace();
+            throw new DatoInvalidoException("Hubo un error al obtener compradores! Intente nuevamente");
         }
         return listaCompradores;
     }
@@ -70,12 +71,12 @@ public class UsuarioDAO {
             obtenerConexion().commit();
             statement.close();
 
-        } catch (SQLIntegrityConstraintViolationException exception) {
-            System.out.println("El usuario ingresado con identificacion = " + usuario.getIdentificacion() + "  -> Ya " +
-                    "esta registrado");
-        } catch (SQLException exception) {
-            System.out.println("Error al registrar usuario");
-            exception.printStackTrace();
+        } catch (SQLException e) {
+            if(e instanceof SQLIntegrityConstraintViolationException){
+                throw  new DatoInvalidoException("El usuario ingresado con identificacion = " + usuario.getIdentificacion() +
+                        "  -> Ya esta registrado");
+            }
+            throw new DatoInvalidoException("Hubo un error al registrar usuario! Intente nuevamente");
         }
     }
 
@@ -87,8 +88,7 @@ public class UsuarioDAO {
             statement.executeUpdate();
 
         } catch (SQLException e) {
-            System.out.println("Error al eliminar un usuario");
-            e.printStackTrace();
+            throw new DatoInvalidoException("Hubo un error al eliminar usuario! Intente nuevamente");
         }
     }
 
@@ -109,8 +109,7 @@ public class UsuarioDAO {
             obtenerConexion().close();
 
         } catch (SQLException e) {
-            System.out.println("Error al modificar Usuario");
-            e.printStackTrace();
+            throw new DatoInvalidoException("Hubo un error al modificar usuario! Intente nuevamente");
         }
         return usuario;
     }
@@ -152,7 +151,8 @@ public class UsuarioDAO {
             statement.close();
             obtenerConexion().close();
         } catch (SQLException e) {
-            e.printStackTrace();
+            throw new DatoInvalidoException("Hubo un error al suscribir todas las notificaciones! Intente " +
+                    "nuevamente");
         }
         return usuario;
     }
@@ -181,7 +181,8 @@ public class UsuarioDAO {
             obtenerConexion().commit();
             statement.close();
         } catch (SQLException e) {
-            e.printStackTrace();
+            throw new DatoInvalidoException("Hubo un error al unsuscribir todas las notificaciones! Intente " +
+                    "nuevamente");
         }
         return usuarioModificado;
     }
@@ -202,7 +203,7 @@ public class UsuarioDAO {
             statement.close();
             obtenerConexion().close();
         } catch (SQLException e) {
-            e.printStackTrace();
+            throw new DatoInvalidoException("Hubo un error al suscribir la notificacion! Intente nuevamente");
         }
         return usuario;
     }
@@ -233,11 +234,11 @@ public class UsuarioDAO {
             resultSet.close();
             statement.close();
             obtenerConexion().close();
-        } catch (SQLIntegrityConstraintViolationException exception) {
-            System.out.println("El usuario ya esta suscrito a la notificacion ingresada");
-            exception.printStackTrace();
-        } catch (SQLException e) {
-            e.printStackTrace();
+        }catch (SQLException e) {
+            if(e instanceof SQLIntegrityConstraintViolationException){
+                throw  new DatoInvalidoException("El usuario ya esta suscrito a la notificacion ingresada");
+            }
+            throw new DatoInvalidoException("Hubo un error al unsuscribir notificacion! Intente nuevamente");
         }
         return usuario;
     }

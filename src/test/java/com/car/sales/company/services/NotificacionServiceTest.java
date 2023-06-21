@@ -19,7 +19,7 @@ import static com.car.sales.company.models.TipoNotificacion.EMAIL;
 import static com.car.sales.company.models.TipoNotificacion.SMS;
 import static com.car.sales.company.models.TipoUsuario.COMPRADOR;
 import static com.car.sales.company.models.TipoUsuario.VENDEDOR;
-import static com.car.sales.company.services.PublicacionService.obtenerVehiculoRandom;
+import static com.car.sales.company.services.PublicacionServiceTest.obtenerVehiculoRandom;
 import static org.junit.Assert.*;
 
 @RunWith(MockitoJUnitRunner.class)
@@ -56,6 +56,8 @@ public class NotificacionServiceTest {
         notificacionSms = new Notificacion("1", COMPRADOR_PRIMERA_OFERTA, SMS, VENDEDOR);
         notificacionEmail = new Notificacion("2", COMPRADOR_PRIMERA_OFERTA, EMAIL, VENDEDOR);
     }
+
+
 
     @Test
     public void testEnviarNotificacionCompradorPrimeraOfertaSoloEmail() {

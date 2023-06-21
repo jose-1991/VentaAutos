@@ -11,13 +11,14 @@ import com.car.sales.company.services.VentaService;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
-import java.util.Collections;
+import java.util.*;
 
 import static com.car.sales.company.models.Accion.*;
 import static com.car.sales.company.models.NombreNotificacion.*;
 import static com.car.sales.company.models.TipoNotificacion.SMS;
 import static com.car.sales.company.models.TipoUsuario.COMPRADOR;
 import static com.car.sales.company.models.TipoUsuario.VENDEDOR;
+
 
 public class UserStore {
     public static void main(String[] args) {
@@ -31,27 +32,32 @@ public class UserStore {
                 publicacionDAO, usuarioDAO);
         Usuario usuario = new Usuario("Javier", "Rodriguez", "licencia", "111111222",
                 "javi.31_82@hotmail.com", VENDEDOR, "77426426");
+        usuario.setListaUnsuscribciones(new ArrayList<>());
+        usuario.setAceptaNotificacionSms(true);
 //        usuario.setAceptaNotificacionSms(true);
-        Usuario usuario1 = new Usuario("jose", "sanz", "licencia", "40123984",
+        Usuario usuario1 = new Usuario("jose", "sanz", "licencia", "111111222",
                 "javi.31_82@hotmail.com", COMPRADOR, "77426426");
+        usuario1.setAceptaNotificacionSms(true);
+        usuario1.setListaUnsuscribciones(new ArrayList<>());
 //        usuario.setUnsuscribcionesSms(new ArrayList<>());
 //        usuario.getUnsuscripcionesSms().add(COMPRADOR_PRIMERA_OFERTA);
 //        usuario.getUnsuscripcionesSms().add(COMPRADOR_ACEPTA_OFERTA);
 
-        Vehiculo vehiculo = new Vehiculo("54GHH73JXMN109736", "Toyota", "Scion", 2020);
+        Vehiculo vehiculo = obtenerVehiculoRandom();
         Publicacion publicacion = new Publicacion();
         publicacion.setVendedor(usuario);
         publicacion.setProducto(vehiculo);
-        publicacion.setOfertasCompradores(Collections.singletonList(new Oferta(usuario1, 100, 0,
-                LocalDateTime.now())));
+        publicacion.setOfertasCompradores(new ArrayList<>());
+        publicacion.getOfertasCompradores().add(new Oferta(usuario1,90,80,LocalDateTime.now()));
         publicacion.setEstaDisponibleEnLaWeb(true);
         publicacion.setPrecio(80);
         publicacion.setFecha(LocalDate.now().minusDays(8));
+        publicacion.setId(UUID.fromString("865272c5-b716-44ca-8963-4f9030e813d8"));
 
-        InputNotificacion inputNotificacion = new InputNotificacion(COMPRADOR_PRIMERA_OFERTA, vehiculo, 120, 0, "javi.31_82@hotmail" +
-                ".com", "8771824");
-
-        usuarioService.registrarUsuario(usuario);
+//        publicacionService.publicarProducto(usuario, vehiculo, 80);
+        ventaService.interactuar(publicacion,usuario1, ACEPTAR_OFERTA, 70);
+//            ofertaDAO.agregarOferta(new Oferta(usuario1,10,0,LocalDateTime.now()), UUID.fromString(null));
+//        usuarioService.registrarUsuario(usuario);
 //        Usuario usuario2 = usuarioService.actualizarSuscripciones(usuario, COMPRADOR_PRIMERA_OFERTA, SMS,
 //                UNSUSCRIBIR_TODO);
 //        System.out.println(usuario2.getListaUnsuscribciones().size());
@@ -81,5 +87,34 @@ public class UserStore {
 //        System.out.println(publicacion1.getOfertasCompradores().get(0).getMontoContraOferta());
 //        ofertaDAO.actualizarOferta(UUID.fromString("564847e8-187d-4783-90d0-d38708f949bb"), "40123984", Accion.RETIRAR_OFERTA);
 //        System.out.println((int) ((Math.random() * 13) + 2010));
+    }
+
+    public static Vehiculo obtenerVehiculoRandom() {
+        Vehiculo vehiculo = new Vehiculo();
+        List<String> listaMarcas = Arrays.asList("Toyota", "Nissan", "Mitsubishi", "Ford", "Hyundai", "Chevrolet",
+                "Kia", "Mazda", "Suzuki", "BMW");
+        List<String> listaModelos = Arrays.asList("Alto", "Scion", "Versa", "Focus", "Veloster", "Celica", "Montero",
+                "Demio", "Baleno", "CHR");
+        int indexMarca = (int) (Math.random() * listaMarcas.size());
+        int indexModelo = (int) (Math.random() * listaModelos.size());
+        int anioRandom = (int) ((Math.random() * 13) + 2010);
+        vehiculo.setVin(generarRandomVin());
+        vehiculo.setMarca(listaMarcas.get(indexMarca));
+        vehiculo.setModelo(listaModelos.get(indexModelo));
+        vehiculo.setAnio(anioRandom);
+        return vehiculo;
+    }
+
+    public static String generarRandomVin() {
+        String characters = "0123456789ABCDEFGHJKLMNPRSTUVWXYZ";
+        Random random = new Random();
+        StringBuilder sb = new StringBuilder(17);
+
+        for (int i = 0; i < 17; i++) {
+            int index = random.nextInt(characters.length());
+            char randomChar = characters.charAt(index);
+            sb.append(randomChar);
+        }
+        return sb.toString();
     }
 }

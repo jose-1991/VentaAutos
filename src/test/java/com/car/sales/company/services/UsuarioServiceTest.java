@@ -203,9 +203,10 @@ public class UsuarioServiceTest {
         assertEquals(nombreNotificacion, usuarioActual.getListaUnsuscribciones().get(0).getNombreNotificacion());
         assertEquals(SMS, usuarioActual.getListaUnsuscribciones().get(0).getTipoNotificacion());
     }
-    @Test (expected = SQLIntegrityConstraintViolationException.class)
+    @Test (expected = DatoInvalidoException.class)
     public void testActualizarSuscripcionCaseUnsuscribirBotaExceptionCuandoYaEstaUnsuscrito(){
-        when(usuarioDaoMock.unsucribirNotificacion(anyString(),any(),any())).thenThrow(SQLIntegrityConstraintViolationException.class);
+        
+        when(usuarioDaoMock.unsucribirNotificacion(anyString(),any(),any())).thenThrow(DatoInvalidoException.class);
         usuarioService.actualizarSuscripciones(usuarioEsperado, nombreNotificacion, SMS, UNSUSCRIBIR);
     }
 

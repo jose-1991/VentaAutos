@@ -46,11 +46,10 @@ public class ValidacionHelper {
     }
 
     public static double validarPositivoDecimal(double valor) {
-
         if (valor >= 1) {
             return Math.round(valor * 100.0) / 100.0;
         } else {
-            throw new DatoInvalidoException("Numeros negativos no son validos");
+            throw new DatoInvalidoException("El numero debe ser mayor a cero");
         }
     }
 }

@@ -16,14 +16,10 @@ import org.mockito.junit.MockitoJUnitRunner;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.List;
+import java.util.*;
 
 import static com.car.sales.company.models.TipoUsuario.COMPRADOR;
 import static com.car.sales.company.models.TipoUsuario.VENDEDOR;
-import static com.car.sales.company.services.PublicacionService.obtenerVehiculoRandom;
 import static org.junit.Assert.*;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyDouble;
@@ -165,5 +161,34 @@ public class PublicacionServiceTest {
        Vehiculo vehiculoActual = obtenerVehiculoRandom();
 
        assertNotNull(vehiculoActual);
+    }
+
+    public static Vehiculo obtenerVehiculoRandom() {
+        Vehiculo vehiculo = new Vehiculo();
+        List<String> listaMarcas = Arrays.asList("Toyota", "Nissan", "Mitsubishi", "Ford", "Hyundai", "Chevrolet",
+                "Kia", "Mazda", "Suzuki", "BMW");
+        List<String> listaModelos = Arrays.asList("Alto", "Scion", "Versa", "Focus", "Veloster", "Celica", "Montero",
+                "Demio", "Baleno", "CHR");
+        int indexMarca = (int) (Math.random() * listaMarcas.size());
+        int indexModelo = (int) (Math.random() * listaModelos.size());
+        int anioRandom = (int) ((Math.random() * 13) + 2010);
+        vehiculo.setVin(generarRandomVin());
+        vehiculo.setMarca(listaMarcas.get(indexMarca));
+        vehiculo.setModelo(listaModelos.get(indexModelo));
+        vehiculo.setAnio(anioRandom);
+        return vehiculo;
+    }
+
+    public static String generarRandomVin() {
+        String characters = "0123456789ABCDEFGHJKLMNPRSTUVWXYZ";
+        Random random = new Random();
+        StringBuilder sb = new StringBuilder(17);
+
+        for (int i = 0; i < 17; i++) {
+            int index = random.nextInt(characters.length());
+            char randomChar = characters.charAt(index);
+            sb.append(randomChar);
+        }
+        return sb.toString();
     }
 }

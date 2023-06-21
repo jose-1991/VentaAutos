@@ -1,5 +1,6 @@
 package com.car.sales.company.dao;
 
+import com.car.sales.company.exceptions.DatoInvalidoException;
 import com.car.sales.company.models.Publicacion;
 import com.car.sales.company.models.Usuario;
 import com.car.sales.company.models.Vehiculo;
@@ -44,14 +45,16 @@ public class PublicacionDAO {
             statement.executeUpdate();
             statement.close();
 
-        } catch (SQLException exception) {
-            System.out.println("Error al registrar publicacion");
-            exception.printStackTrace();
+        } catch (SQLException e) {
+            if (e instanceof SQLIntegrityConstraintViolationException) {
+                throw new DatoInvalidoException("Error! La publicacion ya existe");
+            }
+            throw new DatoInvalidoException("Error al registrar publicacion");
         }
     }
 
     public void rePublicarProducto(UUID id, double precio) {
-        query = UPDATE_PUBLICACION +" esta_disponible_web = ?, precio = ?,fecha = ? WHERE id = '" + id + "'";
+        query = UPDATE_PUBLICACION + " esta_disponible_web = ?, precio = ?,fecha = ? WHERE id = '" + id + "'";
 
         try (PreparedStatement statement = obtenerConexion().prepareStatement(query)) {
             statement.setBoolean(1, true);
@@ -59,7 +62,7 @@ public class PublicacionDAO {
             statement.setDate(3, Date.valueOf(LocalDate.now()));
             statement.executeUpdate();
         } catch (SQLException e) {
-            e.printStackTrace();
+            throw new DatoInvalidoException("Hubo un error al republicar producto! Intente nuevamente");
         }
 
     }
@@ -83,7 +86,8 @@ public class PublicacionDAO {
                 publicacionesDeBaja.add(publicacion);
             }
         } catch (SQLException e) {
-            e.printStackTrace();
+            throw new DatoInvalidoException("Hubo un error al obtener publicacicones para dar de baja! Intente " +
+                    "nuevamente");
         }
         return publicacionesDeBaja;
     }
@@ -104,7 +108,7 @@ public class PublicacionDAO {
             obtenerConexion().commit();
             statement.close();
         } catch (SQLException e) {
-            e.printStackTrace();
+            throw new DatoInvalidoException("Hubo un error al dar de baja publicaciones! Intente nuevamente");
         }
     }
 

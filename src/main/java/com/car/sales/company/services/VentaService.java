@@ -65,10 +65,14 @@ public class VentaService {
     private Publicacion interactuarConContraOferta(Publicacion publicacion, Usuario comprador, double nuevoMonto) {
         if (comprador.getTipoUsuario().equals(COMPRADOR)) {
             Oferta ofertaActual = encontrarOfertaUsuario(publicacion, comprador);
-            ofertaActual.setMontoContraOferta(nuevoMonto);
-            ofertaDAO.interaccionContraOferta(comprador.getIdentificacion(), publicacion.getId(), nuevoMonto);
-            notificacionService.enviarNotificacion(comprador, publicacion.getProducto(), ofertaActual.getMontoOferta(),
-                    ofertaActual.getMontoContraOferta(), VENDEDOR_CONTRAOFERTA);
+            if (ofertaActual.getMontoContraOferta() == 0) {
+                ofertaActual.setMontoContraOferta(nuevoMonto);
+                ofertaDAO.interaccionContraOferta(comprador.getIdentificacion(), publicacion.getId(), nuevoMonto);
+                notificacionService.enviarNotificacion(comprador, publicacion.getProducto(), ofertaActual.getMontoOferta(),
+                        ofertaActual.getMontoContraOferta(), VENDEDOR_CONTRAOFERTA);
+            }else {
+                throw new DatoInvalidoException("El usuario ya realizo una contra oferta");
+            }
         } else {
             throw new DatoInvalidoException("El usuario debe ser comprador");
         }
@@ -115,7 +119,6 @@ public class VentaService {
             ofertaDAO.actualizarOferta(publicacion.getId(), usuario.getIdentificacion(), RETIRAR_OFERTA);
             notificacionService.enviarNotificacion(publicacion.getVendedor(), publicacion.getProducto(),
                     ofertaActual.getMontoOferta(), ofertaActual.getMontoContraOferta(), COMPRADOR_RETIRA_OFERTA);
-
 
         } else {
             throw new DatoInvalidoException("El usuario debe ser de tipo comprador");

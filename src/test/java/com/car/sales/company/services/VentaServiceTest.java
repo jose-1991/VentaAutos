@@ -22,7 +22,7 @@ import java.util.Collections;
 import static com.car.sales.company.models.Accion.*;
 import static com.car.sales.company.models.TipoUsuario.COMPRADOR;
 import static com.car.sales.company.models.TipoUsuario.VENDEDOR;
-import static com.car.sales.company.services.PublicacionService.obtenerVehiculoRandom;
+import static com.car.sales.company.services.PublicacionServiceTest.obtenerVehiculoRandom;
 import static org.junit.Assert.*;
 import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.Mockito.times;
