@@ -14,7 +14,7 @@ import static com.car.sales.company.models.Accion.RETIRAR_OFERTA;
 
 public class OfertaDAO {
 
-    private final String UPDATE_OFERTA = "UPDATE comercio.oferta SET ";
+    private final String UPDATE_OFERTA = "UPDATE comercio.oferta ";
     String query;
 
     private static Connection obtenerConexion() throws SQLException {
@@ -30,17 +30,20 @@ public class OfertaDAO {
     }
 
     public void interaccionContraOferta(String identificacion, UUID publicacionId, double nuevoMonto) {
-        query = UPDATE_OFERTA + "monto_contra_oferta = '" + nuevoMonto + "' WHERE publicacion_id = '" + publicacionId + "' AND" +
+        query =
+                UPDATE_OFERTA + " SET monto_contra_oferta = '" + nuevoMonto + "' WHERE publicacion_id = '" + publicacionId + "' AND" +
                 " usuario_id = '" + identificacion + "'";
+
         ejecutarQuerySql(query);
     }
 
     public void actualizarOferta(UUID id, String identificacion, Accion accion) {
-        query = UPDATE_OFERTA + "inactivo = '1' WHERE (usuario_id <> '" + identificacion + "' AND publicacion_id = '" +
-                id + "')";
+        query = UPDATE_OFERTA + "SET inactivo = '1' WHERE (usuario_id <> '" + identificacion + "' AND publicacion_id " +
+                "= '" + id + "')";
         if (accion.equals(RETIRAR_OFERTA)) {
             query = query.replace("<>", "=");
         }
+
         ejecutarQuerySql(query);
     }
 

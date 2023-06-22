@@ -1,13 +1,14 @@
 package com.car.sales.company.dao;
 
 import com.car.sales.company.exceptions.DatoInvalidoException;
-import com.car.sales.company.models.*;
+import com.car.sales.company.models.Oferta;
+import com.car.sales.company.models.Publicacion;
+import com.car.sales.company.models.Usuario;
+import com.car.sales.company.models.Vehiculo;
 
 import java.sql.*;
-import java.time.Instant;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
-import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.List;
@@ -17,7 +18,7 @@ import static com.car.sales.company.dao.OfertaDAO.ejecutarQuerySql;
 import static com.car.sales.company.dao.UsuarioDAO.convertirUsuario;
 
 public class PublicacionDAO {
-    String UPDATE_PUBLICACION = "UPDATE comercio.publicacion SET";
+    String UPDATE_PUBLICACION = "UPDATE comercio.publicacion ";
     String query;
 
     private Connection obtenerConexion() throws SQLException {
@@ -26,20 +27,17 @@ public class PublicacionDAO {
 
     public void registrarPublicacionProducto(Publicacion publicacion) {
         Vehiculo vehiculo = (Vehiculo) publicacion.getProducto();
-        query =
-                "INSERT INTO comercio.producto VALUES('" + vehiculo.getVin() + "','" + vehiculo.getStockNumber() + "','" + vehiculo.getMarca() + "','" +
-                        vehiculo.getModelo() + "','" + vehiculo.getAnio() + "')";
+        query = "INSERT INTO comercio.producto VALUES('" + vehiculo.getVin() + "','" + vehiculo.getStockNumber() + "','" +
+                vehiculo.getMarca() + "','" + vehiculo.getModelo() + "','" + vehiculo.getAnio() + "')";
         ejecutarQuerySql(query);
 
-        query =
-                "INSERT INTO comercio.publicacion VALUES('" + publicacion.getId() + "','" + publicacion.getVendedor().getIdentificacion() + "','" +
-                        vehiculo.getVin() + "','" + publicacion.getFecha() + "','" + publicacion.getPrecio() + "','1')";
+        query = "INSERT INTO comercio.publicacion VALUES('" + publicacion.getId() + "','" + publicacion.getVendedor().getIdentificacion() +
+                "','" + vehiculo.getVin() + "','" + publicacion.getFecha() + "','" + publicacion.getPrecio() + "','1')";
         ejecutarQuerySql(query);
     }
 
     public void rePublicarProducto(UUID id, double precio) {
-        query =
-                UPDATE_PUBLICACION + " esta_disponible_web = 1, precio = '"+precio+"',fecha = '"+LocalDate.now()+"' WHERE id = '" + id + "'";
+        query = UPDATE_PUBLICACION + "SET esta_disponible_web = 1, precio = '" + precio + "',fecha = '" + LocalDate.now() + "' WHERE id = '" + id + "'";
 
         ejecutarQuerySql(query);
     }
@@ -70,7 +68,7 @@ public class PublicacionDAO {
     }
 
     public void darDeBajaPublicaciones(List<Publicacion> listaPublicaciones) {
-        query = UPDATE_PUBLICACION + " esta_disponible_web = ? WHERE id = ?";
+        query = UPDATE_PUBLICACION + "SET esta_disponible_web = ? WHERE id = ?";
 
         try {
             PreparedStatement statement = obtenerConexion().prepareStatement(query);
@@ -128,7 +126,7 @@ public class PublicacionDAO {
                 publicacion.setProducto(vehiculo);
                 publicacion.setOfertasCompradores(new ArrayList<>());
                 //    2023-06-21T15:13:01.759
-                if (resultSet.getDate("fecha") != null) {
+                if (resultSet.getDate("fecha_oferta") != null) {
                     Oferta oferta = new Oferta();
                     usuario.setIdentificacion(resultSet.getString("usuario_id"));
                     oferta.setComprador(usuario);
@@ -146,4 +144,14 @@ public class PublicacionDAO {
         }
         return publicacion;
     }
+
+    public void generico(String query){
+        try(Statement statement = obtenerConexion().createStatement();
+        ResultSet resultSet = statement.executeQuery(query)) {
+
+        }catch (SQLException e){
+
+        }
+    }
+
 }
