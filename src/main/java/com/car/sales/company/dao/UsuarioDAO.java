@@ -7,7 +7,7 @@ import java.sql.*;
 import java.util.ArrayList;
 import java.util.List;
 
-import static com.car.sales.company.dao.OfertaDAO.ejecutarQuerySql;
+import static com.car.sales.company.dao.OfertaDAO.ejecutarQueryParaModificaciones;
 import static com.car.sales.company.models.TipoNotificacion.SMS;
 
 public class UsuarioDAO {
@@ -45,7 +45,7 @@ public class UsuarioDAO {
                 "INSERT INTO comercio.usuario VALUES('" + usuario.getIdentificacion() + "','" + usuario.getNombre() + "','" + usuario.getApellido() +
                         "','" + usuario.getTipoIdentificacion() + "','" + usuario.getTipoUsuario() + "','" + usuario.getEmail() + "'," +
                         "'" + usuario.getCelular() + "','" + aceptaNotificacionesSms + "')";
-        ejecutarQuerySql(query);
+        ejecutarQueryParaModificaciones(query);
         try {
             query = SELECT_ID_FROM_NOTIFICACION + "WHERE tipo_notificacion = ? and tipo_usuario = ?";
             PreparedStatement statement = obtenerConexion().prepareStatement(query);
@@ -77,7 +77,7 @@ public class UsuarioDAO {
 
     public void eliminarUsuario(String identificacion) {
         query = "DELETE FROM comercio.usuario WHERE identificacion = '" + identificacion + "'";
-        ejecutarQuerySql(query);
+        ejecutarQueryParaModificaciones(query);
     }
 
     public Usuario modificarUsuario(String identificacion, String celular) {
@@ -85,7 +85,7 @@ public class UsuarioDAO {
         query =
                 "UPDATE comercio.usuario SET celular = '" + celular + "', acepta_notificacion_sms = '" + notificacionSms + "'  WHERE " +
                         "identificacion = '" + identificacion + "'";
-        ejecutarQuerySql(query);
+        ejecutarQueryParaModificaciones(query);
         return obtenerUsuario(identificacion);
     }
 
@@ -122,7 +122,7 @@ public class UsuarioDAO {
             query += "AND notificacion_id NOT IN (SELECT id FROM comercio.notificacion " +
                     "WHERE tipo_notificacion = 'SMS')";
         }
-        ejecutarQuerySql(query);
+        ejecutarQueryParaModificaciones(query);
         return obtenerUsuario(identificacion);
     }
 
@@ -167,7 +167,7 @@ public class UsuarioDAO {
         query = ELIMINAR_UNSUSCRIPCIONES + "WHERE usuario_id = '" + identificacion + "' AND notificacion_id =" +
                 "(" + SELECT_ID_FROM_NOTIFICACION + "WHERE nombre = '" + nombreNotificacion + "' AND tipo_notificacion ='" + tipoNotificacion + "')";
 
-        ejecutarQuerySql(query);
+        ejecutarQueryParaModificaciones(query);
         return obtenerUsuario(identificacion);
     }
 
@@ -190,7 +190,7 @@ public class UsuarioDAO {
             while (resultSet.next()) {
                 if (resultSet.getString("usuario_id") == null) {
                     query = REGISTRAR_UNSUSCRIPCION + "VALUES('" + identificacion + "','" + resultSet.getString("id") + "')";
-                    ejecutarQuerySql(query);
+                    ejecutarQueryParaModificaciones(query);
                 }
             }
             usuario = obtenerUsuario(identificacion);
@@ -223,6 +223,14 @@ public class UsuarioDAO {
         } catch (SQLException e) {
             throw new RuntimeException(e);
         }
+    }
+
+    public Usuario obtenerUsuarioNew(String identificacion){
+        query = SELECCIONAR_USUARIOS + "WHERE identificacion = '"+ identificacion+"'";
+
+        Usuario usuario = PublicacionDAO.ejecutarQueryParaSeleccion(query, Usuario.class);
+
+        return usuario;
     }
 
     private void verificarCelularYConsentimientoSms(String usuarioId, TipoNotificacion tipoNotificacion) {

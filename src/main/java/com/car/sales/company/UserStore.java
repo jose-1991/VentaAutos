@@ -54,12 +54,14 @@ public class UserStore {
         publicacion.setFecha(LocalDate.now());
 //        publicacion.setId(UUID.fromString("865272c5-b716-44ca-8963-4f9030e813d8"));
 
+        Usuario usuario2 = usuarioDAO.obtenerUsuarioNew("48123984");
+        System.out.println(usuario2.toString());
 //        publicacionService.publicarProducto(usuario, vehiculo, 80);
 //        ventaService.interactuar(publicacion,usuario1, ACEPTAR_OFERTA, 0);
 //            ofertaDAO.agregarOferta(new Oferta(usuario1,10,0,LocalDateTime.now()), UUID.fromString("d406d889-f690-4611-a7dd-cfde8d4e1509"));
 //        usuarioService.actualizarSuscripciones(usuario, "77774752");
-        Usuario usuario2 = usuarioService.actualizarSuscripciones("23527494", COMPRADOR_PRIMERA_OFERTA, SMS,
-                UNSUSCRIBIR);
+//        Usuario usuario2 = usuarioService.actualizarSuscripciones("23527494", COMPRADOR_PRIMERA_OFERTA, SMS,
+//                UNSUSCRIBIR);
 //        System.out.println(usuario2.getListaUnsuscribciones().size());
 //        System.out.println(LocalDate.now().minusDays(6));
 //        usuarioService.registrarUsuario(usuario);

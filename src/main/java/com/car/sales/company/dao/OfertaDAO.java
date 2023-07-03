@@ -26,7 +26,7 @@ public class OfertaDAO {
                 "','" + oferta.getMontoOferta() + "','" + oferta.getMontoContraOferta() + "','0','" +
                 oferta.getFechaOferta() + "')";
 
-        ejecutarQuerySql(query);
+        ejecutarQueryParaModificaciones(query);
     }
 
     public void interaccionContraOferta(String identificacion, UUID publicacionId, double nuevoMonto) {
@@ -34,7 +34,7 @@ public class OfertaDAO {
                 UPDATE_OFERTA + " SET monto_contra_oferta = '" + nuevoMonto + "' WHERE publicacion_id = '" + publicacionId + "' AND" +
                 " usuario_id = '" + identificacion + "'";
 
-        ejecutarQuerySql(query);
+        ejecutarQueryParaModificaciones(query);
     }
 
     public void actualizarOferta(UUID id, String identificacion, Accion accion) {
@@ -44,10 +44,10 @@ public class OfertaDAO {
             query = query.replace("<>", "=");
         }
 
-        ejecutarQuerySql(query);
+        ejecutarQueryParaModificaciones(query);
     }
 
-    public static void ejecutarQuerySql(String query) {
+    public static void ejecutarQueryParaModificaciones(String query) {
         try  (PreparedStatement statement = obtenerConexion().prepareStatement(query)){
             statement.executeUpdate();
         } catch (SQLException e) {
