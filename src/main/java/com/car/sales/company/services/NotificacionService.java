@@ -1,5 +1,6 @@
 package com.car.sales.company.services;
 
+import com.car.sales.company.dao.UsuarioDAO;
 import com.car.sales.company.exceptions.DatoInvalidoException;
 import com.car.sales.company.models.*;
 
@@ -8,9 +9,16 @@ import java.util.List;
 import static com.car.sales.company.models.TipoNotificacion.*;
 
 public class NotificacionService {
+    UsuarioDAO usuarioDAO;
 
-    public InputNotificacion enviarNotificacion(Usuario usuario, Producto producto, double montoOferta, double montoContraOferta,
+    public NotificacionService(UsuarioDAO usuarioDAO) {
+        this.usuarioDAO = usuarioDAO;
+    }
+
+    public InputNotificacion enviarNotificacion(String usuarioId, Producto producto, double montoOferta,
+                                                double montoContraOferta,
                                                 NombreNotificacion nombreNotificacion) {
+        Usuario usuario = usuarioDAO.obtenerUsuario(usuarioId);
         if (nombreNotificacion == null) {
             throw new DatoInvalidoException("Notificacion invalida");
         }

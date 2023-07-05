@@ -8,6 +8,7 @@ import com.car.sales.company.models.*;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.UUID;
 
 import static com.car.sales.company.helper.ValidacionHelper.validarVehiculo;
 import static com.car.sales.company.models.NombreNotificacion.NUEVO_VEHICULO_EN_VENTA;
@@ -26,6 +27,7 @@ public class PublicacionService {
         this.publicacionDAO = publicacionDAO;
         this.usuarioDAO = usuarioDAO;
     }
+
     public Publicacion publicarProducto(Usuario vendedor, Producto producto, double precio) {
         Publicacion publicacion = new Publicacion();
         if (vendedor != null && vendedor.getTipoUsuario().equals(VENDEDOR) && producto != null) {
@@ -33,6 +35,7 @@ public class PublicacionService {
                 Vehiculo vehiculo = (Vehiculo) producto;
                 validarVehiculo(vehiculo);
             }
+            publicacion.setId(UUID.randomUUID());
             publicacion.setProducto(producto);
             publicacion.setVendedor(vendedor);
             publicacion.setFecha(LocalDate.now());
@@ -52,8 +55,8 @@ public class PublicacionService {
     public int darDeBajaPublicaciones() {
         List<Publicacion> listaPublicacionesDeBaja = publicacionDAO.obtenerPublicacionesParaDarDeBaja();
         for (Publicacion publicacion : listaPublicacionesDeBaja) {
-//            notificacionService.enviarNotificacion(publicacion.getVendedor(), publicacion.getProducto(), 0, 0,
-//                    VEHICULO_EXPIRADO);
+            notificacionService.enviarNotificacion(publicacion.getVendedor().getIdentificacion(), publicacion.getProducto(), 0, 0,
+                    VEHICULO_EXPIRADO);
         }
         publicacionDAO.darDeBajaPublicaciones(listaPublicacionesDeBaja);
         return listaPublicacionesDeBaja.size();
@@ -77,7 +80,7 @@ public class PublicacionService {
     public void notificarTodosLosCompradores(List<Usuario> compradores, Producto producto,
                                              NombreNotificacion nombreNotificacion) {
         for (Usuario usuario : compradores) {
-            notificacionService.enviarNotificacion(usuario, producto, 0, 0, nombreNotificacion);
+            notificacionService.enviarNotificacion(usuario.getIdentificacion(), producto, 0, 0, nombreNotificacion);
         }
     }
 }

@@ -23,7 +23,7 @@ public class UserStore {
         PublicacionDAO publicacionDAO = new PublicacionDAO();
         OfertaDAO ofertaDAO = new OfertaDAO();
         UsuarioService usuarioService = new UsuarioService(usuarioDAO);
-        NotificacionService notificacionService = new NotificacionService();
+        NotificacionService notificacionService = new NotificacionService(usuarioDAO);
         VentaService ventaService = new VentaService(notificacionService, ofertaDAO, publicacionDAO);
         PublicacionService publicacionService = new PublicacionService(notificacionService,
                 publicacionDAO, usuarioDAO);
@@ -50,13 +50,13 @@ public class UserStore {
         publicacion.setPrecio(800);
         publicacion.setFecha(LocalDate.now());
 
-        publicacionService.darDeBajaPublicaciones();
+//        System.out.println(publicacionDAO.obtenerPublicacion(UUID.fromString("062c8e8f-80cd-4f18-a31c-1e88452efbac")));
 //        System.out.println(usuarioDAO.obtenerCompradores());
 //        System.out.println(usuarioDAO.obtenerCompradores().size());
 //        publicacion.setId(UUID.fromString("865272c5-b716-44ca-8963-4f9030e813d8"));
 
-//        Usuario usuario2 = usuarioDAO.obtenerUsuarioNew("48123984");
-//        System.out.println(usuario2.toString());
+        Usuario usuario2 = usuarioDAO.obtenerUsuario("111111222");
+        System.out.println(usuario2.toString());
 //        publicacionService.publicarProducto(usuario, vehiculo, 80);
 //        ventaService.interactuar(publicacion,usuario1, ACEPTAR_OFERTA, 0);
 //            ofertaDAO.agregarOferta(new Oferta(usuario1,10,0,LocalDateTime.now()), UUID.fromString("d406d889-f690-4611-a7dd-cfde8d4e1509"));

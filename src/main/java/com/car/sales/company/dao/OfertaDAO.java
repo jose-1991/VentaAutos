@@ -10,6 +10,7 @@ import java.sql.SQLException;
 import java.sql.SQLIntegrityConstraintViolationException;
 import java.util.UUID;
 
+import static com.car.sales.company.dao.ConexionDB.obtenerInstancia;
 import static com.car.sales.company.models.Accion.RETIRAR_OFERTA;
 
 public class OfertaDAO {
@@ -17,9 +18,6 @@ public class OfertaDAO {
     private final String UPDATE_OFERTA = "UPDATE comercio.oferta ";
     String query;
 
-    private static Connection obtenerConexion() throws SQLException {
-        return ConexionDB.obtenerInstancia();
-    }
 
     public void agregarOferta(Oferta oferta, UUID publicacionId) {
         query = "INSERT INTO comercio.oferta VALUES('" + oferta.getComprador().getIdentificacion() + "','" + publicacionId +
@@ -48,7 +46,7 @@ public class OfertaDAO {
     }
 
     public static void ejecutarQueryParaModificaciones(String query) {
-        try  (PreparedStatement statement = obtenerConexion().prepareStatement(query)){
+        try  (PreparedStatement statement = obtenerInstancia().prepareStatement(query)){
             statement.executeUpdate();
         } catch (SQLException e) {
             e.printStackTrace();

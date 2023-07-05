@@ -10,11 +10,9 @@ public class Vehiculo implements Producto {
     private int anio;
 
     public Vehiculo() {
-        this.stockNumber = UUID.randomUUID();
     }
 
     public Vehiculo(String vin, String marca, String modelo, int anio) {
-        this.stockNumber = UUID.randomUUID();
         this.vin = vin;
         this.marca = marca;
         this.modelo = modelo;
@@ -60,6 +58,17 @@ public class Vehiculo implements Producto {
 
     public void setAnio(int anio) {
         this.anio = anio;
+    }
+
+    @Override
+    public String toString() {
+        return "Vehiculo{" +
+                "stockNumber=" + stockNumber +
+                ", vin='" + vin +
+                ", marca='" + marca +
+                ", modelo='" + modelo +
+                ", anio=" + anio +
+                '}';
     }
 }
 

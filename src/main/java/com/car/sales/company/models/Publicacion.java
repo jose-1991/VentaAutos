@@ -13,9 +13,6 @@ public class Publicacion {
     private List<Oferta> ofertasCompradores;
     private boolean estaDisponibleEnWeb;
 
-    public Publicacion() {
-        this.id = UUID.randomUUID();
-    }
 
     public UUID getId() {
         return id;
@@ -82,6 +79,6 @@ public class Publicacion {
                 ", fecha=" + fecha +
                 ", precio=" + precio +
                 ", estaDisponibleEnLaWeb=" + estaDisponibleEnWeb +
-                '}';
+                ", ofertasCompradores=" + ofertasCompradores +'}';
     }
 }
