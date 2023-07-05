@@ -73,7 +73,7 @@ public class VentaServiceTest {
         publicacion = new Publicacion();
         publicacion.setVendedor(vendedor);
         publicacion.setProducto(vehiculo);
-        publicacion.setEstaDisponibleEnLaWeb(true);
+        publicacion.setEstaDisponibleEnWeb(true);
         publicacion.setFecha(LocalDate.now());
         publicacion.setPrecio(18000);
 
@@ -112,7 +112,7 @@ public class VentaServiceTest {
         oferta3.setMontoOferta(19000);
         Publicacion publicacionActual = ventaService.interactuar(publicacion, vendedor, ACEPTAR_OFERTA, 0);
 
-        assertFalse(publicacionActual.isEstaDisponibleEnLaWeb());
+        assertFalse(publicacionActual.isEstaDisponibleEnWeb());
         assertEquals(19000, publicacionActual.getOfertasCompradores().get(2).getMontoOferta(), 0.0);
         assertTrue(publicacionActual.getOfertasCompradores().get(0).isInactivo());
         assertTrue(publicacionActual.getOfertasCompradores().get(1).isInactivo());
@@ -130,7 +130,7 @@ public class VentaServiceTest {
 
         Publicacion publicacionActual = ventaService.interactuar(publicacion, vendedor, ACEPTAR_OFERTA, 0);
 
-        assertFalse(publicacionActual.isEstaDisponibleEnLaWeb());
+        assertFalse(publicacionActual.isEstaDisponibleEnWeb());
         assertEquals(19000, publicacionActual.getOfertasCompradores().get(1).getMontoOferta(), 0.0);
         assertTrue(publicacionActual.getOfertasCompradores().get(0).isInactivo());
         assertTrue(publicacionActual.getOfertasCompradores().get(2).isInactivo());
@@ -150,7 +150,7 @@ public class VentaServiceTest {
         oferta3.setMontoContraOferta(20000);
         Publicacion publicacionActual = ventaService.interactuar(publicacion, comprador3, ACEPTAR_OFERTA, 0);
 
-        assertFalse(publicacionActual.isEstaDisponibleEnLaWeb());
+        assertFalse(publicacionActual.isEstaDisponibleEnWeb());
         assertEquals(20000, publicacionActual.getOfertasCompradores().get(2).getMontoContraOferta(), 0.0);
         assertTrue(publicacionActual.getOfertasCompradores().get(0).isInactivo());
         assertTrue(publicacionActual.getOfertasCompradores().get(1).isInactivo());

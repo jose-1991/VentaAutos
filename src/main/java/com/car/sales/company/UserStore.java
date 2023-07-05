@@ -13,9 +13,6 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.*;
 
-import static com.car.sales.company.models.Accion.*;
-import static com.car.sales.company.models.NombreNotificacion.*;
-import static com.car.sales.company.models.TipoNotificacion.SMS;
 import static com.car.sales.company.models.TipoUsuario.COMPRADOR;
 import static com.car.sales.company.models.TipoUsuario.VENDEDOR;
 
@@ -49,13 +46,17 @@ public class UserStore {
         publicacion.setProducto(vehiculo);
         publicacion.setOfertasCompradores(new ArrayList<>());
         publicacion.getOfertasCompradores().add(new Oferta(usuario1,90,80,LocalDateTime.now()));
-        publicacion.setEstaDisponibleEnLaWeb(true);
+        publicacion.setEstaDisponibleEnWeb(true);
         publicacion.setPrecio(800);
         publicacion.setFecha(LocalDate.now());
+
+        publicacionService.darDeBajaPublicaciones();
+//        System.out.println(usuarioDAO.obtenerCompradores());
+//        System.out.println(usuarioDAO.obtenerCompradores().size());
 //        publicacion.setId(UUID.fromString("865272c5-b716-44ca-8963-4f9030e813d8"));
 
-        Usuario usuario2 = usuarioDAO.obtenerUsuarioNew("48123984");
-        System.out.println(usuario2.toString());
+//        Usuario usuario2 = usuarioDAO.obtenerUsuarioNew("48123984");
+//        System.out.println(usuario2.toString());
 //        publicacionService.publicarProducto(usuario, vehiculo, 80);
 //        ventaService.interactuar(publicacion,usuario1, ACEPTAR_OFERTA, 0);
 //            ofertaDAO.agregarOferta(new Oferta(usuario1,10,0,LocalDateTime.now()), UUID.fromString("d406d889-f690-4611-a7dd-cfde8d4e1509"));

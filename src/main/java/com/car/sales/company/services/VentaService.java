@@ -97,7 +97,7 @@ public class VentaService {
         notificacionService.enviarNotificacion(usuario, publicacion.getProducto(),
                 mejorOferta.getMontoOferta(), mejorOferta.getMontoContraOferta(), nombreNotificacion);
         notificarCompradoresVehiculoVendido(publicacion, mejorOferta);
-        publicacion.setEstaDisponibleEnLaWeb(false);
+        publicacion.setEstaDisponibleEnWeb(false);
         publicacionDAO.darDeBajaPublicaciones(Collections.singletonList(publicacion));
         ofertaDAO.actualizarOferta(publicacion.getId(), usuario.getIdentificacion(), ACEPTAR_OFERTA);
 

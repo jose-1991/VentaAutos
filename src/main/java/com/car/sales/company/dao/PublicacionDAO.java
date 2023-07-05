@@ -13,15 +13,15 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 
+import static com.car.sales.company.dao.ConexionDB.obtenerInstancia;
 import static com.car.sales.company.dao.OfertaDAO.ejecutarQueryParaModificaciones;
-import static com.car.sales.company.dao.UsuarioDAO.convertirUsuario;
 
 public class PublicacionDAO {
     String UPDATE_PUBLICACION = "UPDATE comercio.publicacion ";
     String query;
 
     private static Connection obtenerConexion() throws SQLException {
-        return ConexionDB.obtenerInstancia();
+        return obtenerInstancia();
     }
 
     public void registrarPublicacionProducto(Publicacion publicacion) {
@@ -42,47 +42,38 @@ public class PublicacionDAO {
     }
 
     public List<Publicacion> obtenerPublicacionesParaDarDeBaja() {
-        List<Publicacion> publicacionesDeBaja = new ArrayList<>();
         query = "SELECT * FROM comercio.publicacion AS p INNER JOIN comercio.usuario AS u ON p.usuario_id = u" +
                 ".identificacion INNER JOIN " +
-                "comercio.producto ON p.producto_id = comerico.producto.vin WHERE id NOT IN (SELECT DISTINCT " +
+                "comercio.producto ON p.producto_id = producto.vin WHERE id NOT IN (SELECT DISTINCT " +
                 "publicacion_id " +
-                "FROM comercio.oferta) AND" +
+                "FROM comercio.oferta) AND " +
                 "fecha  NOT BETWEEN DATE_SUB(curdate(), INTERVAL 5 DAY) AND curdate()";
-        try (Statement statement = obtenerConexion().createStatement();
-             ResultSet resultSet = statement.executeQuery(query)) {
-            while (resultSet.next()) {
-                Publicacion publicacion = convertirPublicacion(resultSet);
-                Usuario vendedor = convertirUsuario(resultSet);
-                Vehiculo vehiculo = convertirVehiculo(resultSet);
-                publicacion.setVendedor(vendedor);
-                publicacion.setProducto(vehiculo);
-                publicacionesDeBaja.add(publicacion);
-            }
-        } catch (SQLException e) {
-            throw new DatoInvalidoException("Hubo un error al obtener publicacicones para dar de baja! Intente " +
-                    "nuevamente");
-        }
-        return publicacionesDeBaja;
+      return ejecutarQueryParaSeleccion(query,Publicacion.class);
+
     }
 
     public void darDeBajaPublicaciones(List<Publicacion> listaPublicaciones) {
-        query = UPDATE_PUBLICACION + "SET esta_disponible_web = ? WHERE id = ?";
+        List<String> listaQueries = new ArrayList<>();
+        for (Publicacion publicacion: listaPublicaciones){
+            query = UPDATE_PUBLICACION + "SET esta_disponible_en_web = '0' WHERE id = '"+publicacion.getId()+"'";
+            listaQueries.add(query);
+        }
+        ejecutarBatch(listaQueries);
+    }
 
-        try {
-            PreparedStatement statement = obtenerConexion().prepareStatement(query);
-            obtenerConexion().setAutoCommit(false);
-
-            for (Publicacion publicacion : listaPublicaciones) {
-                statement.setBoolean(1, false);
-                statement.setString(2, publicacion.getId().toString());
-                statement.addBatch();
+    public static  void ejecutarBatch(List<String> listaQueries){
+        try (Statement statement = obtenerInstancia().createStatement();){
+            obtenerInstancia().setAutoCommit(false);
+            for (String query: listaQueries){
+                statement.addBatch(query);
             }
             statement.executeBatch();
-            obtenerConexion().commit();
-            statement.close();
+            obtenerInstancia().commit();
+            obtenerInstancia().setAutoCommit(true);
+            obtenerInstancia().close();
+
         } catch (SQLException e) {
-            throw new DatoInvalidoException("Hubo un error al dar de baja publicaciones! Intente nuevamente");
+            throw new RuntimeException(e);
         }
     }
 
@@ -91,7 +82,7 @@ public class PublicacionDAO {
         publicacion.setId(UUID.fromString(resultSet.getString("id")));
         publicacion.setFecha((resultSet.getDate("fecha")).toLocalDate());
         publicacion.setPrecio(resultSet.getDouble("precio"));
-        publicacion.setEstaDisponibleEnLaWeb(resultSet.getBoolean("esta_disponible_web"));
+        publicacion.setEstaDisponibleEnWeb(resultSet.getBoolean("esta_disponible_web"));
         return publicacion;
     }
 
@@ -121,7 +112,7 @@ public class PublicacionDAO {
                 vehiculo.setVin(resultSet.getString("producto_id"));
                 publicacion.setFecha(resultSet.getDate("fecha").toLocalDate());
                 publicacion.setPrecio(resultSet.getDouble("precio"));
-                publicacion.setEstaDisponibleEnLaWeb(resultSet.getBoolean("esta_disponible_web"));
+                publicacion.setEstaDisponibleEnWeb(resultSet.getBoolean("esta_disponible_web"));
                 publicacion.setVendedor(usuario);
                 publicacion.setProducto(vehiculo);
                 publicacion.setOfertasCompradores(new ArrayList<>());
@@ -145,36 +136,25 @@ public class PublicacionDAO {
         return publicacion;
     }
 
-    public List<Object> generico(String query, int numeroColumnas) {
-        List<Object> objectList = new ArrayList<>();
-        try (Statement statement = obtenerConexion().createStatement();
-             ResultSet resultSet = statement.executeQuery(query)) {
-            while (resultSet.next()) {
-                for (int x = 0; x<numeroColumnas; x++){
-                    objectList.add(resultSet.getObject(x));
-                }
-            }
-        } catch (SQLException e) {
 
-        }
-        return objectList;
-    }
-
-    public static <T> T ejecutarQueryParaSeleccion(String query, Class<T> clazz){
+    public static <T> T ejecutarQueryParaSeleccion1(String query, Class<T> clazz) {
         T obj;
         try (Statement statement = obtenerConexion().createStatement();
-             ResultSet resultSet = statement.executeQuery(query))   {
+             ResultSet resultSet = statement.executeQuery(query)) {
             obj = clazz.newInstance();
-            while (resultSet.next()){
-                for (Method method: clazz.getDeclaredMethods()){
-                    if (method.getName().startsWith("set")){
+            while (resultSet.next()) {
+                for (Method method : clazz.getDeclaredMethods()) {
+                    if (method.getName().startsWith("set")) {
                         String columna = convertirASnakeCase(method.getName().substring(3));
-                        switch (method.getParameterTypes()[0].getName()){
-                            case "java.lang.Integer":
-                                method.invoke(obj, resultSet.getInt(columna));
-                                break;
+                        switch (method.getParameterTypes()[0].getName()) {
                             case "java.lang.String":
                                 method.invoke(obj, resultSet.getString(columna));
+                                break;
+                            case "java.lang.Double":
+                                method.invoke(obj, resultSet.getDouble(columna));
+                                break;
+                            case "boolean":
+                                method.invoke(obj, resultSet.getBoolean(columna));
                                 break;
                             case "java.time.LocalDateTime":
                                 DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
@@ -182,35 +162,133 @@ public class PublicacionDAO {
                                 LocalDateTime localDateTime = LocalDateTime.parse(dateTime, formatter);
                                 method.invoke(obj, localDateTime);
                                 break;
-                            case "java.lang.Double":
-                                method.invoke(obj, resultSet.getDouble(columna));
-                                break;
                             case "java.time.LocalDate":
                                 method.invoke(obj, resultSet.getDate(columna).toLocalDate());
                                 break;
                             case "com.car.sales.company.models.TipoUsuario":
                                 method.invoke(obj, TipoUsuario.valueOf(resultSet.getString(columna)));
                                 break;
-                            case "boolean":
-                                method.invoke(obj, resultSet.getBoolean(columna));
+                            case "import java.util.UUID":
+                                method.invoke(obj, UUID.fromString(resultSet.getString(columna)));
                                 break;
+                            case "com.car.sales.company.models.Usuario":
+                                Usuario usuario = new Usuario();
+                                usuario.setIdentificacion(resultSet.getString(columna));
+                                method.invoke(obj, usuario);
+                                break;
+                            case "com.car.sales.company.models.Vehiculo":
+                                Vehiculo vehiculo = new Vehiculo();
+                                vehiculo.setVin(resultSet.getString(columna));
+                                method.invoke(obj, vehiculo);
                         }
                     }
                 }
             }
-
         } catch (SQLException | InstantiationException | IllegalAccessException | InvocationTargetException e) {
             throw new RuntimeException(e);
         }
         return obj;
     }
 
+    public static <T> List<T> ejecutarQueryParaSeleccion(String query, Class<T> clazz) {
+
+        List<T> listaObjetos = new ArrayList<>();
+        try (Statement statement = obtenerInstancia().createStatement();
+             ResultSet resultSet = statement.executeQuery(query)) {
+            while (resultSet.next()) {
+                T obj = clazz.newInstance();
+                for (Method method : clazz.getDeclaredMethods()) {
+                    if (method.getName().startsWith("set")) {
+                        String columna = convertirASnakeCase(method.getName().substring(3));
+                        switch (obj.getClass().getName()) {
+                            case "com.car.sales.company.models.Usuario":
+                                casoUsuario(obj, method, resultSet, columna);
+                                break;
+                            case "com.car.sales.company.models.Publicacion":
+                                casoPublicacion(obj, method, resultSet, columna);
+                                break;
+                            case "com.car.sales.company.models.Oferta":
+                                casoOferta(obj, method, resultSet, columna);
+                                break;
+                        }
+                    }
+                }
+                listaObjetos.add(obj);
+            }
+        } catch (SQLException | InstantiationException | IllegalAccessException | InvocationTargetException e) {
+            throw new RuntimeException(e);
+        }
+        return listaObjetos;
+    }
+
+    private static <T> void casoUsuario(T usuario, Method method, ResultSet resultSet, String columna) throws SQLException,
+            InvocationTargetException, IllegalAccessException {
+        switch (method.getParameterTypes()[0].getName()) {
+            case "java.lang.String":
+                method.invoke(usuario, resultSet.getString(columna));
+                break;
+            case "boolean":
+                method.invoke(usuario, resultSet.getBoolean(columna));
+                break;
+            case "com.car.sales.company.models.TipoUsuario":
+                method.invoke(usuario, TipoUsuario.valueOf(resultSet.getString(columna)));
+                break;
+        }
+    }
+
+    private static <T> void casoPublicacion(T publicacion, Method method, ResultSet resultSet,
+                                          String columna) throws SQLException, InvocationTargetException, IllegalAccessException {
+        switch (method.getParameterTypes()[0].getName()) {
+            case "java.util.UUID":
+                method.invoke(publicacion, UUID.fromString(resultSet.getString(columna)));
+                break;
+            case "com.car.sales.company.models.Usuario":
+                columna = "usuario_id";
+                Usuario usuario = new Usuario();
+                usuario.setIdentificacion(resultSet.getString(columna));
+                method.invoke(publicacion, usuario);
+                break;
+            case "com.car.sales.company.models.Vehiculo":
+                columna = "producto_id";
+                Vehiculo vehiculo = new Vehiculo();
+                vehiculo.setVin(resultSet.getString(columna));
+                method.invoke(publicacion, vehiculo);
+            case "java.time.LocalDate":
+                method.invoke(publicacion, resultSet.getDate(columna).toLocalDate());
+                break;
+            case "java.lang.Double":
+                method.invoke(publicacion, resultSet.getDouble(columna));
+                break;
+            case "boolean":
+                method.invoke(publicacion, resultSet.getBoolean(columna));
+                break;
+        }
+    }
+
+    private static <T> void casoOferta(T oferta, Method method, ResultSet resultSet, String columna) throws SQLException, InvocationTargetException, IllegalAccessException {
+        switch (method.getParameterTypes()[0].getName()) {
+            case "java.lang.String":
+                method.invoke(oferta, resultSet.getString(columna));
+                break;
+            case "java.lang.Double":
+                method.invoke(oferta, resultSet.getDouble(columna));
+                break;
+            case "boolean":
+                method.invoke(oferta, resultSet.getBoolean(columna));
+                break;
+            case "java.time.LocalDateTime":
+                DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
+                String dateTime = resultSet.getString("fecha_oferta");
+                LocalDateTime localDateTime = LocalDateTime.parse(dateTime, formatter);
+                method.invoke(oferta, localDateTime);
+                break;
+        }
+    }
+
     public static String convertirASnakeCase(String camelCase) {
         String regex = "([a-z])([A-Z]+)";
         String replacement = "$1_$2";
-        return camelCase
-                .replaceAll(regex, replacement)
-                .toLowerCase();
+        return camelCase.replaceAll(regex, replacement).toLowerCase();
 
 
     }

@@ -68,13 +68,13 @@ public class PublicacionServiceTest {
         publicacion1.setVendedor(vendedor);
         publicacion1.setProducto(vehiculo);
         publicacion1.setOfertasCompradores(new ArrayList<>());
-        publicacion1.setEstaDisponibleEnLaWeb(true);
+        publicacion1.setEstaDisponibleEnWeb(true);
 
         publicacion2 = new Publicacion();
         publicacion2.setVendedor(vendedor);
         publicacion2.setProducto(obtenerVehiculoRandom());
         publicacion2.setOfertasCompradores(new ArrayList<>());
-        publicacion2.setEstaDisponibleEnLaWeb(true);
+        publicacion2.setEstaDisponibleEnWeb(true);
 
         listaUsuariosEsperada = Arrays.asList(comprador, comprador2);
     }
@@ -86,7 +86,7 @@ public class PublicacionServiceTest {
         Publicacion publicacionActual = publicacionService.publicarProducto(vendedor, vehiculo, precio);
 
         assertNotNull(publicacionActual);
-        assertTrue(publicacionActual.isEstaDisponibleEnLaWeb());
+        assertTrue(publicacionActual.isEstaDisponibleEnWeb());
         verify(publicacionDaoMock).registrarPublicacionProducto(any());
     }
 
@@ -135,14 +135,14 @@ public class PublicacionServiceTest {
     @Test
     public void testRePublicarProducto() {
         publicacion1.setOfertasCompradores(Collections.EMPTY_LIST);
-        publicacion1.setEstaDisponibleEnLaWeb(false);
+        publicacion1.setEstaDisponibleEnWeb(false);
         publicacion1.setPrecio(15000);
         nuevoPrecio = 14000;
 
         Publicacion publicacionActual = publicacionService.rePublicarProducto(publicacion1, nuevoPrecio);
 
         assertNotNull(publicacionActual);
-        assertTrue(publicacionActual.isEstaDisponibleEnLaWeb());
+        assertTrue(publicacionActual.isEstaDisponibleEnWeb());
         assertEquals(LocalDate.now(), publicacionActual.getFecha());
         verify(publicacionDaoMock).rePublicarProducto(any(), anyDouble());
     }

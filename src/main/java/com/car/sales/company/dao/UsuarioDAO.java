@@ -8,6 +8,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import static com.car.sales.company.dao.OfertaDAO.ejecutarQueryParaModificaciones;
+import static com.car.sales.company.dao.PublicacionDAO.ejecutarQueryParaSeleccion;
 import static com.car.sales.company.models.TipoNotificacion.SMS;
 
 public class UsuarioDAO {
@@ -25,18 +26,7 @@ public class UsuarioDAO {
 
     public List<Usuario> obtenerCompradores() {
         query = SELECCIONAR_USUARIOS + "WHERE tipo_usuario = 'COMPRADOR'";
-        List<Usuario> listaCompradores = new ArrayList<>();
-
-        try (Statement statement = obtenerConexion().createStatement();
-             ResultSet resultSet = statement.executeQuery(query)) {
-            while (resultSet.next()) {
-                Usuario usuario = convertirUsuario(resultSet);
-                listaCompradores.add(usuario);
-            }
-        } catch (SQLException e) {
-            throw new DatoInvalidoException("Hubo un error al obtener compradores! Intente nuevamente");
-        }
-        return listaCompradores;
+        return ejecutarQueryParaSeleccion(query, Usuario.class);
     }
 
     public void registrarUsuario(Usuario usuario) {
@@ -228,9 +218,9 @@ public class UsuarioDAO {
     public Usuario obtenerUsuarioNew(String identificacion){
         query = SELECCIONAR_USUARIOS + "WHERE identificacion = '"+ identificacion+"'";
 
-        Usuario usuario = PublicacionDAO.ejecutarQueryParaSeleccion(query, Usuario.class);
+        List<Usuario> listaUsuarios = ejecutarQueryParaSeleccion(query, Usuario.class);
 
-        return usuario;
+        return listaUsuarios.get(0);
     }
 
     private void verificarCelularYConsentimientoSms(String usuarioId, TipoNotificacion tipoNotificacion) {

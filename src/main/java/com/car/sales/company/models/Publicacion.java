@@ -11,7 +11,7 @@ public class Publicacion {
     private LocalDate fecha;
     private double precio;
     private List<Oferta> ofertasCompradores;
-    private boolean estaDisponibleEnLaWeb;
+    private boolean estaDisponibleEnWeb;
 
     public Publicacion() {
         this.id = UUID.randomUUID();
@@ -65,12 +65,12 @@ public class Publicacion {
         this.precio = precio;
     }
 
-    public boolean isEstaDisponibleEnLaWeb() {
-        return estaDisponibleEnLaWeb;
+    public boolean isEstaDisponibleEnWeb() {
+        return estaDisponibleEnWeb;
     }
 
-    public void setEstaDisponibleEnLaWeb(boolean estaDisponibleEnLaWeb) {
-        this.estaDisponibleEnLaWeb = estaDisponibleEnLaWeb;
+    public void setEstaDisponibleEnWeb(boolean estaDisponibleEnWeb) {
+        this.estaDisponibleEnWeb = estaDisponibleEnWeb;
     }
 
     @Override
@@ -81,7 +81,7 @@ public class Publicacion {
                 ", producto=" + producto +
                 ", fecha=" + fecha +
                 ", precio=" + precio +
-                ", estaDisponibleEnLaWeb=" + estaDisponibleEnLaWeb +
+                ", estaDisponibleEnLaWeb=" + estaDisponibleEnWeb +
                 '}';
     }
 }

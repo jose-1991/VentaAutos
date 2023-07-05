@@ -7,9 +7,7 @@ import com.car.sales.company.models.*;
 
 import java.time.LocalDate;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
-import java.util.Random;
 
 import static com.car.sales.company.helper.ValidacionHelper.validarVehiculo;
 import static com.car.sales.company.models.NombreNotificacion.NUEVO_VEHICULO_EN_VENTA;
@@ -39,7 +37,7 @@ public class PublicacionService {
             publicacion.setVendedor(vendedor);
             publicacion.setFecha(LocalDate.now());
             publicacion.setPrecio(precio);
-            publicacion.setEstaDisponibleEnLaWeb(true);
+            publicacion.setEstaDisponibleEnWeb(true);
             publicacion.setOfertasCompradores(new ArrayList<>());
             publicacionDAO.registrarPublicacionProducto(publicacion);
             List<Usuario> listaCompradores = usuarioDAO.obtenerCompradores();
@@ -54,8 +52,8 @@ public class PublicacionService {
     public int darDeBajaPublicaciones() {
         List<Publicacion> listaPublicacionesDeBaja = publicacionDAO.obtenerPublicacionesParaDarDeBaja();
         for (Publicacion publicacion : listaPublicacionesDeBaja) {
-            notificacionService.enviarNotificacion(publicacion.getVendedor(), publicacion.getProducto(), 0, 0,
-                    VEHICULO_EXPIRADO);
+//            notificacionService.enviarNotificacion(publicacion.getVendedor(), publicacion.getProducto(), 0, 0,
+//                    VEHICULO_EXPIRADO);
         }
         publicacionDAO.darDeBajaPublicaciones(listaPublicacionesDeBaja);
         return listaPublicacionesDeBaja.size();
@@ -65,7 +63,7 @@ public class PublicacionService {
         if (nuevoPrecioProducto < publicacion.getPrecio()) {
             publicacion.setPrecio(nuevoPrecioProducto);
             publicacion.setFecha(LocalDate.now());
-            publicacion.setEstaDisponibleEnLaWeb(true);
+            publicacion.setEstaDisponibleEnWeb(true);
             publicacionDAO.rePublicarProducto(publicacion.getId(), nuevoPrecioProducto);
             notificarTodosLosCompradores(usuarioDAO.obtenerCompradores(), publicacion.getProducto(),
                     NUEVO_VEHICULO_EN_VENTA);
