@@ -12,7 +12,7 @@ import static com.car.sales.company.dao.PublicacionDAO.*;
 import static com.car.sales.company.models.TipoNotificacion.SMS;
 
 public class UsuarioDAO {
-    private final String SELECT_ID_FROM_NOTIFICACION = "SELECT id FROM comercio.notificacion ";
+    private final String SELECT_ID_FROM_NOTIFICACION = "SELECT id, tipo_usuario FROM comercio.notificacion ";
     private static final String SELECT_NOTIFICACIONES_ID_DE_USUARIO = "SELECT notificacion_id FROM comercio" +
             ".usuario_notificacion ";
     private final String REGISTRAR_UNSUSCRIPCION = "INSERT INTO comercio.usuario_notificacion ";
@@ -39,7 +39,9 @@ public class UsuarioDAO {
         query =
                 SELECT_ID_FROM_NOTIFICACION + "WHERE tipo_notificacion = 'SMS' and tipo_usuario = '" +
                         usuario.getTipoUsuario().toString() + "'";
-        ejecutarQueryParaSeleccion(query, Usuario.class);
+        List<Notificacion> listaNotificaciones = ejecutarQueryParaSeleccion(query, Notificacion.class);
+        for (Notificacion notificacion: listaNotificaciones){
+        }
 //        ejecutarQueriesConBatch();
 
 
@@ -152,8 +154,8 @@ public class UsuarioDAO {
 
     public Usuario obtenerUsuario(String identificacion) {
         query = SELECCIONAR_USUARIOS + "WHERE identificacion = '"+identificacion+"'";
-        Usuario usuario = ejecutarQueryParaSeleccion1(query, Usuario.class);
-        return usuario;
+        List<Usuario> listaDeUsuarios = ejecutarQueryParaSeleccion(query, Usuario.class);
+        return listaDeUsuarios.get(0);
     }
 
     private void verificarCelularYConsentimientoSms(String usuarioId, TipoNotificacion tipoNotificacion) {

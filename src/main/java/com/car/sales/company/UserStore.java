@@ -55,8 +55,12 @@ public class UserStore {
 //        System.out.println(usuarioDAO.obtenerCompradores().size());
 //        publicacion.setId(UUID.fromString("865272c5-b716-44ca-8963-4f9030e813d8"));
 
-        Usuario usuario2 = usuarioDAO.obtenerUsuario("111111222");
-        System.out.println(usuario2.toString());
+        System.out.println(PublicacionDAO.ejecutarQueryParaSeleccion( "select id, tipo_usuario from comercio" +
+                ".notificacion WHERE tipo_notificacion =" +
+                " 'SMS' and" +
+                " tipo_usuario = 'COMPRADOR'", Notificacion.class));
+//        Usuario usuario2 = usuarioDAO.obtenerUsuario("111111222");
+//        System.out.println(usuario2.toString());
 //        publicacionService.publicarProducto(usuario, vehiculo, 80);
 //        ventaService.interactuar(publicacion,usuario1, ACEPTAR_OFERTA, 0);
 //            ofertaDAO.agregarOferta(new Oferta(usuario1,10,0,LocalDateTime.now()), UUID.fromString("d406d889-f690-4611-a7dd-cfde8d4e1509"));
