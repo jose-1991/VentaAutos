@@ -55,8 +55,8 @@ public class PublicacionService {
     public int darDeBajaPublicaciones() {
         List<Publicacion> listaPublicacionesDeBaja = publicacionDAO.obtenerPublicacionesParaDarDeBaja();
         for (Publicacion publicacion : listaPublicacionesDeBaja) {
-            notificacionService.enviarNotificacion(publicacion.getVendedor().getIdentificacion(), publicacion.getProducto(), 0, 0,
-                    VEHICULO_EXPIRADO);
+//            notificacionService.enviarNotificacion(publicacion.getVendedor().getIdentificacion(), publicacion.getProducto(), 0, 0,
+//                    VEHICULO_EXPIRADO);
         }
         publicacionDAO.darDeBajaPublicaciones(listaPublicacionesDeBaja);
         return listaPublicacionesDeBaja.size();

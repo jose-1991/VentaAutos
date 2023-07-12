@@ -32,7 +32,7 @@ public class UserStore {
         usuario.setListaUnsuscribciones(new ArrayList<>());
         usuario.setAceptaNotificacionSms(true);
 //        usuario.setAceptaNotificacionSms(true);
-        Usuario usuario1 = new Usuario("jose", "sanz", "licencia", "48123984",
+        Usuario usuario1 = new Usuario("jose", "sanz", "licencia", "999990000",
                 "javi.31_82@hotmail.com", COMPRADOR, "77426426");
         usuario1.setAceptaNotificacionSms(true);
         usuario1.setListaUnsuscribciones(new ArrayList<>());
@@ -45,20 +45,21 @@ public class UserStore {
         publicacion.setVendedor(usuario);
         publicacion.setProducto(vehiculo);
         publicacion.setOfertasCompradores(new ArrayList<>());
-        publicacion.getOfertasCompradores().add(new Oferta(usuario1,90,80,LocalDateTime.now()));
+        publicacion.getOfertasCompradores().add(new Oferta(usuario1, 90, 80, LocalDateTime.now()));
         publicacion.setEstaDisponibleEnWeb(true);
         publicacion.setPrecio(800);
         publicacion.setFecha(LocalDate.now());
 
+        usuarioService.registrarUsuario(usuario1);
+//        publicacionService.darDeBajaPublicaciones();
 //        System.out.println(publicacionDAO.obtenerPublicacion(UUID.fromString("062c8e8f-80cd-4f18-a31c-1e88452efbac")));
 //        System.out.println(usuarioDAO.obtenerCompradores());
 //        System.out.println(usuarioDAO.obtenerCompradores().size());
 //        publicacion.setId(UUID.fromString("865272c5-b716-44ca-8963-4f9030e813d8"));
-
-        System.out.println(PublicacionDAO.ejecutarQueryParaSeleccion( "select id, tipo_usuario from comercio" +
-                ".notificacion WHERE tipo_notificacion =" +
-                " 'SMS' and" +
-                " tipo_usuario = 'COMPRADOR'", Notificacion.class));
+//        System.out.println(PublicacionDAO.ejecutarQueryParaSeleccion( "select id, tipo_usuario from comercio" +
+//                ".notificacion WHERE tipo_notificacion =" +
+//                " 'SMS' and" +
+//                " tipo_usuario = 'COMPRADOR'", Notificacion.class));
 //        Usuario usuario2 = usuarioDAO.obtenerUsuario("111111222");
 //        System.out.println(usuario2.toString());
 //        publicacionService.publicarProducto(usuario, vehiculo, 80);

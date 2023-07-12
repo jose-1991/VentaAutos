@@ -39,12 +39,10 @@ public class UsuarioDAO {
         query =
                 SELECT_ID_FROM_NOTIFICACION + "WHERE tipo_notificacion = 'SMS' and tipo_usuario = '" +
                         usuario.getTipoUsuario().toString() + "'";
-        List<Notificacion> listaNotificaciones = ejecutarQueryParaSeleccion(query, Notificacion.class);
-        for (Notificacion notificacion: listaNotificaciones){
-        }
-//        ejecutarQueriesConBatch();
+        List<Notificacion> listaDeIdNotificaciones = ejecutarQueryParaSeleccion(query, Notificacion.class);
 
-
+        query = "INSERT INTO comercio.usuario_notificacion VALUES('"+usuario.getIdentificacion()+"', ?)";
+        ejecutarQueriesConBatch(listaDeIdNotificaciones, query);
 
     }
 
@@ -126,6 +124,7 @@ public class UsuarioDAO {
                 "    RIGHT JOIN comercio.notificacion n " +
                 "    ON  u.notificacion_id = n.id AND u.usuario_id = ? " +
                 "    WHERE n.id =(" + SELECT_ID_FROM_NOTIFICACION + "WHERE nombre = ? AND tipo_notificacion = ?)";
+
         Usuario usuario;
         try {
             PreparedStatement statement = obtenerConexion().prepareStatement(query);

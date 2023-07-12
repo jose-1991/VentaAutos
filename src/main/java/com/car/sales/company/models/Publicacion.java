@@ -13,7 +13,6 @@ public class Publicacion {
     private List<Oferta> ofertasCompradores;
     private boolean estaDisponibleEnWeb;
 
-
     public UUID getId() {
         return id;
     }

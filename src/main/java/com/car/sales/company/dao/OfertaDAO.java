@@ -4,7 +4,6 @@ import com.car.sales.company.exceptions.DatoInvalidoException;
 import com.car.sales.company.models.Accion;
 import com.car.sales.company.models.Oferta;
 
-import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
 import java.sql.SQLIntegrityConstraintViolationException;
@@ -18,7 +17,6 @@ public class OfertaDAO {
     private final String UPDATE_OFERTA = "UPDATE comercio.oferta ";
     String query;
 
-
     public void agregarOferta(Oferta oferta, UUID publicacionId) {
         query = "INSERT INTO comercio.oferta VALUES('" + oferta.getComprador().getIdentificacion() + "','" + publicacionId +
                 "','" + oferta.getMontoOferta() + "','" + oferta.getMontoContraOferta() + "','0','" +
@@ -31,7 +29,6 @@ public class OfertaDAO {
         query =
                 UPDATE_OFERTA + " SET monto_contra_oferta = '" + nuevoMonto + "' WHERE publicacion_id = '" + publicacionId + "' AND" +
                 " usuario_id = '" + identificacion + "'";
-
         ejecutarQueryParaModificaciones(query);
     }
 
@@ -41,7 +38,6 @@ public class OfertaDAO {
         if (accion.equals(RETIRAR_OFERTA)) {
             query = query.replace("<>", "=");
         }
-
         ejecutarQueryParaModificaciones(query);
     }
 

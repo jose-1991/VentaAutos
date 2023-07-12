@@ -20,7 +20,6 @@ public class PublicacionDAO {
     String UPDATE_PUBLICACION = "UPDATE comercio.publicacion ";
     String query;
 
-
     public void registrarPublicacionProducto(Publicacion publicacion) {
         Vehiculo vehiculo = (Vehiculo) publicacion.getProducto();
         query = "INSERT INTO comercio.producto VALUES('" + vehiculo.getVin() + "','" + vehiculo.getStockNumber() + "','" +
@@ -46,32 +45,43 @@ public class PublicacionDAO {
                 "FROM comercio.oferta) AND " +
                 "fecha  NOT BETWEEN DATE_SUB(curdate(), INTERVAL 5 DAY) AND curdate()";
         return ejecutarQueryParaSeleccion(query, Publicacion.class);
-
     }
 
     public void darDeBajaPublicaciones(List<Publicacion> listaPublicaciones) {
-        List<String> listaQueries = new ArrayList<>();
-        for (Publicacion publicacion : listaPublicaciones) {
-            query = UPDATE_PUBLICACION + "SET esta_disponible_en_web = '0' WHERE id = '" + publicacion.getId() + "'";
-            listaQueries.add(query);
-        }
-        ejecutarQueriesConBatch(listaQueries);
+        query = UPDATE_PUBLICACION + "SET esta_disponible_en_web = '0' WHERE id = ?";
+        ejecutarQueriesConBatch(listaPublicaciones, query);
     }
 
-    public static void ejecutarQueriesConBatch(List<String> listaQueries) {
-        try (Statement statement = obtenerInstancia().createStatement();) {
+    private Statement agregarAlBatch(String query, int numeroQueries) {
+        try (Statement statement = obtenerInstancia().createStatement()){
+            int contador = 0;
             obtenerInstancia().setAutoCommit(false);
-            for (String query : listaQueries) {
-                statement.addBatch(query);
-            }
-            statement.executeBatch();
-            obtenerInstancia().commit();
-            obtenerInstancia().setAutoCommit(true);
-            obtenerInstancia().close();
+            statement.addBatch(query);
+            if (contador == numeroQueries){
 
+            }
+            return statement;
         } catch (SQLException e) {
             throw new RuntimeException(e);
         }
+    }
+
+    public static<T> void ejecutarQueriesConBatch(List<T> elementos, String query) {
+       try (PreparedStatement statement = obtenerInstancia().prepareStatement(query)){
+           obtenerInstancia().setAutoCommit(false);
+           Method method;
+           for (T obj: elementos){
+               method = obj.getClass().getDeclaredMethod("getId");
+               statement.setString(1,method.invoke(obj).toString());
+               statement.addBatch();
+           }
+           statement.executeBatch();
+           obtenerInstancia().commit();
+           obtenerInstancia().setAutoCommit(true);
+           obtenerInstancia().close();
+       } catch (SQLException | NoSuchMethodException | InvocationTargetException | IllegalAccessException e) {
+           throw new RuntimeException(e);
+       }
     }
 
     public Publicacion obtenerPublicacion(UUID id) {
@@ -96,8 +106,8 @@ public class PublicacionDAO {
     private static <T> List<T> convertirAListaDeObjetos(ResultSet resultSet, Class<T> clazz) throws InstantiationException
             , IllegalAccessException, SQLException, InvocationTargetException{
         List<T> listaObjetos = new ArrayList<>();
-        T obj = clazz.newInstance();
         do {
+            T obj = clazz.newInstance();
             for (Method method : clazz.getDeclaredMethods()) {
                 if (method.getName().startsWith("set")) {
                     String columna = convertirASnakeCase(method.getName().substring(3));
