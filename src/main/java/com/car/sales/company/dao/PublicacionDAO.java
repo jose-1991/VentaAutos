@@ -21,6 +21,7 @@ public class PublicacionDAO {
     String query;
 
     public void registrarPublicacionProducto(Publicacion publicacion) {
+
         Vehiculo vehiculo = (Vehiculo) publicacion.getProducto();
         query = "INSERT INTO comercio.producto VALUES('" + vehiculo.getVin() + "','" + vehiculo.getStockNumber() + "','" +
                 vehiculo.getMarca() + "','" + vehiculo.getModelo() + "','" + vehiculo.getAnio() + "')";
@@ -33,16 +34,13 @@ public class PublicacionDAO {
 
     public void rePublicarProducto(UUID id, double precio) {
         query = UPDATE_PUBLICACION + "SET esta_disponible_web = 1, precio = '" + precio + "',fecha = '" + LocalDate.now() + "' WHERE id = '" + id + "'";
-
         ejecutarQueryParaModificaciones(query);
     }
 
     public List<Publicacion> obtenerPublicacionesParaDarDeBaja() {
         query = "SELECT * FROM comercio.publicacion AS p INNER JOIN comercio.usuario AS u ON p.usuario_id = u" +
-                ".identificacion INNER JOIN " +
-                "comercio.producto ON p.producto_id = producto.vin WHERE id NOT IN (SELECT DISTINCT " +
-                "publicacion_id " +
-                "FROM comercio.oferta) AND " +
+                ".identificacion INNER JOIN comercio.producto ON p.producto_id = producto.vin WHERE id NOT IN " +
+                "(SELECT DISTINCT publicacion_id FROM comercio.oferta) AND " +
                 "fecha  NOT BETWEEN DATE_SUB(curdate(), INTERVAL 5 DAY) AND curdate()";
         return ejecutarQueryParaSeleccion(query, Publicacion.class);
     }
@@ -76,12 +74,30 @@ public class PublicacionDAO {
                statement.addBatch();
            }
            statement.executeBatch();
-           obtenerInstancia().commit();
-           obtenerInstancia().setAutoCommit(true);
-           obtenerInstancia().close();
+           actualizarConexion(obtenerInstancia());
        } catch (SQLException | NoSuchMethodException | InvocationTargetException | IllegalAccessException e) {
            throw new RuntimeException(e);
        }
+    }
+
+    private static void actualizarConexion(Connection connection) throws SQLException {
+        connection.commit();
+        connection.setAutoCommit(true);
+        connection.close();
+    }
+
+    public static void ejecutarQueriesConBatch(List<String> listaQueries){
+        try (Statement statement = obtenerInstancia().createStatement()){
+            obtenerInstancia().setAutoCommit(false);
+            for (String query: listaQueries){
+                statement.addBatch(query);
+            }
+            statement.executeBatch();
+            actualizarConexion(obtenerInstancia());
+
+        } catch (SQLException e) {
+            throw new RuntimeException(e);
+        }
     }
 
     public Publicacion obtenerPublicacion(UUID id) {

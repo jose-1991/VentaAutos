@@ -5,6 +5,7 @@ import com.car.sales.company.models.*;
 
 import java.sql.*;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 import static com.car.sales.company.dao.OfertaDAO.ejecutarQueryParaModificaciones;
@@ -31,19 +32,20 @@ public class UsuarioDAO {
 
     public void registrarUsuario(Usuario usuario) {
         int aceptaNotificacionesSms = usuario.isAceptaNotificacionSms() ? 1 : 0;
+        List<String> listaQueries = new ArrayList<>();
         query =
                 "INSERT INTO comercio.usuario VALUES('" + usuario.getIdentificacion() + "','" + usuario.getNombre() + "','" + usuario.getApellido() +
                         "','" + usuario.getTipoIdentificacion() + "','" + usuario.getTipoUsuario() + "','" + usuario.getEmail() + "'," +
                         "'" + usuario.getCelular() + "','" + aceptaNotificacionesSms + "')";
-        ejecutarQueryParaModificaciones(query);
-        query =
-                SELECT_ID_FROM_NOTIFICACION + "WHERE tipo_notificacion = 'SMS' and tipo_usuario = '" +
-                        usuario.getTipoUsuario().toString() + "'";
-        List<Notificacion> listaDeIdNotificaciones = ejecutarQueryParaSeleccion(query, Notificacion.class);
-
-        query = "INSERT INTO comercio.usuario_notificacion VALUES('"+usuario.getIdentificacion()+"', ?)";
-        ejecutarQueriesConBatch(listaDeIdNotificaciones, query);
-
+        listaQueries.add(query);
+//        ejecutarQueryParaModificaciones(query);
+        query = "INSERT INTO comercio.usuario_notificacion (usuario_id, notificacion_id)" +
+                "SELECT usuario.identificacion, notificacion.id FROM usuario, notificacion" +
+                " WHERE usuario.identificacion = '" + usuario.getIdentificacion() + "' AND notificacion.tipo_notificacion" +
+                " = 'SMS' and tipo_usuario = " + usuario.getTipoUsuario() + "'";
+        listaQueries.add(query);
+//        ejecutarQueryParaModificaciones(query);
+        ejecutarQueriesConBatch(listaQueries);
     }
 
     public void eliminarUsuario(String identificacion) {
@@ -61,56 +63,32 @@ public class UsuarioDAO {
     }
 
     public Usuario suscribirTodo(String identificacion) {
-        query = ELIMINAR_UNSUSCRIPCIONES + "WHERE usuario_id = '" + identificacion + "'";
-        if (!usuarioTieneCelularYConsentimientoSms(identificacion)) {
-            query += "AND notificacion_id NOT IN (SELECT id FROM comercio.notificacion " +
-                    "WHERE tipo_notificacion = 'SMS')";
-        }
+        query = "DELETE FROM comercio.usuario_notificacion WHERE usuario_id = '" + identificacion + "' AND " +
+                "((SELECT acepta_notificacion_sms FROM comercio.usuario WHERE identificacion = '" + identificacion + "') = 0" +
+                "OR notificacion_id NOT IN (SELECT id FROM notificacion WHERE tipo_notificacion = 'SMS'))";
+
         ejecutarQueryParaModificaciones(query);
         return obtenerUsuario(identificacion);
+
     }
 
     public Usuario unsuscribirTodo(String usuarioId) {
-
-        query = SELECT_ID_FROM_NOTIFICACION + "WHERE tipo_notificacion = 'EMAIL' AND id NOT IN" +
-                "(" + SELECT_NOTIFICACIONES_ID_DE_USUARIO + "WHERE usuario_id ='" + usuarioId + "') AND tipo_usuario = (SELECT tipo_usuario FROM comercio" +
-                ".usuario WHERE identificacion ='" + usuarioId + "')";
-        if (usuarioTieneCelularYConsentimientoSms(usuarioId)) {
-            query = query.replace("tipo_notificacion = 'EMAIL' AND", "");
-        }
-        Usuario usuarioModificado;
-        try {
-            Statement statement = obtenerConexion().createStatement();
-            ResultSet resultSet = statement.executeQuery(query);
-            query = REGISTRAR_UNSUSCRIPCION + "VALUES(?,?)";
-            PreparedStatement preparedStatement = obtenerConexion().prepareStatement(query);
-            obtenerConexion().setAutoCommit(false);
-            while (resultSet.next()) {
-                String notificacionId = resultSet.getString("id");
-                preparedStatement.setString(1, usuarioId);
-                preparedStatement.setString(2, notificacionId);
-                preparedStatement.addBatch();
-            }
-            preparedStatement.executeBatch();
-            usuarioModificado = obtenerUsuario(usuarioId);
-            resultSet.close();
-            obtenerConexion().commit();
-            preparedStatement.close();
-        } catch (SQLException e) {
-            throw new DatoInvalidoException("Hubo un error al unsuscribir todas las notificaciones! Intente " +
-                    "nuevamente");
-        }
-        return usuarioModificado;
+        query = "INSERT INTO comercio.usuario_notificacion (usuario_id, notificacion_id)" +
+                " SELECT '" + usuarioId + "', n.id FROM notificacion AS n" +
+                " WHERE  ((SELECT acepta_notificacion_sms FROM comercio.usuario WHERE identificacion = '"+usuarioId+"') = 1" +
+                " OR n.tipo_notificacion = 'EMAIL')" +
+                " AND n.id NOT IN (SELECT notificacion_id FROM comercio.usuario_notificacion WHERE usuario_id = '" + usuarioId + "')" +
+                " AND n.tipo_usuario = (SELECT tipo_usuario FROM comercio.usuario WHERE identificacion = '" + usuarioId + "')";
+        ejecutarQueryParaModificaciones(query);
+        return obtenerUsuario(usuarioId);
     }
 
     public Usuario suscribirNotificacion(String identificacion, NombreNotificacion nombreNotificacion,
                                          TipoNotificacion tipoNotificacion) {
-
         verificarCelularYConsentimientoSms(identificacion, tipoNotificacion);
-
-        query = ELIMINAR_UNSUSCRIPCIONES + "WHERE usuario_id = '" + identificacion + "' AND notificacion_id =" +
-                "(" + SELECT_ID_FROM_NOTIFICACION + "WHERE nombre = '" + nombreNotificacion + "' AND tipo_notificacion ='" + tipoNotificacion + "')";
-
+        query = ELIMINAR_UNSUSCRIPCIONES + "WHERE usuario_id = '" + identificacion + "' " +
+                "AND notificacion_id = (" + SELECT_ID_FROM_NOTIFICACION + "WHERE nombre = '" + nombreNotificacion + "' " +
+                "AND tipo_notificacion ='" + tipoNotificacion + "')";
         ejecutarQueryParaModificaciones(query);
         return obtenerUsuario(identificacion);
     }
@@ -120,39 +98,16 @@ public class UsuarioDAO {
 
         verificarCelularYConsentimientoSms(identificacion, tipoNotificacion);
 
-        query = "SELECT * FROM comercio.usuario_notificacion u " +
-                "    RIGHT JOIN comercio.notificacion n " +
-                "    ON  u.notificacion_id = n.id AND u.usuario_id = ? " +
-                "    WHERE n.id =(" + SELECT_ID_FROM_NOTIFICACION + "WHERE nombre = ? AND tipo_notificacion = ?)";
+        query = " INSERT IGNORE INTO comercio.usuario_notificacion (usuario_id, notificacion_id)" +
+                " SELECT '" + identificacion + "', n.id FROM notificacion AS n WHERE n.id = " +
+                "(SELECT id FROM notificacion WHERE nombre = '" + nombreNotificacion + "' AND tipo_notificacion = '" + tipoNotificacion + "')";
 
-        Usuario usuario;
-        try {
-            PreparedStatement statement = obtenerConexion().prepareStatement(query);
-            statement.setString(1, identificacion);
-            statement.setString(2, nombreNotificacion.toString());
-            statement.setString(3, tipoNotificacion.toString());
-            ResultSet resultSet = statement.executeQuery();
-            while (resultSet.next()) {
-                if (resultSet.getString("usuario_id") == null) {
-                    query = REGISTRAR_UNSUSCRIPCION + "VALUES('" + identificacion + "','" + resultSet.getString("id") + "')";
-                    ejecutarQueryParaModificaciones(query);
-                }
-            }
-            usuario = obtenerUsuario(identificacion);
-            resultSet.close();
-            statement.close();
-            obtenerConexion().close();
-        } catch (SQLException e) {
-            if (e instanceof SQLIntegrityConstraintViolationException) {
-                throw new DatoInvalidoException("El usuario ya esta suscrito a la notificacion ingresada");
-            }
-            throw new DatoInvalidoException("Hubo un error al unsuscribir notificacion! Intente nuevamente");
-        }
-        return usuario;
+        ejecutarQueryParaModificaciones(query);
+        return obtenerUsuario(identificacion);
     }
 
     public Usuario obtenerUsuario(String identificacion) {
-        query = SELECCIONAR_USUARIOS + "WHERE identificacion = '"+identificacion+"'";
+        query = SELECCIONAR_USUARIOS + "WHERE identificacion = '" + identificacion + "'";
         List<Usuario> listaDeUsuarios = ejecutarQueryParaSeleccion(query, Usuario.class);
         return listaDeUsuarios.get(0);
     }
